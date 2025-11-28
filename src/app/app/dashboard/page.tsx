@@ -15,8 +15,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import {
-  TrendingUp,
-  TrendingDown,
   FileText,
   Clock,
   CheckCircle2,
@@ -194,18 +192,14 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Statements
+              Current View
             </CardTitle>
-            <div className="flex items-center text-xs text-green-600">
-              <TrendingUp className="mr-1 h-3 w-3" />
-              +12.5%
-            </div>
+            <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pagination.total || 0}</div>
+            <div className="text-2xl font-bold">{pagination.total}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              <TrendingUp className="inline mr-1 h-3 w-3" />
-              Active statements this month
+              {statusFilter.toLowerCase()} statements
             </p>
           </CardContent>
         </Card>
@@ -214,17 +208,13 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Pending Review
             </CardTitle>
-            <div className="flex items-center text-xs text-yellow-600">
-              <TrendingDown className="mr-1 h-3 w-3" />
-              -20%
-            </div>
+            <Clock className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {statusFilter === "PENDING" ? pagination.total : "--"}
+              {statusFilter === "PENDING" ? pagination.total : "—"}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              <TrendingDown className="inline mr-1 h-3 w-3" />
               Awaiting approval
             </p>
           </CardContent>
@@ -234,14 +224,11 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Sent Statements
             </CardTitle>
-            <div className="flex items-center text-xs text-green-600">
-              <TrendingUp className="mr-1 h-3 w-3" />
-              +12.5%
-            </div>
+            <CheckCircle2 className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {statusFilter === "SENT" ? pagination.total : "--"}
+              {statusFilter === "SENT" ? pagination.total : "—"}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               Successfully delivered
@@ -251,18 +238,16 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Success Rate
+              Rejected
             </CardTitle>
-            <div className="flex items-center text-xs text-green-600">
-              <TrendingUp className="mr-1 h-3 w-3" />
-              +4.5%
-            </div>
+            <XCircle className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">98.5%</div>
+            <div className="text-2xl font-bold">
+              {statusFilter === "REJECTED" ? pagination.total : "—"}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
-              <TrendingUp className="inline mr-1 h-3 w-3" />
-              Steady performance increase
+              Not sent
             </p>
           </CardContent>
         </Card>
