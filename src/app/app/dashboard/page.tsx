@@ -13,6 +13,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   TrendingUp,
   TrendingDown,
@@ -221,7 +222,7 @@ export default function DashboardPage() {
                     <TableRow className="hover:bg-transparent">
                       <TableHead className="w-10"></TableHead>
                       <TableHead className="w-10">
-                        <input type="checkbox" className="rounded border-gray-300" />
+                        <Checkbox />
                       </TableHead>
                       <TableHead className="font-medium">Header</TableHead>
                       <TableHead className="font-medium">Section Type</TableHead>
@@ -239,7 +240,7 @@ export default function DashboardPage() {
                           <GripVertical className="h-4 w-4 text-gray-400" />
                         </TableCell>
                         <TableCell>
-                          <input type="checkbox" className="rounded border-gray-300" />
+                          <Checkbox />
                         </TableCell>
                         <TableCell className="font-medium text-gray-900">
                           {section.header}

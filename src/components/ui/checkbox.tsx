@@ -8,30 +8,37 @@ import { cn } from "@/lib/utils"
 export type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement>
 
 const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ className, ...props }, ref) => {
+  ({ className, checked, defaultChecked, onChange, ...props }, ref) => {
+    const [isChecked, setIsChecked] = React.useState(defaultChecked ?? false)
+    const controlledChecked = checked !== undefined ? checked : isChecked
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (checked === undefined) {
+        setIsChecked(e.target.checked)
+      }
+      onChange?.(e)
+    }
+
     return (
-      <div className="relative">
+      <label className="relative inline-flex items-center cursor-pointer">
         <input
           type="checkbox"
-          className="sr-only peer"
+          className="sr-only"
           ref={ref}
+          checked={controlledChecked}
+          onChange={handleChange}
           {...props}
         />
         <div
           className={cn(
-            "h-4 w-4 shrink-0 rounded-sm border border-gray-300 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 peer-checked:bg-gray-900 peer-checked:border-gray-900 peer-checked:text-white flex items-center justify-center cursor-pointer",
+            "h-4 w-4 shrink-0 rounded-sm border border-gray-300 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center",
+            controlledChecked && "bg-gray-900 border-gray-900",
             className
           )}
-          onClick={() => {
-            const input = ref as React.RefObject<HTMLInputElement>
-            if (input.current) {
-              input.current.click()
-            }
-          }}
         >
-          <Check className="h-3 w-3 hidden peer-checked:block text-white" />
+          {controlledChecked && <Check className="h-3 w-3 text-white" />}
         </div>
-      </div>
+      </label>
     )
   }
 )
