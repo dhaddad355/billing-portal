@@ -6,6 +6,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import StatementActions from "./statement-actions";
+import { Clock, CheckCircle2, XCircle, ExternalLink } from "lucide-react";
 
 interface StatementPageProps {
   params: { id: string };
@@ -49,13 +50,33 @@ export default async function StatementPage({ params }: StatementPageProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "PENDING":
-        return <Badge variant="warning">Pending</Badge>;
+        return (
+          <Badge variant="outline" className="text-yellow-700 border-yellow-300 bg-yellow-50">
+            <Clock className="mr-1 h-3 w-3" />
+            Pending
+          </Badge>
+        );
       case "SENT":
-        return <Badge variant="success">Sent</Badge>;
+        return (
+          <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">
+            <CheckCircle2 className="mr-1 h-3 w-3" />
+            Sent
+          </Badge>
+        );
       case "REJECTED":
-        return <Badge variant="destructive">Rejected</Badge>;
+        return (
+          <Badge variant="outline" className="text-red-700 border-red-300 bg-red-50">
+            <XCircle className="mr-1 h-3 w-3" />
+            Rejected
+          </Badge>
+        );
       case "ERROR":
-        return <Badge variant="destructive">Error</Badge>;
+        return (
+          <Badge variant="destructive">
+            <XCircle className="mr-1 h-3 w-3" />
+            Error
+          </Badge>
+        );
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -64,7 +85,7 @@ export default async function StatementPage({ params }: StatementPageProps) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Statement Details</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Statement Details</h1>
         {getStatusBadge(statement.status)}
       </div>
 
@@ -77,51 +98,51 @@ export default async function StatementPage({ params }: StatementPageProps) {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm text-gray-500">Patient Name</label>
+                <label className="text-sm text-muted-foreground">Patient Name</label>
                 <p className="font-medium">{statement.persons?.full_name || "N/A"}</p>
               </div>
               <div>
-                <label className="text-sm text-gray-500">Account Number</label>
+                <label className="text-sm text-muted-foreground">Account Number</label>
                 <p className="font-medium">{statement.account_number_suffix}</p>
               </div>
               <div>
-                <label className="text-sm text-gray-500">Statement Date</label>
+                <label className="text-sm text-muted-foreground">Statement Date</label>
                 <p className="font-medium">{formatDate(statement.statement_date)}</p>
               </div>
               <div>
-                <label className="text-sm text-gray-500">Amount Due</label>
-                <p className="font-medium text-xl">
+                <label className="text-sm text-muted-foreground">Amount Due</label>
+                <p className="font-medium text-xl text-primary">
                   {formatCurrency(statement.patient_balance, statement.currency_code)}
                 </p>
               </div>
               <div>
-                <label className="text-sm text-gray-500">Last Statement Date</label>
+                <label className="text-sm text-muted-foreground">Last Statement Date</label>
                 <p className="font-medium">{formatDate(statement.last_statement_date)}</p>
               </div>
               <div>
-                <label className="text-sm text-gray-500">Last Pay Date</label>
+                <label className="text-sm text-muted-foreground">Last Pay Date</label>
                 <p className="font-medium">{formatDate(statement.last_pay_date)}</p>
               </div>
               <div>
-                <label className="text-sm text-gray-500">Next Statement Date</label>
+                <label className="text-sm text-muted-foreground">Next Statement Date</label>
                 <p className="font-medium">{formatDate(statement.next_statement_date)}</p>
               </div>
               <div>
-                <label className="text-sm text-gray-500">Created</label>
+                <label className="text-sm text-muted-foreground">Created</label>
                 <p className="font-medium">{formatDate(statement.created_at)}</p>
               </div>
             </div>
 
             {/* Contact Info */}
             <div className="border-t pt-4">
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">Contact Information</h4>
+              <h4 className="text-sm font-semibold mb-2">Contact Information</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm text-gray-500">Email</label>
+                  <label className="text-sm text-muted-foreground">Email</label>
                   <p className="font-medium">{statement.persons?.email_address || "N/A"}</p>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-500">Cell Phone</label>
+                  <label className="text-sm text-muted-foreground">Cell Phone</label>
                   <p className="font-medium">{statement.persons?.cell_phone || "N/A"}</p>
                 </div>
               </div>
@@ -130,19 +151,19 @@ export default async function StatementPage({ params }: StatementPageProps) {
             {/* Short Code Info */}
             {statement.short_code && (
               <div className="border-t pt-4">
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">View Link</h4>
+                <h4 className="text-sm font-semibold mb-2">View Link</h4>
                 <div>
-                  <label className="text-sm text-gray-500">Short Code</label>
+                  <label className="text-sm text-muted-foreground">Short Code</label>
                   <p className="font-mono">{statement.short_code}</p>
                 </div>
                 <div className="mt-2">
-                  <label className="text-sm text-gray-500">View URL</label>
-                  <p className="font-mono text-sm text-blue-600">
+                  <label className="text-sm text-muted-foreground">View URL</label>
+                  <p className="font-mono text-sm text-primary">
                     https://bill.lasereyeinstitute.com/view/{statement.short_code}
                   </p>
                 </div>
                 <div className="mt-2">
-                  <label className="text-sm text-gray-500">View Count</label>
+                  <label className="text-sm text-muted-foreground">View Count</label>
                   <p className="font-medium">{statement.view_count}</p>
                 </div>
               </div>
@@ -168,20 +189,21 @@ export default async function StatementPage({ params }: StatementPageProps) {
               <div className="space-y-4">
                 <iframe
                   src={pdfUrl}
-                  className="w-full h-[600px] border rounded"
+                  className="w-full h-[600px] border rounded-md"
                   title="Statement PDF"
                 />
                 <a
                   href={pdfUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline text-sm"
+                  className="inline-flex items-center gap-1 text-primary hover:underline text-sm"
                 >
+                  <ExternalLink className="h-3 w-3" />
                   Open PDF in new tab
                 </a>
               </div>
             ) : (
-              <p className="text-gray-500">PDF not available</p>
+              <p className="text-muted-foreground">PDF not available</p>
             )}
           </CardContent>
         </Card>
