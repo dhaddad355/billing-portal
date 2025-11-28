@@ -47,6 +47,10 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
+  pages: {
+    signIn: "/auth/signin",
+    signOut: "/auth/signout",
+  },
   callbacks: {
     async signIn({ user, account, profile }) {
       if (account?.provider !== "azure-ad") {
