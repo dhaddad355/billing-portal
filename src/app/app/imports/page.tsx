@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -113,15 +113,19 @@ export default function ImportsPage() {
   };
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr + "T00:00:00");
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
+    // Parse date string as UTC to avoid timezone issues
+    const [year, month, day] = dateStr.split("-").map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
+    
+    // Get today and yesterday in UTC
+    const now = new Date();
+    const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const yesterdayUTC = new Date(todayUTC);
+    yesterdayUTC.setUTCDate(yesterdayUTC.getUTCDate() - 1);
 
-    if (date.toDateString() === today.toDateString()) {
+    if (date.getTime() === todayUTC.getTime()) {
       return "Today";
-    } else if (date.toDateString() === yesterday.toDateString()) {
+    } else if (date.getTime() === yesterdayUTC.getTime()) {
       return "Yesterday";
     } else {
       return date.toLocaleDateString("en-US", {
@@ -129,6 +133,7 @@ export default function ImportsPage() {
         year: "numeric",
         month: "long",
         day: "numeric",
+        timeZone: "UTC",
       });
     }
   };
@@ -163,6 +168,16 @@ export default function ImportsPage() {
     { value: 30, label: "Last 30 days" },
     { value: 90, label: "Last 90 days" },
   ];
+
+  // Memoize calculated values
+  const avgDailyImports = useMemo(() => {
+    return summary.daysWithImports > 0
+      ? Math.round(summary.totalImports / summary.daysWithImports)
+      : 0;
+  }, [summary.totalImports, summary.daysWithImports]);
+
+  const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const todaysImports = useMemo(() => summary.dailyCounts[todayStr] || 0, [summary.dailyCounts, todayStr]);
 
   return (
     <div className="space-y-6">
@@ -205,9 +220,7 @@ export default function ImportsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {summary.daysWithImports > 0
-                ? Math.round(summary.totalImports / summary.daysWithImports)
-                : 0}
+              {avgDailyImports}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               Statements per active day
@@ -223,7 +236,7 @@ export default function ImportsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {summary.dailyCounts[new Date().toISOString().split("T")[0]] || 0}
+              {todaysImports}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               Statements imported today

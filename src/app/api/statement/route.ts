@@ -18,6 +18,35 @@ interface StatementPayload {
 }
 
 export async function POST(request: NextRequest) {
+  // Extract request metadata early for logging
+  const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+  const userAgent = request.headers.get("user-agent") || "unknown";
+  
+  // Helper function to log import attempts
+  const logImport = async (
+    supabase: ReturnType<typeof getServiceClient>,
+    accountNumber: string | undefined,
+    personId: number | undefined,
+    statementId: string | null,
+    status: "SUCCESS" | "FAILED",
+    errorMessage?: string
+  ) => {
+    try {
+      await supabase.from("import_logs").insert({
+        account_number: accountNumber || "unknown",
+        statement_id: statementId,
+        person_id: personId || null,
+        status,
+        error_message: errorMessage || null,
+        ip_address: ipAddress,
+        user_agent: userAgent,
+      });
+    } catch (logError) {
+      // Log import logging failures but don't fail the main request
+      console.error("Failed to log import:", logError);
+    }
+  };
+  
   try {
     // Validate API key
     const apiKey = request.headers.get("x-api-key");
@@ -59,6 +88,7 @@ export async function POST(request: NextRequest) {
       if (pdfFile) {
         // Validate file type
         if (pdfFile.type !== "application/pdf") {
+          await logImport(supabase, payload.account_number_full, payload.person_id, null, "FAILED", "Invalid file type");
           return NextResponse.json(
             { success: false, error: "Invalid file type. Only PDF files are accepted." },
             { status: 400 }
@@ -69,6 +99,7 @@ export async function POST(request: NextRequest) {
         
         // Validate PDF magic bytes (%PDF-)
         if (pdfBuffer.length < 5 || pdfBuffer.toString("utf8", 0, 5) !== "%PDF-") {
+          await logImport(supabase, payload.account_number_full, payload.person_id, null, "FAILED", "Invalid PDF file format");
           return NextResponse.json(
             { success: false, error: "Invalid PDF file format" },
             { status: 400 }
@@ -84,6 +115,8 @@ export async function POST(request: NextRequest) {
         
         // Validate PDF magic bytes (%PDF-)
         if (pdfBuffer.length < 5 || pdfBuffer.toString("utf8", 0, 5) !== "%PDF-") {
+          const supabase = getServiceClient();
+          await logImport(supabase, payload.account_number_full, payload.person_id, null, "FAILED", "Invalid PDF file format");
           return NextResponse.json(
             { success: false, error: "Invalid PDF file format" },
             { status: 400 }
@@ -94,6 +127,7 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!payload.person_id) {
+      await logImport(supabase, payload.account_number_full, payload.person_id, null, "FAILED", "person_id is required");
       return NextResponse.json(
         { success: false, error: "person_id is required" },
         { status: 400 }
@@ -101,6 +135,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!payload.account_number_full) {
+      await logImport(supabase, payload.account_number_full, payload.person_id, null, "FAILED", "account_number_full is required");
       return NextResponse.json(
         { success: false, error: "account_number_full is required" },
         { status: 400 }
@@ -108,6 +143,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (payload.patient_balance === undefined || payload.patient_balance === null) {
+      await logImport(supabase, payload.account_number_full, payload.person_id, null, "FAILED", "patient_balance is required");
       return NextResponse.json(
         { success: false, error: "patient_balance is required" },
         { status: 400 }
@@ -115,6 +151,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!pdfBuffer) {
+      await logImport(supabase, payload.account_number_full, payload.person_id, null, "FAILED", "PDF file is required");
       return NextResponse.json(
         { success: false, error: "PDF file is required" },
         { status: 400 }
@@ -165,6 +202,7 @@ export async function POST(request: NextRequest) {
 
     if (personError) {
       console.error("Error upserting person:", personError);
+      await logImport(supabase, payload.account_number_full, payload.person_id, null, "FAILED", "Failed to save person data");
       return NextResponse.json(
         { success: false, error: "Failed to save person data" },
         { status: 500 }
@@ -185,6 +223,7 @@ export async function POST(request: NextRequest) {
 
     if (uploadError) {
       console.error("Error uploading PDF:", uploadError);
+      await logImport(supabase, payload.account_number_full, payload.person_id, null, "FAILED", "Failed to upload PDF");
       return NextResponse.json(
         { success: false, error: "Failed to upload PDF" },
         { status: 500 }
@@ -213,6 +252,7 @@ export async function POST(request: NextRequest) {
       console.error("Error inserting statement:", statementError);
       // Try to clean up uploaded file
       await supabase.storage.from(STORAGE_BUCKET).remove([pdfPath]);
+      await logImport(supabase, payload.account_number_full, payload.person_id, null, "FAILED", "Failed to save statement");
       return NextResponse.json(
         { success: false, error: "Failed to save statement" },
         { status: 500 }
@@ -230,18 +270,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Log the import for history tracking
-    const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
-    const userAgent = request.headers.get("user-agent") || "unknown";
-    
-    await supabase.from("import_logs").insert({
-      account_number: payload.account_number_full,
-      statement_id: statementId,
-      person_id: payload.person_id,
-      status: "SUCCESS",
-      ip_address: ipAddress,
-      user_agent: userAgent,
-    });
+    // Log the successful import for history tracking
+    await logImport(supabase, payload.account_number_full, payload.person_id, statementId, "SUCCESS");
 
     return NextResponse.json({
       success: true,
@@ -249,6 +279,21 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error processing statement:", error);
+    // Try to log failed import in catch block
+    try {
+      const supabase = getServiceClient();
+      await supabase.from("import_logs").insert({
+        account_number: "unknown",
+        statement_id: null,
+        person_id: null,
+        status: "FAILED",
+        error_message: "Internal server error",
+        ip_address: ipAddress,
+        user_agent: userAgent,
+      });
+    } catch (logError) {
+      console.error("Failed to log import error:", logError);
+    }
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }
