@@ -31,6 +31,7 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
+  trustHost: true,
   callbacks: {
     async signIn({ user, account, profile }) {
       if (account?.provider !== "azure-ad") {
@@ -103,10 +104,6 @@ export const authOptions: NextAuthOptions = {
         },
       };
     },
-  },
-  pages: {
-    signIn: "/api/auth/signin",
-    error: "/api/auth/error",
   },
   session: {
     strategy: "jwt",
