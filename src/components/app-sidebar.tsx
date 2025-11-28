@@ -105,8 +105,8 @@ export function AppSidebar({ user }: AppSidebarProps) {
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="#">
+            <SidebarMenuButton asChild isActive={pathname === "/app/settings"}>
+              <Link href="/app/settings">
                 <Settings className="h-4 w-4" />
                 <span>Settings</span>
               </Link>
