@@ -19,6 +19,7 @@ interface ExtendedSession extends Session {
 }
 
 export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     AzureADProvider({
       clientId: process.env.AZURE_AD_CLIENT_ID!,
@@ -26,12 +27,11 @@ export const authOptions: NextAuthOptions = {
       tenantId: process.env.AZURE_AD_TENANT_ID,
       authorization: {
         params: {
-          scope: "openid profile email",
+          scope: "openid profile email User.Read",
         },
       },
     }),
   ],
-  trustHost: true,
   callbacks: {
     async signIn({ user, account, profile }) {
       if (account?.provider !== "azure-ad") {
