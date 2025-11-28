@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -12,33 +10,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrency, formatDate } from "@/lib/utils";
-
-interface Person {
-  full_name: string;
-  first_name: string | null;
-  last_name: string | null;
-  email_address: string | null;
-  cell_phone: string | null;
-}
-
-interface Statement {
-  id: string;
-  person_id: number;
-  statement_date: string;
-  account_number_suffix: number;
-  patient_balance: number;
-  currency_code: string;
-  last_statement_date: string | null;
-  last_pay_date: string | null;
-  short_code: string | null;
-  view_count: number;
-  status: string;
-  created_at: string;
-  sent_at: string | null;
-  persons: Person;
-}
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select } from "@/components/ui/select";
+import {
+  TrendingUp,
+  TrendingDown,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Columns3,
+  MoreVertical,
+  GripVertical,
+} from "lucide-react";
 
 interface Pagination {
   page: number;
@@ -47,244 +33,351 @@ interface Pagination {
   totalPages: number;
 }
 
+// Metric Card Component
+interface MetricCardProps {
+  title: string;
+  value: string;
+  change: string;
+  changeType: "positive" | "negative";
+  description: string;
+  subdescription: string;
+}
+
+function MetricCard({ title, value, change, changeType, description, subdescription }: MetricCardProps) {
+  return (
+    <Card className="p-4">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm text-gray-500">{title}</span>
+        <div className={`flex items-center text-xs ${changeType === "positive" ? "text-green-600" : "text-red-600"}`}>
+          {changeType === "positive" ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
+          {change}
+        </div>
+      </div>
+      <div className="text-2xl font-bold text-gray-900 mb-2">{value}</div>
+      <div className="flex items-center text-sm text-gray-600">
+        <span>{description}</span>
+        {changeType === "positive" ? (
+          <TrendingUp className="h-3 w-3 ml-1 text-gray-400" />
+        ) : (
+          <TrendingDown className="h-3 w-3 ml-1 text-gray-400" />
+        )}
+      </div>
+      <div className="text-xs text-gray-400 mt-1">{subdescription}</div>
+    </Card>
+  );
+}
+
+// Status Badge Component for data table
+function StatusBadge({ status }: { status: string }) {
+  if (status === "Done") {
+    return (
+      <span className="inline-flex items-center text-xs text-green-700">
+        <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span>
+        Done
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center text-xs text-gray-500">
+      <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-1.5"></span>
+      In Process
+    </span>
+  );
+}
+
+// Section Type Badge Component
+function SectionTypeBadge({ type }: { type: string }) {
+  return (
+    <span className="inline-flex items-center px-2 py-0.5 text-xs text-gray-600 bg-gray-100 rounded border border-gray-200">
+      {type}
+    </span>
+  );
+}
+
+// Demo data for the new dashboard layout
+const demoSections = [
+  { id: "1", header: "Cover page", sectionType: "Cover page", status: "In Process", target: 18, limit: 5, reviewer: "Eddie Lake" },
+  { id: "2", header: "Table of contents", sectionType: "Table of contents", status: "Done", target: 29, limit: 24, reviewer: "Eddie Lake" },
+  { id: "3", header: "Executive summary", sectionType: "Narrative", status: "Done", target: 10, limit: 13, reviewer: "Eddie Lake" },
+  { id: "4", header: "Technical approach", sectionType: "Narrative", status: "Done", target: 27, limit: 23, reviewer: "Jamik Tashpulatov" },
+  { id: "5", header: "Design", sectionType: "Narrative", status: "In Process", target: 2, limit: 16, reviewer: "Jamik Tashpulatov" },
+  { id: "6", header: "Capabilities", sectionType: "Narrative", status: "In Process", target: 20, limit: 8, reviewer: "Jamik Tashpulatov" },
+  { id: "7", header: "Integration with existing systems", sectionType: "Narrative", status: "In Process", target: 19, limit: 21, reviewer: "Jamik Tashpulatov" },
+  { id: "8", header: "Innovation and Advantages", sectionType: "Narrative", status: "Done", target: 25, limit: 26, reviewer: null },
+  { id: "9", header: "Overview of EMR's Innovative Solutions", sectionType: "Technical content", status: "Done", target: 7, limit: 23, reviewer: null },
+  { id: "10", header: "Advanced Algorithms and Machine Learning", sectionType: "Narrative", status: "Done", target: 30, limit: 28, reviewer: null },
+];
+
 export default function DashboardPage() {
-  const [statements, setStatements] = useState<Statement[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
-    pageSize: 20,
-    total: 0,
-    totalPages: 0,
+    pageSize: 10,
+    total: 68,
+    totalPages: 7,
   });
-  const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState("PENDING");
-  const [sendingId, setSendingId] = useState<string | null>(null);
-  const [rejectingId, setRejectingId] = useState<string | null>(null);
-
-  const fetchStatements = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `/api/app/statements?status=${statusFilter}&page=${pagination.page}`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setStatements(data.statements);
-        setPagination(data.pagination);
-      }
-    } catch (error) {
-      console.error("Error fetching statements:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [statusFilter, pagination.page]);
-
-  useEffect(() => {
-    fetchStatements();
-  }, [fetchStatements]);
-
-  const handleSend = async (id: string) => {
-    if (sendingId) return;
-    setSendingId(id);
-    try {
-      const response = await fetch(`/api/app/statements/${id}/send`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      });
-      if (response.ok) {
-        fetchStatements();
-      } else {
-        const error = await response.json();
-        alert(`Error: ${error.error}`);
-      }
-    } catch (error) {
-      console.error("Error sending statement:", error);
-      alert("Failed to send statement");
-    } finally {
-      setSendingId(null);
-    }
-  };
-
-  const handleReject = async (id: string) => {
-    if (rejectingId) return;
-    if (!confirm("Are you sure you want to reject this statement?")) return;
-    setRejectingId(id);
-    try {
-      const response = await fetch(`/api/app/statements/${id}/reject`, {
-        method: "POST",
-      });
-      if (response.ok) {
-        fetchStatements();
-      } else {
-        const error = await response.json();
-        alert(`Error: ${error.error}`);
-      }
-    } catch (error) {
-      console.error("Error rejecting statement:", error);
-      alert("Failed to reject statement");
-    } finally {
-      setRejectingId(null);
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return <Badge variant="warning">Pending</Badge>;
-      case "SENT":
-        return <Badge variant="success">Sent</Badge>;
-      case "REJECTED":
-        return <Badge variant="destructive">Rejected</Badge>;
-      case "ERROR":
-        return <Badge variant="destructive">Error</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
-  };
+  const [activeTab, setActiveTab] = useState("outline");
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Statement Dashboard</h1>
+    <div className="flex-1 flex flex-col">
+      {/* Header with title and Quick Create button */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <h1 className="text-lg font-semibold text-gray-900">Documents</h1>
+        <Button className="bg-gray-900 text-white hover:bg-gray-800 gap-2">
+          <Plus className="h-4 w-4" />
+          Quick Create
+        </Button>
       </div>
 
-      {/* Status Filter */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Filter by Status</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-2">
-            {["PENDING", "SENT", "REJECTED"].map((status) => (
-              <Button
-                key={status}
-                variant={statusFilter === status ? "default" : "outline"}
-                size="sm"
-                onClick={() => {
-                  setStatusFilter(status);
-                  setPagination((prev) => ({ ...prev, page: 1 }));
-                }}
+      {/* Main Content */}
+      <div className="flex-1 p-6 space-y-6">
+        {/* Metric Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <MetricCard
+            title="Total Revenue"
+            value="$1,250.00"
+            change="+12.5%"
+            changeType="positive"
+            description="Trending up this month"
+            subdescription="Visitors for the last 6 months"
+          />
+          <MetricCard
+            title="New Customers"
+            value="1,234"
+            change="-20%"
+            changeType="negative"
+            description="Down 20% this period"
+            subdescription="Acquisition needs attention"
+          />
+          <MetricCard
+            title="Active Accounts"
+            value="45,678"
+            change="+12.5%"
+            changeType="positive"
+            description="Strong user retention"
+            subdescription="Engagement exceed targets"
+          />
+          <MetricCard
+            title="Growth Rate"
+            value="4.5%"
+            change="+4.5%"
+            changeType="positive"
+            description="Steady performance increase"
+            subdescription="Meets growth projections"
+          />
+        </div>
+
+        {/* Tabs and Data Table */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex items-center justify-between mb-4">
+            <TabsList className="bg-transparent p-0 h-auto gap-0">
+              <TabsTrigger
+                value="outline"
+                className="px-4 py-2 data-[state=active]:bg-gray-100 rounded-lg"
               >
-                {status}
+                Outline
+              </TabsTrigger>
+              <TabsTrigger
+                value="performance"
+                className="px-4 py-2 data-[state=active]:bg-gray-100 rounded-lg"
+              >
+                Past Performance
+                <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 text-xs bg-gray-200 text-gray-600 rounded">
+                  3
+                </span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="personnel"
+                className="px-4 py-2 data-[state=active]:bg-gray-100 rounded-lg"
+              >
+                Key Personnel
+                <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 text-xs bg-gray-200 text-gray-600 rounded">
+                  2
+                </span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="documents"
+                className="px-4 py-2 data-[state=active]:bg-gray-100 rounded-lg"
+              >
+                Focus Documents
+              </TabsTrigger>
+            </TabsList>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Columns3 className="h-4 w-4" />
+                Customize Columns
               </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Statements Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">
-            {statusFilter} Statements ({pagination.total})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8 text-gray-500">Loading...</div>
-          ) : statements.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              No {statusFilter.toLowerCase()} statements found.
+              <Button variant="outline" size="sm" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Section
+              </Button>
             </div>
-          ) : (
-            <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Patient Name</TableHead>
-                    <TableHead>Account #</TableHead>
-                    <TableHead className="text-right">Amount Due</TableHead>
-                    <TableHead>Statement Date</TableHead>
-                    <TableHead>Last Statement</TableHead>
-                    <TableHead>Last Pay Date</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {statements.map((statement) => (
-                    <TableRow key={statement.id}>
-                      <TableCell className="font-medium">
-                        {statement.persons?.full_name || "N/A"}
-                      </TableCell>
-                      <TableCell>{statement.account_number_suffix}</TableCell>
-                      <TableCell className="text-right font-semibold">
-                        {formatCurrency(statement.patient_balance, statement.currency_code)}
-                      </TableCell>
-                      <TableCell>{formatDate(statement.statement_date)}</TableCell>
-                      <TableCell>{formatDate(statement.last_statement_date)}</TableCell>
-                      <TableCell>{formatDate(statement.last_pay_date)}</TableCell>
-                      <TableCell>{formatDate(statement.created_at)}</TableCell>
-                      <TableCell>{getStatusBadge(statement.status)}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Link href={`/app/statements/${statement.id}`}>
-                            <Button variant="outline" size="sm">
-                              View
-                            </Button>
-                          </Link>
-                          {statement.status === "PENDING" && (
-                            <>
-                              <Button
-                                variant="success"
-                                size="sm"
-                                onClick={() => handleSend(statement.id)}
-                                disabled={sendingId === statement.id}
-                              >
-                                {sendingId === statement.id ? "Sending..." : "Send"}
-                              </Button>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => handleReject(statement.id)}
-                                disabled={rejectingId === statement.id}
-                              >
-                                {rejectingId === statement.id ? "..." : "Reject"}
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+          </div>
 
-              {/* Pagination */}
-              {pagination.totalPages > 1 && (
-                <div className="flex justify-between items-center mt-4">
-                  <span className="text-sm text-gray-500">
-                    Page {pagination.page} of {pagination.totalPages}
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={pagination.page <= 1}
-                      onClick={() =>
-                        setPagination((prev) => ({ ...prev, page: prev.page - 1 }))
-                      }
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={pagination.page >= pagination.totalPages}
-                      onClick={() =>
-                        setPagination((prev) => ({ ...prev, page: prev.page + 1 }))
-                      }
-                    >
-                      Next
-                    </Button>
+          <TabsContent value="outline" className="m-0">
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="w-10"></TableHead>
+                      <TableHead className="w-10">
+                        <input type="checkbox" className="rounded border-gray-300" />
+                      </TableHead>
+                      <TableHead className="font-medium">Header</TableHead>
+                      <TableHead className="font-medium">Section Type</TableHead>
+                      <TableHead className="font-medium">Status</TableHead>
+                      <TableHead className="font-medium text-right">Target</TableHead>
+                      <TableHead className="font-medium text-right">Limit</TableHead>
+                      <TableHead className="font-medium">Reviewer</TableHead>
+                      <TableHead className="w-10"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {demoSections.map((section) => (
+                      <TableRow key={section.id} className="hover:bg-gray-50">
+                        <TableCell className="py-3">
+                          <GripVertical className="h-4 w-4 text-gray-400" />
+                        </TableCell>
+                        <TableCell>
+                          <input type="checkbox" className="rounded border-gray-300" />
+                        </TableCell>
+                        <TableCell className="font-medium text-gray-900">
+                          {section.header}
+                        </TableCell>
+                        <TableCell>
+                          <SectionTypeBadge type={section.sectionType} />
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge status={section.status} />
+                        </TableCell>
+                        <TableCell className="text-right text-gray-600">
+                          {section.target}
+                        </TableCell>
+                        <TableCell className="text-right text-gray-600">
+                          {section.limit}
+                        </TableCell>
+                        <TableCell>
+                          {section.reviewer ? (
+                            <span className="text-gray-900">{section.reviewer}</span>
+                          ) : (
+                            <Button variant="outline" size="sm" className="text-gray-500">
+                              Assign reviewer
+                            </Button>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <button className="p-1 hover:bg-gray-100 rounded">
+                            <MoreVertical className="h-4 w-4 text-gray-400" />
+                          </button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+
+                {/* Pagination Footer */}
+                <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
+                  <div className="text-sm text-gray-500">
+                    0 of {pagination.total} row(s) selected.
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-700">Rows per page</span>
+                      <Select
+                        value={pagination.pageSize.toString()}
+                        onChange={(e) =>
+                          setPagination((prev) => ({
+                            ...prev,
+                            pageSize: parseInt(e.target.value),
+                          }))
+                        }
+                        className="w-16"
+                      >
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                      </Select>
+                    </div>
+                    <span className="text-sm text-gray-700">
+                      Page {pagination.page} of {pagination.totalPages}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        disabled={pagination.page <= 1}
+                        onClick={() =>
+                          setPagination((prev) => ({ ...prev, page: 1 }))
+                        }
+                      >
+                        <ChevronsLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        disabled={pagination.page <= 1}
+                        onClick={() =>
+                          setPagination((prev) => ({ ...prev, page: prev.page - 1 }))
+                        }
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        disabled={pagination.page >= pagination.totalPages}
+                        onClick={() =>
+                          setPagination((prev) => ({ ...prev, page: prev.page + 1 }))
+                        }
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8"
+                        disabled={pagination.page >= pagination.totalPages}
+                        onClick={() =>
+                          setPagination((prev) => ({ ...prev, page: pagination.totalPages }))
+                        }
+                      >
+                        <ChevronsRight className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="performance">
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-gray-500">Past Performance content will be displayed here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="personnel">
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-gray-500">Key Personnel content will be displayed here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="documents">
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-gray-500">Focus Documents content will be displayed here.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
