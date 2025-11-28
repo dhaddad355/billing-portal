@@ -230,6 +230,19 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Log the import for history tracking
+    const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    const userAgent = request.headers.get("user-agent") || "unknown";
+    
+    await supabase.from("import_logs").insert({
+      account_number: payload.account_number_full,
+      statement_id: statementId,
+      person_id: payload.person_id,
+      status: "SUCCESS",
+      ip_address: ipAddress,
+      user_agent: userAgent,
+    });
+
     return NextResponse.json({
       success: true,
       statementId,
