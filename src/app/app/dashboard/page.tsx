@@ -149,7 +149,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Status Filter */}
-      <Card>
+      <Card className="shadow-sm">
         <CardHeader>
           <CardTitle className="text-lg">Filter by Status</CardTitle>
         </CardHeader>
@@ -173,7 +173,7 @@ export default function DashboardPage() {
       </Card>
 
       {/* Statements Table */}
-      <Card>
+      <Card className="shadow-sm">
         <CardHeader>
           <CardTitle className="text-lg">
             {statusFilter} Statements ({pagination.total})
@@ -181,9 +181,9 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8 text-gray-500">Loading...</div>
+            <div className="py-8 text-center text-muted-foreground">Loading...</div>
           ) : statements.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="py-8 text-center text-muted-foreground">
               No {statusFilter.toLowerCase()} statements found.
             </div>
           ) : (
@@ -227,7 +227,7 @@ export default function DashboardPage() {
                           {statement.status === "PENDING" && (
                             <>
                               <Button
-                                variant="success"
+                                variant="default"
                                 size="sm"
                                 onClick={() => handleSend(statement.id)}
                                 disabled={sendingId === statement.id}
@@ -253,8 +253,8 @@ export default function DashboardPage() {
 
               {/* Pagination */}
               {pagination.totalPages > 1 && (
-                <div className="flex justify-between items-center mt-4">
-                  <span className="text-sm text-gray-500">
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
                     Page {pagination.page} of {pagination.totalPages}
                   </span>
                   <div className="flex gap-2">
