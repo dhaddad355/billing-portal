@@ -10,6 +10,7 @@ import {
   Search,
   LogOut,
   MoreHorizontal,
+  History,
 } from "lucide-react";
 
 import {
@@ -50,6 +51,11 @@ export function AppSidebar({ user }: AppSidebarProps) {
       title: "Dashboard",
       href: "/app/dashboard",
       icon: LayoutDashboard,
+    },
+    {
+      title: "Imports",
+      href: "/app/imports",
+      icon: History,
     },
   ];
 
