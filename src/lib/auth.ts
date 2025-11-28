@@ -48,8 +48,8 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: "/auth/signin",
-    signOut: "/auth/signout",
+    signIn: "/api/auth/signin",
+    signOut: "/api/auth/signout",
   },
   callbacks: {
     async signIn({ user, account, profile }) {
