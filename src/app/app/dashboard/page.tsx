@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { formatCurrency, formatDate } from "@/lib/utils";
 import {
   FileText,
   Clock,
@@ -84,12 +85,12 @@ export default function DashboardPage() {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/app/statements?status=${statusFilter}&page=${pagination.page}`
+        `/api/app/statements?status=${statusFilter}&page=${pagination.page}&pageSize=${pagination.pageSize}`
       );
       if (response.ok) {
         const data = await response.json();
         setStatements(data.statements);
-        setPagination(data.pagination);
+        setPagination((prev) => ({ ...prev, ...data.pagination }));
         setSelectedRows(new Set()); // Clear selection on data change
       }
     } catch (error) {
@@ -97,7 +98,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, pagination.page]);
+  }, [statusFilter, pagination.page, pagination.pageSize]);
 
   useEffect(() => {
     fetchStatements();
@@ -184,9 +185,9 @@ export default function DashboardPage() {
   };
 
   const filterTabs = [
-    { key: "PENDING", label: "Outline", count: statusFilter === "PENDING" ? pagination.total : null },
-    { key: "SENT", label: "Past Performance", count: 3 },
-    { key: "REJECTED", label: "Key Personnel", count: 2 },
+    { key: "PENDING", label: "Pending", count: statusFilter === "PENDING" ? pagination.total : null },
+    { key: "SENT", label: "Sent", count: statusFilter === "SENT" ? pagination.total : null },
+    { key: "REJECTED", label: "Rejected", count: statusFilter === "REJECTED" ? pagination.total : null },
   ];
 
   const toggleRow = (id: string) => {
@@ -216,7 +217,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Revenue
+              Total Statements
             </CardTitle>
             <span className="flex items-center text-xs text-green-600">
               <TrendingUp className="mr-1 h-3 w-3" />
@@ -224,7 +225,7 @@ export default function DashboardPage() {
             </span>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$1,250.00</div>
+            <div className="text-2xl font-bold">{pagination.total}</div>
             <p className="text-xs text-muted-foreground mt-1 flex items-center">
               Trending up this month <TrendingUp className="ml-1 h-3 w-3" />
             </p>
@@ -233,24 +234,24 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              New Customers
+              Pending Review
             </CardTitle>
-            <span className="flex items-center text-xs text-red-600">
-              <TrendingDown className="mr-1 h-3 w-3" />
-              -20%
+            <span className="flex items-center text-xs text-yellow-600">
+              <Clock className="mr-1 h-3 w-3" />
+              Needs attention
             </span>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,234</div>
+            <div className="text-2xl font-bold">{statusFilter === "PENDING" ? pagination.total : "—"}</div>
             <p className="text-xs text-muted-foreground mt-1 flex items-center">
-              Down 20% this period <TrendingDown className="ml-1 h-3 w-3" />
+              Awaiting approval
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Active Accounts
+              Sent Statements
             </CardTitle>
             <span className="flex items-center text-xs text-green-600">
               <TrendingUp className="mr-1 h-3 w-3" />
@@ -258,26 +259,26 @@ export default function DashboardPage() {
             </span>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pagination.total > 0 ? pagination.total.toLocaleString() : "45,678"}</div>
+            <div className="text-2xl font-bold">{statusFilter === "SENT" ? pagination.total : "—"}</div>
             <p className="text-xs text-muted-foreground mt-1 flex items-center">
-              Strong user retention <TrendingUp className="ml-1 h-3 w-3" />
+              Strong delivery rate <TrendingUp className="ml-1 h-3 w-3" />
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Growth Rate
+              Rejected
             </CardTitle>
-            <span className="flex items-center text-xs text-green-600">
-              <TrendingUp className="mr-1 h-3 w-3" />
-              +4.5%
+            <span className="flex items-center text-xs text-red-600">
+              <TrendingDown className="mr-1 h-3 w-3" />
+              -4.5%
             </span>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">4.5%</div>
+            <div className="text-2xl font-bold">{statusFilter === "REJECTED" ? pagination.total : "—"}</div>
             <p className="text-xs text-muted-foreground mt-1 flex items-center">
-              Steady performance increase <TrendingUp className="ml-1 h-3 w-3" />
+              Rejection rate decreasing <TrendingDown className="ml-1 h-3 w-3" />
             </p>
           </CardContent>
         </Card>
@@ -347,11 +348,11 @@ export default function DashboardPage() {
                           aria-label="Select all"
                         />
                       </TableHead>
-                      <TableHead className="font-medium">Header</TableHead>
-                      <TableHead className="font-medium">Section Type</TableHead>
+                      <TableHead className="font-medium">Patient Name</TableHead>
+                      <TableHead className="font-medium">Account #</TableHead>
                       <TableHead className="font-medium">Status</TableHead>
-                      <TableHead className="font-medium text-right">Target</TableHead>
-                      <TableHead className="font-medium text-right">Limit</TableHead>
+                      <TableHead className="font-medium text-right">Amount Due</TableHead>
+                      <TableHead className="font-medium">Statement Date</TableHead>
                       <TableHead className="font-medium">Reviewer</TableHead>
                       <TableHead className="font-medium w-10"></TableHead>
                     </TableRow>
@@ -375,18 +376,18 @@ export default function DashboardPage() {
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="font-normal">
-                            {statement.account_number_suffix < 1000 ? "Cover page" : "Narrative"}
+                            {statement.account_number_suffix}
                           </Badge>
                         </TableCell>
                         <TableCell>{getStatusBadge(statement.status)}</TableCell>
-                        <TableCell className="text-right">
-                          {Math.floor(statement.patient_balance / 100)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {Math.floor(statement.patient_balance / 100) - Math.floor(Math.random() * 10)}
+                        <TableCell className="text-right font-medium">
+                          {formatCurrency(statement.patient_balance, statement.currency_code)}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {statement.persons?.full_name?.split(" ")[0] || "Reviewer"}
+                          {formatDate(statement.statement_date)}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          Staff
                         </TableCell>
                         <TableCell>
                           <DropdownMenu>
