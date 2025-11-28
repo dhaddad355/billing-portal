@@ -35,8 +35,9 @@ export async function GET() {
       });
     } catch (postmarkError) {
       console.error("Postmark error:", postmarkError);
+      const errorMessage = postmarkError instanceof Error ? postmarkError.message : "Unknown error occurred";
       return NextResponse.json(
-        { error: `Failed to fetch templates: ${String(postmarkError)}` },
+        { error: `Failed to fetch templates: ${errorMessage}` },
         { status: 500 }
       );
     }
@@ -110,8 +111,9 @@ export async function POST(request: NextRequest) {
       }
     } catch (postmarkError) {
       console.error("Postmark error:", postmarkError);
+      const errorMessage = postmarkError instanceof Error ? postmarkError.message : "Unknown error occurred";
       return NextResponse.json(
-        { error: `Postmark operation failed: ${String(postmarkError)}` },
+        { error: `Postmark operation failed: ${errorMessage}` },
         { status: 500 }
       );
     }

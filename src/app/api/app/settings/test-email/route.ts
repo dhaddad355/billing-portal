@@ -2,6 +2,30 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
+/**
+ * Strips HTML tags from a string to create plain text.
+ * Repeatedly applies the regex to handle nested tags.
+ */
+function stripHtmlTags(html: string): string {
+  if (!html) return "";
+  let text = html;
+  let previousText = "";
+  // Repeatedly strip tags until no more tags are found
+  while (text !== previousText) {
+    previousText = text;
+    text = text.replace(/<[^>]*>/g, "");
+  }
+  // Decode common HTML entities (decode &amp; last to avoid double-unescaping)
+  text = text
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&");
+  return text.trim();
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -38,7 +62,7 @@ export async function POST(request: NextRequest) {
         To: toEmail,
         Subject: subject,
         HtmlBody: htmlBody || undefined,
-        TextBody: textBody || htmlBody?.replace(/<[^>]*>/g, "") || "",
+        TextBody: textBody || stripHtmlTags(htmlBody || ""),
       });
 
       return NextResponse.json({
@@ -48,8 +72,9 @@ export async function POST(request: NextRequest) {
       });
     } catch (postmarkError) {
       console.error("Postmark error:", postmarkError);
+      const errorMessage = postmarkError instanceof Error ? postmarkError.message : "Unknown error occurred";
       return NextResponse.json(
-        { error: `Failed to send email: ${String(postmarkError)}` },
+        { error: `Failed to send email: ${errorMessage}` },
         { status: 500 }
       );
     }

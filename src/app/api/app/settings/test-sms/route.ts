@@ -47,8 +47,9 @@ export async function POST(request: NextRequest) {
       });
     } catch (twilioError) {
       console.error("Twilio error:", twilioError);
+      const errorMessage = twilioError instanceof Error ? twilioError.message : "Unknown error occurred";
       return NextResponse.json(
-        { error: `Failed to send SMS: ${String(twilioError)}` },
+        { error: `Failed to send SMS: ${errorMessage}` },
         { status: 500 }
       );
     }
