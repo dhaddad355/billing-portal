@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { AlertCircle, Calendar, CreditCard, FileText } from "lucide-react";
 
 interface PatientViewClientProps {
   shortcode: string;
@@ -75,30 +76,39 @@ export default function PatientViewClient({
 
   if (!verified) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-8 bg-gradient-to-b from-blue-50 to-white">
+      <main className="min-h-screen flex items-center justify-center p-8 bg-background">
         <Card className="max-w-md w-full">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl text-blue-900">Laser Eye Institute</CardTitle>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <span className="text-sm font-bold">LEI</span>
+              </div>
+            </div>
+            <CardTitle className="text-2xl">Laser Eye Institute</CardTitle>
             <CardDescription>Statement Verification</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600 mb-6 text-center">
+            <p className="text-muted-foreground mb-6 text-center">
               For your privacy, please verify your identity by entering your date of birth.
             </p>
             <form onSubmit={handleVerify} className="space-y-4">
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="dob">Date of Birth</Label>
-                <Input
-                  id="dob"
-                  type="text"
-                  placeholder="MM/DD/YYYY"
-                  value={dob}
-                  onChange={(e) => setDob(e.target.value)}
-                  className="mt-1"
-                />
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="dob"
+                    type="text"
+                    placeholder="MM/DD/YYYY"
+                    value={dob}
+                    onChange={(e) => setDob(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
               </div>
               {error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+                <div className="flex items-center gap-2 p-3 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
                   {error}
                 </div>
               )}
@@ -116,29 +126,34 @@ export default function PatientViewClient({
   const pdfUrl = `/api/view/${shortcode}/pdf`;
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-8 bg-gradient-to-b from-blue-50 to-white">
+    <main className="min-h-screen flex items-center justify-center p-8 bg-background">
       <Card className="max-w-lg w-full">
         <CardHeader className="text-center border-b">
-          <CardTitle className="text-2xl text-blue-900">Laser Eye Institute</CardTitle>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <span className="text-sm font-bold">LEI</span>
+            </div>
+          </div>
+          <CardTitle className="text-2xl">Laser Eye Institute</CardTitle>
           <CardDescription>Your Statement</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
           <div className="space-y-6">
             {patientName && (
               <div className="text-center">
-                <p className="text-sm text-gray-500">Statement for</p>
+                <p className="text-sm text-muted-foreground">Statement for</p>
                 <p className="text-xl font-semibold">{patientName}</p>
               </div>
             )}
 
             <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-500">Statement Date</p>
+              <div className="p-4 rounded-lg border bg-card">
+                <p className="text-sm text-muted-foreground">Statement Date</p>
                 <p className="font-semibold">{formatDate(statementDate)}</p>
               </div>
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-gray-500">Amount Due</p>
-                <p className="text-2xl font-bold text-blue-900">
+              <div className="p-4 rounded-lg border bg-primary/5">
+                <p className="text-sm text-muted-foreground">Amount Due</p>
+                <p className="text-2xl font-bold text-primary">
                   {formatCurrency(patientBalance, currencyCode)}
                 </p>
               </div>
@@ -147,17 +162,19 @@ export default function PatientViewClient({
             <div className="space-y-3">
               <a href={paymentUrl} target="_blank" rel="noopener noreferrer">
                 <Button className="w-full" size="lg">
+                  <CreditCard className="mr-2 h-4 w-4" />
                   Pay Now
                 </Button>
               </a>
               <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" className="w-full">
+                  <FileText className="mr-2 h-4 w-4" />
                   Download Statement PDF
                 </Button>
               </a>
             </div>
 
-            <div className="text-center text-sm text-gray-500 border-t pt-4">
+            <div className="text-center text-sm text-muted-foreground border-t pt-4">
               <p>
                 Questions about your statement?<br />
                 Contact Laser Eye Institute at (248) 557-1010
