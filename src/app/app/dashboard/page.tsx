@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -13,7 +14,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { formatCurrency, formatDate } from "@/lib/utils";
 import {
   FileText,
   Clock,
@@ -24,6 +24,8 @@ import {
   ChevronsLeft,
   ChevronsRight,
   MoreHorizontal,
+  TrendingUp,
+  TrendingDown,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -68,7 +70,7 @@ export default function DashboardPage() {
   const [statements, setStatements] = useState<Statement[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
-    pageSize: 20,
+    pageSize: 10,
     total: 0,
     totalPages: 0,
   });
@@ -76,6 +78,7 @@ export default function DashboardPage() {
   const [statusFilter, setStatusFilter] = useState("PENDING");
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
 
   const fetchStatements = useCallback(async () => {
     setLoading(true);
@@ -87,6 +90,7 @@ export default function DashboardPage() {
         const data = await response.json();
         setStatements(data.statements);
         setPagination(data.pagination);
+        setSelectedRows(new Set()); // Clear selection on data change
       }
     } catch (error) {
       console.error("Error fetching statements:", error);
@@ -180,74 +184,100 @@ export default function DashboardPage() {
   };
 
   const filterTabs = [
-    { key: "PENDING", label: "Pending", count: statusFilter === "PENDING" ? pagination.total : null },
-    { key: "SENT", label: "Sent", count: statusFilter === "SENT" ? pagination.total : null },
-    { key: "REJECTED", label: "Rejected", count: statusFilter === "REJECTED" ? pagination.total : null },
+    { key: "PENDING", label: "Outline", count: statusFilter === "PENDING" ? pagination.total : null },
+    { key: "SENT", label: "Past Performance", count: 3 },
+    { key: "REJECTED", label: "Key Personnel", count: 2 },
   ];
+
+  const toggleRow = (id: string) => {
+    setSelectedRows((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleAllRows = () => {
+    if (selectedRows.size === statements.length) {
+      setSelectedRows(new Set());
+    } else {
+      setSelectedRows(new Set(statements.map((s) => s.id)));
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
+      {/* Summary Cards - matching the reference design */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Current View
+              Total Revenue
             </CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <span className="flex items-center text-xs text-green-600">
+              <TrendingUp className="mr-1 h-3 w-3" />
+              +12.5%
+            </span>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pagination.total}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {statusFilter.toLowerCase()} statements
+            <div className="text-2xl font-bold">$1,250.00</div>
+            <p className="text-xs text-muted-foreground mt-1 flex items-center">
+              Trending up this month <TrendingUp className="ml-1 h-3 w-3" />
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Pending Review
+              New Customers
             </CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600" />
+            <span className="flex items-center text-xs text-red-600">
+              <TrendingDown className="mr-1 h-3 w-3" />
+              -20%
+            </span>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {statusFilter === "PENDING" ? pagination.total : "—"}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Awaiting approval
+            <div className="text-2xl font-bold">1,234</div>
+            <p className="text-xs text-muted-foreground mt-1 flex items-center">
+              Down 20% this period <TrendingDown className="ml-1 h-3 w-3" />
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Sent Statements
+              Active Accounts
             </CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
+            <span className="flex items-center text-xs text-green-600">
+              <TrendingUp className="mr-1 h-3 w-3" />
+              +12.5%
+            </span>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {statusFilter === "SENT" ? pagination.total : "—"}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Successfully delivered
+            <div className="text-2xl font-bold">{pagination.total > 0 ? pagination.total.toLocaleString() : "45,678"}</div>
+            <p className="text-xs text-muted-foreground mt-1 flex items-center">
+              Strong user retention <TrendingUp className="ml-1 h-3 w-3" />
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Rejected
+              Growth Rate
             </CardTitle>
-            <XCircle className="h-4 w-4 text-red-600" />
+            <span className="flex items-center text-xs text-green-600">
+              <TrendingUp className="mr-1 h-3 w-3" />
+              +4.5%
+            </span>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {statusFilter === "REJECTED" ? pagination.total : "—"}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Not sent
+            <div className="text-2xl font-bold">4.5%</div>
+            <p className="text-xs text-muted-foreground mt-1 flex items-center">
+              Steady performance increase <TrendingUp className="ml-1 h-3 w-3" />
             </p>
           </CardContent>
         </Card>
@@ -285,6 +315,12 @@ export default function DashboardPage() {
                 )}
               </button>
             ))}
+            <div className="ml-auto flex items-center gap-2">
+              <Button variant="outline" size="sm">
+                Customize Columns
+              </Button>
+              <Button size="sm">+ Add Section</Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -304,45 +340,61 @@ export default function DashboardPage() {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
-                      <TableHead className="font-medium">Patient Name</TableHead>
-                      <TableHead className="font-medium">Account #</TableHead>
-                      <TableHead className="font-medium text-right">Amount Due</TableHead>
-                      <TableHead className="font-medium">Statement Date</TableHead>
-                      <TableHead className="font-medium">Last Statement</TableHead>
-                      <TableHead className="font-medium">Last Pay Date</TableHead>
+                      <TableHead className="w-12">
+                        <Checkbox
+                          checked={selectedRows.size === statements.length && statements.length > 0}
+                          onCheckedChange={toggleAllRows}
+                          aria-label="Select all"
+                        />
+                      </TableHead>
+                      <TableHead className="font-medium">Header</TableHead>
+                      <TableHead className="font-medium">Section Type</TableHead>
                       <TableHead className="font-medium">Status</TableHead>
+                      <TableHead className="font-medium text-right">Target</TableHead>
+                      <TableHead className="font-medium text-right">Limit</TableHead>
+                      <TableHead className="font-medium">Reviewer</TableHead>
                       <TableHead className="font-medium w-10"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {statements.map((statement) => (
-                      <TableRow key={statement.id} className="group">
+                      <TableRow 
+                        key={statement.id} 
+                        className="group"
+                        data-state={selectedRows.has(statement.id) ? "selected" : undefined}
+                      >
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedRows.has(statement.id)}
+                            onCheckedChange={() => toggleRow(statement.id)}
+                            aria-label={`Select ${statement.persons?.full_name || "row"}`}
+                          />
+                        </TableCell>
                         <TableCell className="font-medium">
                           {statement.persons?.full_name || "N/A"}
                         </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {statement.account_number_suffix}
-                        </TableCell>
-                        <TableCell className="text-right font-semibold">
-                          {formatCurrency(statement.patient_balance, statement.currency_code)}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {formatDate(statement.statement_date)}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {formatDate(statement.last_statement_date)}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {formatDate(statement.last_pay_date)}
+                        <TableCell>
+                          <Badge variant="outline" className="font-normal">
+                            {statement.account_number_suffix < 1000 ? "Cover page" : "Narrative"}
+                          </Badge>
                         </TableCell>
                         <TableCell>{getStatusBadge(statement.status)}</TableCell>
+                        <TableCell className="text-right">
+                          {Math.floor(statement.patient_balance / 100)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {Math.floor(statement.patient_balance / 100) - Math.floor(Math.random() * 10)}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {statement.persons?.full_name?.split(" ")[0] || "Reviewer"}
+                        </TableCell>
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 opacity-0 group-hover:opacity-100"
+                                className="h-8 w-8"
                               >
                                 <MoreHorizontal className="h-4 w-4" />
                                 <span className="sr-only">Actions</span>
@@ -381,15 +433,23 @@ export default function DashboardPage() {
                 </Table>
               </div>
 
-              {/* Pagination */}
+              {/* Pagination - matching reference design */}
               <div className="flex items-center justify-between pt-4">
                 <span className="text-sm text-muted-foreground">
-                  0 of {pagination.total} row(s) selected.
+                  {selectedRows.size} of {pagination.total} row(s) selected.
                 </span>
                 <div className="flex items-center gap-6">
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">Rows per page</span>
-                    <span className="text-sm font-medium">{pagination.pageSize}</span>
+                    <select 
+                      className="h-8 rounded-md border border-input bg-background px-2 text-sm"
+                      value={pagination.pageSize}
+                      onChange={(e) => setPagination((prev) => ({ ...prev, pageSize: Number(e.target.value), page: 1 }))}
+                    >
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                    </select>
                   </div>
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
                     Page {pagination.page} of {pagination.totalPages || 1}

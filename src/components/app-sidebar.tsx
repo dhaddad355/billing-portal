@@ -6,8 +6,10 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Settings,
+  HelpCircle,
+  Search,
   LogOut,
-  ChevronsUpDown,
+  MoreHorizontal,
 } from "lucide-react";
 
 import {
@@ -75,7 +77,6 @@ export function AppSidebar({ user }: AppSidebarProps) {
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-semibold">Laser Eye Institute</span>
-            <span className="text-xs text-muted-foreground">Billing Portal</span>
           </div>
         </div>
       </SidebarHeader>
@@ -111,6 +112,22 @@ export function AppSidebar({ user }: AppSidebarProps) {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link href="#">
+                <HelpCircle className="h-4 w-4" />
+                <span>Get Help</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link href="#">
+                <Search className="h-4 w-4" />
+                <span>Search</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -118,9 +135,9 @@ export function AppSidebar({ user }: AppSidebarProps) {
               size="lg"
               className="w-full justify-start data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8">
+              <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user?.image || undefined} alt={user?.name || "User"} />
-                <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                <AvatarFallback className="rounded-lg bg-muted text-xs">
                   {getInitials(user?.name, user?.email)}
                 </AvatarFallback>
               </Avatar>
@@ -130,7 +147,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
                   {user?.email || ""}
                 </span>
               </div>
-              <ChevronsUpDown className="ml-auto h-4 w-4" />
+              <MoreHorizontal className="ml-auto h-4 w-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -141,9 +158,9 @@ export function AppSidebar({ user }: AppSidebarProps) {
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user?.image || undefined} alt={user?.name || "User"} />
-                  <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                  <AvatarFallback className="rounded-lg bg-muted text-xs">
                     {getInitials(user?.name, user?.email)}
                   </AvatarFallback>
                 </Avatar>
