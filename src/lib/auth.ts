@@ -3,6 +3,21 @@ import AzureADProvider from "next-auth/providers/azure-ad";
 import { getServiceClient } from "@/lib/supabase";
 import { JWT } from "next-auth/jwt";
 
+// Validate required environment variables
+const requiredEnvVars = [
+  'NEXTAUTH_SECRET',
+  'NEXTAUTH_URL',
+  'AZURE_AD_CLIENT_ID',
+  'AZURE_AD_CLIENT_SECRET',
+  'AZURE_AD_TENANT_ID'
+];
+
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    console.error(`Missing required environment variable: ${envVar}`);
+  }
+}
+
 interface ExtendedToken extends JWT {
   userId?: string;
   azureOid?: string;
@@ -108,4 +123,5 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
+  debug: process.env.NODE_ENV === "development",
 };
