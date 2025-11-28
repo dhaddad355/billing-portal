@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
-import { Avatar } from "./ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import * as React from "react";
 
 type SidebarProps = {
@@ -48,7 +48,10 @@ export function Sidebar({ user, onSignIn, onSignOut }: SidebarProps) {
         {user ? (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Avatar src={user.image} name={user.name} />
+              <Avatar>
+                <AvatarImage src={user.image || undefined} alt={user.name || "User"} />
+                <AvatarFallback>{user.name?.[0] || user.email?.[0] || "U"}</AvatarFallback>
+              </Avatar>
               <div className="min-w-0">
                 <div className="truncate text-sm font-medium">{user.name || user.email}</div>
                 <div className="truncate text-xs text-muted-foreground">{user.email}</div>
