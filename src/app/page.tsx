@@ -38,7 +38,7 @@ export default function Home() {
                     Access the staff dashboard to review and manage patient statements.
                     You must sign in with your Laser Eye Institute Azure AD account.
                   </p>
-                  <Link href="/app/dashboard">
+                  <Link href="/app/statements-processing">
                     <Button>
                       Staff Dashboard
                     </Button>

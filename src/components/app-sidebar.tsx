@@ -5,11 +5,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
+  FileText,
+  Users,
   Settings,
   HelpCircle,
   Search,
   LogOut,
   MoreHorizontal,
+  PlusCircle,
+  Eye,
 } from "lucide-react";
 
 import {
@@ -50,6 +54,42 @@ export function AppSidebar({ user }: AppSidebarProps) {
       title: "Dashboard",
       href: "/app/dashboard",
       icon: LayoutDashboard,
+    }
+   
+  ];
+
+  const invoiceItems = [
+     {
+      title: "Process Statements",
+      href: "/app/statements-processing",
+      icon: FileText,
+    },{
+      title: "Invoice Settings",
+      href: "/app/settings/invoices",
+      icon: Settings,
+    },
+  ];
+
+  const referralItems = [
+    {
+      title: "Submit Referrals",
+      href: "/app/referrals/add",
+      icon: PlusCircle,
+    },
+    {
+      title: "View Referrals",
+      href: "/app/referrals",
+      icon: Eye,
+    },
+    {
+      title: "Referral Settings",
+      href: "/app/settings/referrals",
+      icon: Settings,
+    },
+     {
+      title: "Manage Providers",
+      href: "/app/referrals/providers",
+      icon: Settings,
     },
   ];
 
@@ -82,10 +122,49 @@ export function AppSidebar({ user }: AppSidebarProps) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Home</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === item.href}
+                  >
+                    <Link href={item.href}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Invoices</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {invoiceItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === item.href}
+                  >
+                    <Link href={item.href}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Referrals</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {referralItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild

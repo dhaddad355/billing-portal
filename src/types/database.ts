@@ -79,3 +79,90 @@ export interface StatementEvent {
   created_at: string;
   created_by_user_id: string | null;
 }
+
+// Referrals Feature Types
+
+export type ReferralStatus = "OPEN" | "CLOSED";
+export type ReferralSubStatus = "Scheduling" | "Appointment" | "Quote" | "Procedure" | "Post-Op";
+export type CommunicationPreference = "Email" | "Fax";
+export type ReferralReason = "Laser Vision Correction" | "Cataract Consultation" | "Other";
+export type SchedulingPreference = "Call Patient" | "SMS Patient" | "Email Patient" | "Patient Instructed To Call";
+
+export interface Practice {
+  id: string;
+  name: string;
+  address_line1: string | null;
+  address_line2: string | null;
+  city: string | null;
+  state: string | null;
+  zip_code: string | null;
+  phone: string | null;
+  fax: string | null;
+  website: string | null;
+  communication_preference: CommunicationPreference;
+  notes: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Provider {
+  id: string;
+  practice_id: string | null;
+  first_name: string;
+  last_name: string;
+  degree: string | null;
+  email: string | null;
+  phone: string | null;
+  notes: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProviderWithPractice extends Provider {
+  practices: Practice | null;
+}
+
+export interface Referral {
+  id: string;
+  provider_id: string | null;
+  practice_id: string | null;
+  patient_full_name: string;
+  patient_dob: string;
+  patient_phone: string | null;
+  patient_email: string | null;
+  referral_reason: ReferralReason;
+  referral_reason_other: string | null;
+  notes: string | null;
+  scheduling_preference: SchedulingPreference;
+  communication_preference: CommunicationPreference;
+  communication_value: string | null;
+  status: ReferralStatus;
+  sub_status: ReferralSubStatus;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReferralWithRelations extends Referral {
+  providers: ProviderWithPractice | null;
+  practices: Practice | null;
+}
+
+export interface ReferralNote {
+  id: string;
+  referral_id: string;
+  user_id: string | null;
+  note: string;
+  note_type: "manual" | "status_change" | "system";
+  previous_status: ReferralStatus | null;
+  new_status: ReferralStatus | null;
+  previous_sub_status: ReferralSubStatus | null;
+  new_sub_status: ReferralSubStatus | null;
+  created_at: string;
+}
+
+export interface ReferralNoteWithUser extends ReferralNote {
+  users: User | null;
+}

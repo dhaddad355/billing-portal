@@ -5,10 +5,9 @@ import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Suspense } from "react";
-
 function SignInContent() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/app/dashboard";
+  const callbackUrl = searchParams.get("callbackUrl") || "/app/statements-processing";
   const error = searchParams.get("error");
 
   return (

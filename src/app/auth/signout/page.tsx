@@ -36,7 +36,7 @@ function SignOutContent() {
             <LogOut className="mr-2 h-4 w-4" />
             Sign out
           </Button>
-          <Link href="/app/dashboard" className="block">
+          <Link href="/app/statements-processing" className="block">
             <Button variant="outline" className="w-full" size="lg">
               Cancel
             </Button>

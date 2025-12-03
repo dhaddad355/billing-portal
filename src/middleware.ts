@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
     });
 
     if (!token) {
-      const signInUrl = new URL("/api/auth/signin", request.url);
+        const signInUrl = new URL("/auth/signin", request.url);
       signInUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(signInUrl);
     }

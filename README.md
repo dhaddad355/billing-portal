@@ -28,7 +28,7 @@ A secure billing portal built with Next.js 14 (App Router) that enables:
 | Route | Access | Description |
 |-------|--------|-------------|
 | `/` | Public | Landing page |
-| `/app/dashboard` | Staff (Azure AD) | Statement management dashboard |
+| `/app/statements-processing` | Staff (Azure AD) | Statement management dashboard |
 | `/app/statements/[id]` | Staff (Azure AD) | Statement detail view |
 | `/view/[shortcode]` | Public (DOB gated) | Patient statement view |
 | `/api/statement` | API Key | Inbound endpoint for .NET app |
