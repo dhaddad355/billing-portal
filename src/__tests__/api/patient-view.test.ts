@@ -1,4 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { NextRequest } from "next/server";
+
+// Type definitions for Next.js route context
+type RouteContext = { params: { shortcode: string } };
 
 // Create chainable mock for Supabase
 const createSupabaseMock = () => {
@@ -58,7 +62,7 @@ describe("Patient View API - GET /api/view/[shortcode]/pdf", () => {
     });
 
     const { GET } = await import("@/app/api/view/[shortcode]/pdf/route");
-    const response = await GET(request as any, { params: { shortcode: "INVALID" } });
+    const response = await GET(request as unknown as NextRequest, { params: Promise.resolve({ shortcode: "INVALID" }) } as RouteContext);
     const data = await response.json();
 
     expect(response.status).toBe(404);
@@ -76,7 +80,7 @@ describe("Patient View API - GET /api/view/[shortcode]/pdf", () => {
     });
 
     const { GET } = await import("@/app/api/view/[shortcode]/pdf/route");
-    const response = await GET(request as any, { params: { shortcode: "ABC123" } });
+    const response = await GET(request as unknown as NextRequest, { params: Promise.resolve({ shortcode: "ABC123" }) } as RouteContext);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -104,7 +108,7 @@ describe("Patient View API - DOB Verification", () => {
     });
 
     const { POST } = await import("@/app/api/view/verify-dob/route");
-    const response = await POST(request as any);
+    const response = await POST(request as unknown as NextRequest);
     const data = await response.json();
 
     expect(response.status).toBe(404);
@@ -119,7 +123,7 @@ describe("Patient View API - DOB Verification", () => {
     });
 
     const { POST } = await import("@/app/api/view/verify-dob/route");
-    const response = await POST(request as any);
+    const response = await POST(request as unknown as NextRequest);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -134,7 +138,7 @@ describe("Patient View API - DOB Verification", () => {
     });
 
     const { POST } = await import("@/app/api/view/verify-dob/route");
-    const response = await POST(request as any);
+    const response = await POST(request as unknown as NextRequest);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -161,7 +165,7 @@ describe("Patient View API - DOB Verification", () => {
     });
 
     const { POST } = await import("@/app/api/view/verify-dob/route");
-    const response = await POST(request as any);
+    const response = await POST(request as unknown as NextRequest);
     const data = await response.json();
 
     expect(response.status).toBe(400);

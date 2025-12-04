@@ -9,7 +9,7 @@ import StatementActions from "./statement-actions";
 import { Clock, CheckCircle2, XCircle, ExternalLink } from "lucide-react";
 
 interface StatementPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function StatementPage({ params }: StatementPageProps) {
@@ -17,6 +17,8 @@ export default async function StatementPage({ params }: StatementPageProps) {
   if (!session) {
     redirect("/api/auth/signin");
   }
+
+  const { id } = await params;
 
   const supabase = getServiceClient();
 
@@ -33,7 +35,7 @@ export default async function StatementPage({ params }: StatementPageProps) {
         date_of_birth
       )
     `)
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (error || !statement) {

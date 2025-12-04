@@ -21,7 +21,7 @@ function SignInContent() {
           </div>
           <CardTitle className="text-2xl">Welcome back</CardTitle>
           <CardDescription>
-            Sign in to the Laser Eye Institute Billing Portal
+            Sign in to MyLEI
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -72,7 +72,7 @@ export default function SignInPage() {
             </div>
             <CardTitle className="text-2xl">Welcome back</CardTitle>
             <CardDescription>
-              Sign in to the Laser Eye Institute Billing Portal
+              Sign in to MyLEI
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

@@ -1,5 +1,5 @@
 -- =====================================================================
--- Billing Portal Schema for Supabase (PostgreSQL)
+-- MyLEI Portal Schema for Supabase (PostgreSQL)
 -- =====================================================================
 
 -- 1. Users table (staff only - populated on Azure AD login)

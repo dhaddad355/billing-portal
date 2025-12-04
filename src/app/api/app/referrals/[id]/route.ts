@@ -15,11 +15,11 @@ interface ExtendedSession {
 // GET /api/app/referrals/[id] - Get a specific referral with notes
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = getServiceClient();
-    const { id } = params;
+    const { id } = await params;
 
     const { data: referral, error: referralError } = await supabase
       .from("referrals")
@@ -69,12 +69,12 @@ export async function GET(
 // PUT /api/app/referrals/[id] - Update a referral
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = getServiceClient();
     const session = (await getServerSession(authOptions)) as ExtendedSession | null;
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     // Get current referral to track status changes

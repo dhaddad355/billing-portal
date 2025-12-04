@@ -1,6 +1,6 @@
-# Laser Eye Institute Billing Portal
+# MyLEI - Laser Eye Institute Portal
 
-A secure billing portal built with Next.js 14 (App Router) that enables:
+A secure portal built with Next.js 14 (App Router) that enables:
 - Staff to review and manage patient statements
 - Patients to view and pay their statements via secure shortcode links
 
@@ -64,7 +64,7 @@ TWILIO_PHONE_NUMBER=+1234567890
 
 # Postmark Configuration (for Email)
 POSTMARK_API_TOKEN=your_postmark_api_token
-POSTMARK_FROM_EMAIL=billing@lasereyeinstitute.com
+POSTMARK_FROM_EMAIL=mylei@lasereyeinstitute.com
 ```
 
 ## Database Setup

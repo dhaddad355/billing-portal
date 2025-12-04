@@ -18,7 +18,6 @@ const REFERRAL_STATUSES = [
 
 export default function AddReferralPage() {
   const router = useRouter();
-  const [loading, setLoading] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
 
   // Provider search
@@ -188,7 +187,7 @@ export default function AddReferralPage() {
 
               {showProviderDropdown && providerResults.length === 0 && providerSearch.length >= 3 && !searchingProvider && (
                 <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover p-4 text-center text-sm text-muted-foreground shadow-lg">
-                  No providers found matching "{providerSearch}"
+                  No providers found matching &ldquo;{providerSearch}&rdquo;
                 </div>
               )}
             </div>

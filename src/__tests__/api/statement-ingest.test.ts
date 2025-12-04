@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { NextRequest } from "next/server";
 
 // Mock the Supabase client
 const mockSupabaseClient = {
@@ -45,7 +46,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
 
   describe("Authentication", () => {
     it("should reject requests without API key", async () => {
-      const request = new Request("http://localhost:3000/api/statement", {
+      const request = new NextRequest("http://localhost:3000/api/statement", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -55,7 +56,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
 
       // Import dynamically to pick up mocks
       const { POST } = await import("@/app/api/statement/route");
-      const response = await POST(request as any);
+      const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(401);
@@ -63,7 +64,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
     });
 
     it("should reject requests with invalid API key", async () => {
-      const request = new Request("http://localhost:3000/api/statement", {
+      const request = new NextRequest("http://localhost:3000/api/statement", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -73,7 +74,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
       });
 
       const { POST } = await import("@/app/api/statement/route");
-      const response = await POST(request as any);
+      const response = await POST(request as unknown as NextRequest);
       const data = await response.json();
 
       expect(response.status).toBe(401);
@@ -83,7 +84,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
 
   describe("Validation", () => {
     it("should reject requests without person_id", async () => {
-      const request = new Request("http://localhost:3000/api/statement", {
+      const request = new NextRequest("http://localhost:3000/api/statement", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -97,7 +98,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
       });
 
       const { POST } = await import("@/app/api/statement/route");
-      const response = await POST(request as any);
+      const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -105,7 +106,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
     });
 
     it("should reject requests without account_number_full", async () => {
-      const request = new Request("http://localhost:3000/api/statement", {
+      const request = new NextRequest("http://localhost:3000/api/statement", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -119,7 +120,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
       });
 
       const { POST } = await import("@/app/api/statement/route");
-      const response = await POST(request as any);
+      const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -127,7 +128,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
     });
 
     it("should reject requests without patient_balance", async () => {
-      const request = new Request("http://localhost:3000/api/statement", {
+      const request = new NextRequest("http://localhost:3000/api/statement", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -141,7 +142,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
       });
 
       const { POST } = await import("@/app/api/statement/route");
-      const response = await POST(request as any);
+      const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -149,7 +150,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
     });
 
     it("should reject requests without PDF file", async () => {
-      const request = new Request("http://localhost:3000/api/statement", {
+      const request = new NextRequest("http://localhost:3000/api/statement", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -163,7 +164,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
       });
 
       const { POST } = await import("@/app/api/statement/route");
-      const response = await POST(request as any);
+      const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -171,7 +172,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
     });
 
     it("should reject requests with invalid PDF (wrong format)", async () => {
-      const request = new Request("http://localhost:3000/api/statement", {
+      const request = new NextRequest("http://localhost:3000/api/statement", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -186,7 +187,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
       });
 
       const { POST } = await import("@/app/api/statement/route");
-      const response = await POST(request as any);
+      const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -196,7 +197,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
 
   describe("Success Cases", () => {
     it("should successfully create a statement with valid JSON payload", async () => {
-      const request = new Request("http://localhost:3000/api/statement", {
+      const request = new NextRequest("http://localhost:3000/api/statement", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -217,7 +218,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
       });
 
       const { POST } = await import("@/app/api/statement/route");
-      const response = await POST(request as any);
+      const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -226,7 +227,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
     });
 
     it("should handle optional date fields correctly", async () => {
-      const request = new Request("http://localhost:3000/api/statement", {
+      const request = new NextRequest("http://localhost:3000/api/statement", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -244,7 +245,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
       });
 
       const { POST } = await import("@/app/api/statement/route");
-      const response = await POST(request as any);
+      const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -254,7 +255,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
 
   describe("Database Operations", () => {
     it("should upsert person record", async () => {
-      const request = new Request("http://localhost:3000/api/statement", {
+      const request = new NextRequest("http://localhost:3000/api/statement", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -271,14 +272,14 @@ describe("Statement Ingest API - POST /api/statement", () => {
       });
 
       const { POST } = await import("@/app/api/statement/route");
-      await POST(request as any);
+      await POST(request);
 
       expect(mockSupabaseClient.from).toHaveBeenCalledWith("persons");
       expect(mockSupabaseClient.upsert).toHaveBeenCalled();
     });
 
     it("should upload PDF to storage", async () => {
-      const request = new Request("http://localhost:3000/api/statement", {
+      const request = new NextRequest("http://localhost:3000/api/statement", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -293,13 +294,13 @@ describe("Statement Ingest API - POST /api/statement", () => {
       });
 
       const { POST } = await import("@/app/api/statement/route");
-      await POST(request as any);
+      await POST(request);
 
       expect(mockSupabaseClient.storage.from).toHaveBeenCalledWith("statements");
     });
 
     it("should create statement event log entry", async () => {
-      const request = new Request("http://localhost:3000/api/statement", {
+      const request = new NextRequest("http://localhost:3000/api/statement", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -314,7 +315,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
       });
 
       const { POST } = await import("@/app/api/statement/route");
-      await POST(request as any);
+      await POST(request);
 
       expect(mockSupabaseClient.from).toHaveBeenCalledWith("statement_events");
     });

@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   FileText,
-  Users,
   Settings,
   HelpCircle,
   Search,

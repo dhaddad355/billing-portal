@@ -250,10 +250,10 @@ export default function ViewReferralsPage() {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          className={PRIORITY_COLORS[referral.priority] || ""}
+                          className={referral.priority ? PRIORITY_COLORS[referral.priority] : ""}
                           variant="secondary"
                         >
-                          {referral.priority}
+                          {referral.priority || "normal"}
                         </Badge>
                       </TableCell>
                       <TableCell>{formatDate(referral.created_at)}</TableCell>

@@ -4,11 +4,11 @@ import { getServiceClient } from "@/lib/supabase";
 // GET /api/app/practices/[id] - Get a specific practice
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = getServiceClient();
-    const { id } = params;
+    const { id } = await params;
 
     const { data, error } = await supabase
       .from("practices")
@@ -34,11 +34,11 @@ export async function GET(
 // PUT /api/app/practices/[id] - Update a practice
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = getServiceClient();
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     const { data, error } = await supabase
@@ -76,11 +76,11 @@ export async function PUT(
 // DELETE /api/app/practices/[id] - Soft delete a practice
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = getServiceClient();
-    const { id } = params;
+    const { id } = await params;
 
     const { data, error } = await supabase
       .from("practices")

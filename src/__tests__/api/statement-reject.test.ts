@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
+import { NextRequest } from "next/server";
 
 // Mock next-auth
 vi.mock("next-auth", () => ({
@@ -53,15 +54,15 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
     vi.resetModules();
     mockSupabaseClient = createMockSupabaseClient();
     
-    (getServerSession as any).mockResolvedValue({
+    (getServerSession as unknown as Mock).mockResolvedValue({
       user: { id: "user-123", azureOid: "oid-123", name: "Test User" },
     });
   });
 
   it("should reject unauthenticated requests", async () => {
-    (getServerSession as any).mockResolvedValue(null);
+    (getServerSession as unknown as Mock).mockResolvedValue(null);
 
-    const request = new Request("http://localhost:3000/api/app/statements/test-id/reject", {
+    const request = new NextRequest("http://localhost:3000/api/app/statements/test-id/reject", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -70,7 +71,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
     });
 
     const { POST } = await import("@/app/api/app/statements/[id]/reject/route");
-    const response = await POST(request as any, { params: { id: "test-id" } });
+    const response = await POST(request, { params: Promise.resolve({ id: "test-id" }) });
     const data = await response.json();
 
     expect(response.status).toBe(401);
@@ -82,13 +83,13 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
       data: { id: "stmt-1", status: "PENDING" },
       error: null,
     });
-    mockSupabaseClient.eq.mockReturnValue({ 
+    mockSupabaseClient.eq.mockReturnValue({
       single: mockSupabaseClient.single,
-      eq: mockSupabaseClient.eq 
+      eq: mockSupabaseClient.eq
     });
     mockSupabaseClient.update.mockReturnValue({ eq: mockSupabaseClient.eq });
 
-    const request = new Request("http://localhost:3000/api/app/statements/stmt-1/reject", {
+    const request = new NextRequest("http://localhost:3000/api/app/statements/stmt-1/reject", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -97,7 +98,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
     });
 
     const { POST } = await import("@/app/api/app/statements/[id]/reject/route");
-    const response = await POST(request as any, { params: { id: "stmt-1" } });
+    const response = await POST(request, { params: Promise.resolve({ id: "stmt-1" }) });
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -109,13 +110,13 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
       data: { id: "stmt-1", status: "PENDING" },
       error: null,
     });
-    mockSupabaseClient.eq.mockReturnValue({ 
+    mockSupabaseClient.eq.mockReturnValue({
       single: mockSupabaseClient.single,
-      eq: mockSupabaseClient.eq 
+      eq: mockSupabaseClient.eq
     });
     mockSupabaseClient.update.mockReturnValue({ eq: mockSupabaseClient.eq });
 
-    const request = new Request("http://localhost:3000/api/app/statements/stmt-1/reject", {
+    const request = new NextRequest("http://localhost:3000/api/app/statements/stmt-1/reject", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -124,7 +125,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
     });
 
     const { POST } = await import("@/app/api/app/statements/[id]/reject/route");
-    await POST(request as any, { params: { id: "stmt-1" } });
+    await POST(request, { params: Promise.resolve({ id: "stmt-1" }) });
 
     expect(mockSupabaseClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -144,7 +145,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
     });
     mockSupabaseClient.update.mockReturnValue({ eq: mockSupabaseClient.eq });
 
-    const request = new Request("http://localhost:3000/api/app/statements/stmt-1/reject", {
+    const request = new NextRequest("http://localhost:3000/api/app/statements/stmt-1/reject", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -153,7 +154,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
     });
 
     const { POST } = await import("@/app/api/app/statements/[id]/reject/route");
-    await POST(request as any, { params: { id: "stmt-1" } });
+    await POST(request, { params: Promise.resolve({ id: "stmt-1" }) });
 
     expect(mockSupabaseClient.insert).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -170,7 +171,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
     });
     mockSupabaseClient.eq.mockReturnValue({ single: mockSupabaseClient.single });
 
-    const request = new Request("http://localhost:3000/api/app/statements/nonexistent/reject", {
+    const request = new NextRequest("http://localhost:3000/api/app/statements/nonexistent/reject", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -179,7 +180,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
     });
 
     const { POST } = await import("@/app/api/app/statements/[id]/reject/route");
-    const response = await POST(request as any, { params: { id: "nonexistent" } });
+    const response = await POST(request, { params: Promise.resolve({ id: "nonexistent" }) });
     const data = await response.json();
 
     expect(response.status).toBe(404);
@@ -193,7 +194,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
     });
     mockSupabaseClient.eq.mockReturnValue({ single: mockSupabaseClient.single });
 
-    const request = new Request("http://localhost:3000/api/app/statements/stmt-1/reject", {
+    const request = new NextRequest("http://localhost:3000/api/app/statements/stmt-1/reject", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -202,7 +203,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
     });
 
     const { POST } = await import("@/app/api/app/statements/[id]/reject/route");
-    const response = await POST(request as any, { params: { id: "stmt-1" } });
+    const response = await POST(request, { params: Promise.resolve({ id: "stmt-1" }) });
     const data = await response.json();
 
     expect(response.status).toBe(400);

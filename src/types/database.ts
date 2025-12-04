@@ -93,9 +93,11 @@ export interface Practice {
   name: string;
   address_line1: string | null;
   address_line2: string | null;
+  address?: string | null; // TODO: Computed field or add to DB
   city: string | null;
   state: string | null;
   zip_code: string | null;
+  zip?: string | null; // Alias for zip_code
   phone: string | null;
   fax: string | null;
   website: string | null;
@@ -112,6 +114,8 @@ export interface Provider {
   first_name: string;
   last_name: string;
   degree: string | null;
+  specialty?: string | null; // TODO: Add to database migration
+  npi?: string | null; // TODO: Add to database migration
   email: string | null;
   phone: string | null;
   notes: string | null;
@@ -124,11 +128,15 @@ export interface ProviderWithPractice extends Provider {
   practices: Practice | null;
 }
 
+export type Priority = "low" | "normal" | "high" | "urgent";
+
 export interface Referral {
   id: string;
   provider_id: string | null;
   practice_id: string | null;
   patient_full_name: string;
+  patient_first_name?: string | null; // TODO: Derived from patient_full_name or add to DB
+  patient_last_name?: string | null; // TODO: Derived from patient_full_name or add to DB
   patient_dob: string;
   patient_phone: string | null;
   patient_email: string | null;
@@ -140,6 +148,10 @@ export interface Referral {
   communication_value: string | null;
   status: ReferralStatus;
   sub_status: ReferralSubStatus;
+  open_status?: ReferralStatus; // Alias for status
+  priority?: Priority | null; // TODO: Add to database migration
+  procedure_type?: string | null; // TODO: Add to database migration
+  procedure_location?: string | null; // TODO: Add to database migration
   created_by: string | null;
   created_at: string;
   updated_at: string;

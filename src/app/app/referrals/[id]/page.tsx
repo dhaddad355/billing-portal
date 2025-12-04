@@ -5,7 +5,6 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { ReferralWithRelations, ReferralNoteWithUser } from "@/types/database";
@@ -46,8 +45,8 @@ export default function ReferralDetailPage() {
 
   // Edit form state
   const [form, setForm] = React.useState({
-    status: "",
-    open_status: "" as "OPEN" | "CLOSED",
+    status: "" as "OPEN" | "CLOSED",
+    sub_status: "" as "Scheduling" | "Appointment" | "Quote" | "Procedure" | "Post-Op",
     priority: "" as "low" | "normal" | "high" | "urgent",
     procedure_type: "",
     procedure_location: "",
@@ -71,7 +70,7 @@ export default function ReferralDetailPage() {
       setNotes(data.notes || []);
       setForm({
         status: data.referral.status,
-        open_status: data.referral.open_status,
+        sub_status: data.referral.sub_status,
         priority: data.referral.priority,
         procedure_type: data.referral.procedure_type || "",
         procedure_location: data.referral.procedure_location || "",
@@ -97,7 +96,7 @@ export default function ReferralDetailPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: form.status,
-          open_status: form.open_status,
+          sub_status: form.sub_status,
           priority: form.priority,
           procedure_type: form.procedure_type || null,
           procedure_location: form.procedure_location || null,
@@ -184,7 +183,7 @@ export default function ReferralDetailPage() {
             </Link>
           </div>
           <h1 className="mt-2 text-2xl font-bold">
-            {referral.patient_first_name} {referral.patient_last_name}
+            {referral.patient_full_name}
           </h1>
           <p className="text-muted-foreground">
             Referred by {referral.providers?.first_name} {referral.providers?.last_name}
@@ -218,7 +217,7 @@ export default function ReferralDetailPage() {
               <div>
                 <div className="text-sm text-muted-foreground">Name</div>
                 <div className="font-medium">
-                  {referral.patient_first_name} {referral.patient_last_name}
+                  {referral.patient_full_name}
                 </div>
               </div>
               <div>
@@ -266,7 +265,26 @@ export default function ReferralDetailPage() {
                 {editMode ? (
                   <select
                     value={form.status}
-                    onChange={(e) => setForm({ ...form, status: e.target.value })}
+                    onChange={(e) => setForm({ ...form, status: e.target.value as "OPEN" | "CLOSED" })}
+                    className="mt-1 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+                  >
+                    <option value="OPEN">Open</option>
+                    <option value="CLOSED">Closed</option>
+                  </select>
+                ) : (
+                  <Badge className={`mt-1 ${STATUS_COLORS[referral.status] || ""}`}>
+                    {referral.status}
+                  </Badge>
+                )}
+              </div>
+              <div>
+                <div className="text-sm text-muted-foreground">Sub Status</div>
+                {editMode ? (
+                  <select
+                    value={form.sub_status}
+                    onChange={(e) =>
+                      setForm({ ...form, sub_status: e.target.value as "Scheduling" | "Appointment" | "Quote" | "Procedure" | "Post-Op" })
+                    }
                     className="mt-1 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
                   >
                     {REFERRAL_STATUSES.map((status) => (
@@ -276,30 +294,8 @@ export default function ReferralDetailPage() {
                     ))}
                   </select>
                 ) : (
-                  <Badge className={`mt-1 ${STATUS_COLORS[referral.status] || ""}`}>
-                    {referral.status}
-                  </Badge>
-                )}
-              </div>
-              <div>
-                <div className="text-sm text-muted-foreground">Open/Closed</div>
-                {editMode ? (
-                  <select
-                    value={form.open_status}
-                    onChange={(e) =>
-                      setForm({ ...form, open_status: e.target.value as "OPEN" | "CLOSED" })
-                    }
-                    className="mt-1 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
-                  >
-                    <option value="OPEN">Open</option>
-                    <option value="CLOSED">Closed</option>
-                  </select>
-                ) : (
-                  <Badge
-                    variant={referral.open_status === "OPEN" ? "default" : "outline"}
-                    className="mt-1"
-                  >
-                    {referral.open_status}
+                  <Badge className={`mt-1 ${STATUS_COLORS[referral.sub_status] || ""}`}>
+                    {referral.sub_status}
                   </Badge>
                 )}
               </div>
@@ -324,8 +320,8 @@ export default function ReferralDetailPage() {
                     <option value="urgent">Urgent</option>
                   </select>
                 ) : (
-                  <Badge className={`mt-1 ${PRIORITY_COLORS[referral.priority] || ""}`}>
-                    {referral.priority}
+                  <Badge className={`mt-1 ${referral.priority ? PRIORITY_COLORS[referral.priority] : ""}`}>
+                    {referral.priority || "normal"}
                   </Badge>
                 )}
               </div>

@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
+import { NextRequest } from "next/server";
 
 // Mock next-auth
 vi.mock("next-auth", () => ({
@@ -23,7 +24,7 @@ vi.mock("postmark", () => ({
 
 // Mock utils
 vi.mock("@/lib/utils", () => ({
-  cn: (...inputs: any[]) => inputs.filter(Boolean).join(" "),
+  cn: (...inputs: unknown[]) => inputs.filter(Boolean).join(" "),
   generateShortCode: vi.fn().mockReturnValue("ABC123"),
 }));
 
@@ -45,7 +46,7 @@ const createSupabaseMock = () => {
   }));
 
   return {
-    from: vi.fn().mockImplementation((table: string) => ({
+    from: vi.fn().mockImplementation(() => ({
       select: vi.fn().mockReturnValue({ eq: mockEq }),
       update: mockUpdate,
       insert: mockInsert,
@@ -75,22 +76,22 @@ describe("Send Statement API - Basic Tests", () => {
     vi.resetModules();
     mockSupabase = createSupabaseMock();
     
-    (getServerSession as any).mockResolvedValue({
+    (getServerSession as unknown as Mock).mockResolvedValue({
       user: { id: "user-123", azureOid: "oid-123", name: "Test User" },
     });
   });
 
   it("should reject unauthenticated requests", async () => {
-    (getServerSession as any).mockResolvedValue(null);
+    (getServerSession as unknown as Mock).mockResolvedValue(null);
 
-    const request = new Request("http://localhost:3000/api/app/statements/test-id/send", {
+    const request = new NextRequest("http://localhost:3000/api/app/statements/test-id/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),
     });
 
     const { POST } = await import("@/app/api/app/statements/[id]/send/route");
-    const response = await POST(request as any, { params: { id: "test-id" } });
+    const response = await POST(request, { params: Promise.resolve({ id: "test-id" }) });
     const data = await response.json();
 
     expect(response.status).toBe(401);
@@ -103,14 +104,14 @@ describe("Send Statement API - Basic Tests", () => {
       error: { message: "Not found" },
     });
 
-    const request = new Request("http://localhost:3000/api/app/statements/nonexistent/send", {
+    const request = new NextRequest("http://localhost:3000/api/app/statements/nonexistent/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),
     });
 
     const { POST } = await import("@/app/api/app/statements/[id]/send/route");
-    const response = await POST(request as any, { params: { id: "nonexistent" } });
+    const response = await POST(request, { params: Promise.resolve({ id: "nonexistent" }) });
     const data = await response.json();
 
     expect(response.status).toBe(404);
@@ -123,14 +124,14 @@ describe("Send Statement API - Basic Tests", () => {
       error: null,
     });
 
-    const request = new Request("http://localhost:3000/api/app/statements/stmt-1/send", {
+    const request = new NextRequest("http://localhost:3000/api/app/statements/stmt-1/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),
     });
 
     const { POST } = await import("@/app/api/app/statements/[id]/send/route");
-    const response = await POST(request as any, { params: { id: "stmt-1" } });
+    const response = await POST(request, { params: Promise.resolve({ id: "stmt-1" }) });
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -170,14 +171,14 @@ describe("Send Statement API - Basic Tests", () => {
       eq: mockSupabase.eq,
     }));
 
-    const request = new Request("http://localhost:3000/api/app/statements/stmt-1/send", {
+    const request = new NextRequest("http://localhost:3000/api/app/statements/stmt-1/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),
     });
 
     const { POST } = await import("@/app/api/app/statements/[id]/send/route");
-    const response = await POST(request as any, { params: { id: "stmt-1" } });
+    const response = await POST(request, { params: Promise.resolve({ id: "stmt-1" }) });
     const data = await response.json();
 
     expect(response.status).toBe(200);

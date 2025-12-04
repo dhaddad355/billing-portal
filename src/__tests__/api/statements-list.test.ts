@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
+import { NextRequest } from "next/server";
 
 // Mock next-auth
 vi.mock("next-auth", () => ({
@@ -40,20 +41,20 @@ describe("Statements List API - GET /api/app/statements", () => {
     vi.resetModules();
     mockSupabaseClient = createChainableMock();
     
-    (getServerSession as any).mockResolvedValue({
+    (getServerSession as unknown as Mock).mockResolvedValue({
       user: { id: "user-123", azureOid: "oid-123", name: "Test User" },
     });
   });
 
   it("should reject unauthenticated requests", async () => {
-    (getServerSession as any).mockResolvedValue(null);
+    (getServerSession as unknown as Mock).mockResolvedValue(null);
 
-    const request = new Request("http://localhost:3000/api/app/statements?status=PENDING", {
+    const request = new NextRequest("http://localhost:3000/api/app/statements?status=PENDING", {
       method: "GET",
     });
 
     const { GET } = await import("@/app/api/app/statements/route");
-    const response = await GET(request as any);
+    const response = await GET(request);
     const data = await response.json();
 
     expect(response.status).toBe(401);
@@ -91,12 +92,12 @@ describe("Statements List API - GET /api/app/statements", () => {
       return { select: mockSelectData };
     });
 
-    const request = new Request("http://localhost:3000/api/app/statements?status=PENDING&page=1&pageSize=10", {
+    const request = new NextRequest("http://localhost:3000/api/app/statements?status=PENDING&page=1&pageSize=10", {
       method: "GET",
     });
 
     const { GET } = await import("@/app/api/app/statements/route");
-    const response = await GET(request as any);
+    const response = await GET(request);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -107,7 +108,7 @@ describe("Statements List API - GET /api/app/statements", () => {
   it("should return empty array when no statements", async () => {
     const mockEqCount = vi.fn().mockResolvedValue({ count: 0 });
     const mockSelectCount = vi.fn(() => ({ eq: mockEqCount }));
-    
+
     const mockRange = vi.fn().mockResolvedValue({ data: [], error: null });
     const mockOrder = vi.fn(() => ({ range: mockRange }));
     const mockEqData = vi.fn(() => ({ order: mockOrder, eq: mockEqData }));
@@ -122,12 +123,12 @@ describe("Statements List API - GET /api/app/statements", () => {
       return { select: mockSelectData };
     });
 
-    const request = new Request("http://localhost:3000/api/app/statements?status=PENDING", {
+    const request = new NextRequest("http://localhost:3000/api/app/statements?status=PENDING", {
       method: "GET",
     });
 
     const { GET } = await import("@/app/api/app/statements/route");
-    const response = await GET(request as any);
+    const response = await GET(request);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -137,7 +138,7 @@ describe("Statements List API - GET /api/app/statements", () => {
   it("should handle database errors gracefully", async () => {
     const mockEqCount = vi.fn().mockResolvedValue({ count: 0 });
     const mockSelectCount = vi.fn(() => ({ eq: mockEqCount }));
-    
+
     const mockRange = vi.fn().mockResolvedValue({ data: null, error: { message: "Database error" } });
     const mockOrder = vi.fn(() => ({ range: mockRange }));
     const mockEqData = vi.fn(() => ({ order: mockOrder, eq: mockEqData }));
@@ -152,12 +153,12 @@ describe("Statements List API - GET /api/app/statements", () => {
       return { select: mockSelectData };
     });
 
-    const request = new Request("http://localhost:3000/api/app/statements?status=PENDING", {
+    const request = new NextRequest("http://localhost:3000/api/app/statements?status=PENDING", {
       method: "GET",
     });
 
     const { GET } = await import("@/app/api/app/statements/route");
-    const response = await GET(request as any);
+    const response = await GET(request);
     const data = await response.json();
 
     expect(response.status).toBe(500);
@@ -167,7 +168,7 @@ describe("Statements List API - GET /api/app/statements", () => {
   it("should include pagination info in response", async () => {
     const mockEqCount = vi.fn().mockResolvedValue({ count: 50 });
     const mockSelectCount = vi.fn(() => ({ eq: mockEqCount }));
-    
+
     const mockRange = vi.fn().mockResolvedValue({ data: [], error: null });
     const mockOrder = vi.fn(() => ({ range: mockRange }));
     const mockEqData = vi.fn(() => ({ order: mockOrder, eq: mockEqData }));
@@ -182,12 +183,12 @@ describe("Statements List API - GET /api/app/statements", () => {
       return { select: mockSelectData };
     });
 
-    const request = new Request("http://localhost:3000/api/app/statements?page=2&pageSize=10", {
+    const request = new NextRequest("http://localhost:3000/api/app/statements?page=2&pageSize=10", {
       method: "GET",
     });
 
     const { GET } = await import("@/app/api/app/statements/route");
-    const response = await GET(request as any);
+    const response = await GET(request);
     const data = await response.json();
 
     expect(response.status).toBe(200);

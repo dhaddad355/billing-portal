@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Laser Eye Institute Billing Portal",
-  description: "Secure billing portal for Laser Eye Institute",
+  title: "MyLEI - Laser Eye Institute",
+  description: "Secure portal for Laser Eye Institute",
   icons: {
     icon: '/favicon.ico',
   },

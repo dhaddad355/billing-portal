@@ -23,7 +23,7 @@ function SignOutContent() {
           </div>
           <CardTitle className="text-2xl">Sign out</CardTitle>
           <CardDescription>
-            Are you sure you want to sign out of the Billing Portal?
+            Are you sure you want to sign out of MyLEI?
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

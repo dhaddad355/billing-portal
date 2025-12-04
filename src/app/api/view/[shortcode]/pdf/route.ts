@@ -3,10 +3,10 @@ import { getServiceClient, STORAGE_BUCKET } from "@/lib/supabase";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { shortcode: string } }
+  { params }: { params: Promise<{ shortcode: string }> }
 ) {
   try {
-    const shortcode = params.shortcode;
+    const { shortcode } = await params;
     const supabase = getServiceClient();
 
     // Find statement by short code

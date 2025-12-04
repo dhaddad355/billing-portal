@@ -16,14 +16,14 @@ export default function Home() {
           <h1 className="text-4xl font-bold tracking-tight mb-2">
             Laser Eye Institute
           </h1>
-          <p className="text-xl text-muted-foreground">Billing Portal</p>
+          <p className="text-xl text-muted-foreground">MyLEI Portal</p>
         </div>
 
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>Welcome</CardTitle>
             <CardDescription>
-              This is the secure billing portal for Laser Eye Institute.
+              This is the secure portal for Laser Eye Institute.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

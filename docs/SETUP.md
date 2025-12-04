@@ -1,6 +1,6 @@
-# Billing Portal Setup Guide
+# MyLEI Portal Setup Guide
 
-Complete setup guide for deploying the Laser Eye Institute Billing Portal with Supabase, Azure AD, and Vercel.
+Complete setup guide for deploying the Laser Eye Institute MyLEI Portal with Supabase, Azure AD, and Vercel.
 
 ## Table of Contents
 
@@ -112,7 +112,7 @@ FOR ALL USING (auth.role() = 'service_role');
 1. Go to [Azure Portal](https://portal.azure.com) → Azure Active Directory
 2. Click "App registrations" → "New registration"
 3. Configure:
-   - **Name**: `LEI Billing Portal`
+   - **Name**: `MyLEI Portal`
    - **Supported account types**: "Accounts in this organizational directory only (Single tenant)"
    - **Redirect URI**: Web → `https://bill.lasereyeinstitute.com/api/auth/callback/azure-ad`
 
@@ -221,7 +221,7 @@ TWILIO_PHONE_NUMBER=+12485551234
 
 # Postmark (Email)
 POSTMARK_API_TOKEN=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-POSTMARK_FROM_EMAIL=billing@lasereyeinstitute.com
+POSTMARK_FROM_EMAIL=mylei@lasereyeinstitute.com
 ```
 
 ---

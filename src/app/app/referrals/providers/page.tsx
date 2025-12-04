@@ -104,7 +104,7 @@ export default function ManageProvidersPage() {
       specialty: provider.specialty || "",
       phone: provider.phone || "",
       email: provider.email || "",
-      practice_id: provider.practice_id,
+      practice_id: provider.practice_id || "",
     });
     setEditingProvider(true);
     setShowProviderModal(true);

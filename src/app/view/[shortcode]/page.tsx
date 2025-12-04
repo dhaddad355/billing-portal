@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AlertCircle } from "lucide-react";
 
 interface ViewPageProps {
-  params: { shortcode: string };
+  params: Promise<{ shortcode: string }>;
 }
 
 interface StatementWithPerson {
@@ -20,6 +20,7 @@ interface StatementWithPerson {
 
 export default async function ViewPage({ params }: ViewPageProps) {
   const supabase = getServiceClient();
+  const { shortcode } = await params;
 
   // Fetch statement by shortcode (minimal data for privacy)
   const { data, error } = await supabase
@@ -35,7 +36,7 @@ export default async function ViewPage({ params }: ViewPageProps) {
         full_name
       )
     `)
-    .eq("short_code", params.shortcode)
+    .eq("short_code", shortcode)
     .single();
 
   if (error || !data) {
@@ -55,7 +56,7 @@ export default async function ViewPage({ params }: ViewPageProps) {
               </div>
             </div>
             <CardTitle className="text-2xl">Laser Eye Institute</CardTitle>
-            <CardDescription>Billing Portal</CardDescription>
+            <CardDescription>MyLEI Portal</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center text-center py-4">
@@ -76,7 +77,7 @@ export default async function ViewPage({ params }: ViewPageProps) {
 
   return (
     <PatientViewClient
-      shortcode={params.shortcode}
+      shortcode={shortcode}
       patientName={statement.persons?.full_name || undefined}
       statementDate={statement.statement_date}
       patientBalance={statement.patient_balance}
