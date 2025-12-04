@@ -1,6 +1,9 @@
 -- Migration: Referrals Feature Schema
 -- Description: Creates tables for practices, providers, referrals, and referral notes
 
+-- Enable pg_trgm extension for fuzzy search (must be first)
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
 -- Create enum types for referral status and sub-status
 CREATE TYPE referral_status AS ENUM ('OPEN', 'CLOSED');
 CREATE TYPE referral_sub_status AS ENUM ('Scheduling', 'Appointment', 'Quote', 'Procedure', 'Post-Op');
@@ -104,9 +107,6 @@ CREATE INDEX idx_referrals_patient_name ON referrals(patient_full_name);
 
 CREATE INDEX idx_referral_notes_referral_id ON referral_notes(referral_id);
 CREATE INDEX idx_referral_notes_created_at ON referral_notes(created_at);
-
--- Enable pg_trgm extension for fuzzy search (if not already enabled)
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- Create search index on practices name
 CREATE INDEX idx_practices_name ON practices USING gin(name gin_trgm_ops);
