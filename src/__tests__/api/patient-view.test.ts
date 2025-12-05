@@ -1,9 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-// Type definitions for Next.js route context
-type RouteContext = { params: { shortcode: string } };
-
 // Create chainable mock for Supabase
 const createSupabaseMock = () => {
   const mockSingle = vi.fn();
@@ -62,7 +59,7 @@ describe("Patient View API - GET /api/view/[shortcode]/pdf", () => {
     });
 
     const { GET } = await import("@/app/api/view/[shortcode]/pdf/route");
-    const response = await GET(request as unknown as NextRequest, { params: Promise.resolve({ shortcode: "INVALID" }) } as RouteContext);
+    const response = await GET(request as unknown as NextRequest, { params: Promise.resolve({ shortcode: "INVALID" }) });
     const data = await response.json();
 
     expect(response.status).toBe(404);
@@ -80,7 +77,7 @@ describe("Patient View API - GET /api/view/[shortcode]/pdf", () => {
     });
 
     const { GET } = await import("@/app/api/view/[shortcode]/pdf/route");
-    const response = await GET(request as unknown as NextRequest, { params: Promise.resolve({ shortcode: "ABC123" }) } as RouteContext);
+    const response = await GET(request as unknown as NextRequest, { params: Promise.resolve({ shortcode: "ABC123" }) });
     const data = await response.json();
 
     expect(response.status).toBe(400);

@@ -10,7 +10,8 @@ vi.mock("next-auth", () => ({
 const createChainableMock = () => {
   const mockRange = vi.fn();
   const mockOrder = vi.fn(() => ({ range: mockRange }));
-  const mockEq = vi.fn(() => ({ order: mockOrder, eq: mockEq }));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mockEq: any = vi.fn(() => ({ order: mockOrder, eq: mockEq }));
   const mockSelect = vi.fn(() => ({ eq: mockEq, count: undefined }));
   const mockFrom = vi.fn(() => ({ select: mockSelect }));
 
@@ -80,17 +81,21 @@ describe("Statements List API - GET /api/app/statements", () => {
     // Set up the data query (second call)
     const mockRange = vi.fn().mockResolvedValue({ data: mockStatements, error: null });
     const mockOrder = vi.fn(() => ({ range: mockRange }));
-    const mockEqData = vi.fn(() => ({ order: mockOrder, eq: mockEqData }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mockEqData: any = vi.fn(() => ({ order: mockOrder, eq: mockEqData }));
     const mockSelectData = vi.fn(() => ({ eq: mockEqData }));
 
     let callCount = 0;
-    mockSupabaseClient.from.mockImplementation(() => {
-      callCount++;
-      if (callCount === 1) {
-        return { select: mockSelectCount };
-      }
-      return { select: mockSelectData };
-    });
+    mockSupabaseClient.from.mockImplementation(
+      (() => {
+        callCount++;
+        if (callCount === 1) {
+          return { select: mockSelectCount };
+        }
+        return { select: mockSelectData };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      }) as any
+    );
 
     const request = new NextRequest("http://localhost:3000/api/app/statements?status=PENDING&page=1&pageSize=10", {
       method: "GET",
@@ -111,17 +116,21 @@ describe("Statements List API - GET /api/app/statements", () => {
 
     const mockRange = vi.fn().mockResolvedValue({ data: [], error: null });
     const mockOrder = vi.fn(() => ({ range: mockRange }));
-    const mockEqData = vi.fn(() => ({ order: mockOrder, eq: mockEqData }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mockEqData: any = vi.fn(() => ({ order: mockOrder, eq: mockEqData }));
     const mockSelectData = vi.fn(() => ({ eq: mockEqData }));
 
     let callCount = 0;
-    mockSupabaseClient.from.mockImplementation(() => {
-      callCount++;
-      if (callCount === 1) {
-        return { select: mockSelectCount };
-      }
-      return { select: mockSelectData };
-    });
+    mockSupabaseClient.from.mockImplementation(
+      (() => {
+        callCount++;
+        if (callCount === 1) {
+          return { select: mockSelectCount };
+        }
+        return { select: mockSelectData };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      }) as any
+    );
 
     const request = new NextRequest("http://localhost:3000/api/app/statements?status=PENDING", {
       method: "GET",
@@ -141,17 +150,21 @@ describe("Statements List API - GET /api/app/statements", () => {
 
     const mockRange = vi.fn().mockResolvedValue({ data: null, error: { message: "Database error" } });
     const mockOrder = vi.fn(() => ({ range: mockRange }));
-    const mockEqData = vi.fn(() => ({ order: mockOrder, eq: mockEqData }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mockEqData: any = vi.fn(() => ({ order: mockOrder, eq: mockEqData }));
     const mockSelectData = vi.fn(() => ({ eq: mockEqData }));
 
     let callCount = 0;
-    mockSupabaseClient.from.mockImplementation(() => {
-      callCount++;
-      if (callCount === 1) {
-        return { select: mockSelectCount };
-      }
-      return { select: mockSelectData };
-    });
+    mockSupabaseClient.from.mockImplementation(
+      (() => {
+        callCount++;
+        if (callCount === 1) {
+          return { select: mockSelectCount };
+        }
+        return { select: mockSelectData };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      }) as any
+    );
 
     const request = new NextRequest("http://localhost:3000/api/app/statements?status=PENDING", {
       method: "GET",
@@ -171,17 +184,21 @@ describe("Statements List API - GET /api/app/statements", () => {
 
     const mockRange = vi.fn().mockResolvedValue({ data: [], error: null });
     const mockOrder = vi.fn(() => ({ range: mockRange }));
-    const mockEqData = vi.fn(() => ({ order: mockOrder, eq: mockEqData }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mockEqData: any = vi.fn(() => ({ order: mockOrder, eq: mockEqData }));
     const mockSelectData = vi.fn(() => ({ eq: mockEqData }));
 
     let callCount = 0;
-    mockSupabaseClient.from.mockImplementation(() => {
-      callCount++;
-      if (callCount === 1) {
-        return { select: mockSelectCount };
-      }
-      return { select: mockSelectData };
-    });
+    mockSupabaseClient.from.mockImplementation(
+      (() => {
+        callCount++;
+        if (callCount === 1) {
+          return { select: mockSelectCount };
+        }
+        return { select: mockSelectData };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      }) as any
+    );
 
     const request = new NextRequest("http://localhost:3000/api/app/statements?page=2&pageSize=10", {
       method: "GET",

@@ -74,7 +74,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
       });
 
       const { POST } = await import("@/app/api/statement/route");
-      const response = await POST(request as unknown as NextRequest);
+      const response = await POST(request);
       const data = await response.json();
 
       expect(response.status).toBe(401);
