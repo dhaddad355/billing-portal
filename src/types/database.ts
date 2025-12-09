@@ -178,3 +178,103 @@ export interface ReferralNote {
 export interface ReferralNoteWithUser extends ReferralNote {
   users: User | null;
 }
+
+// Quotes Feature Types
+
+export type RefractiveError = "Myopia" | "Hyperopia" | "Presbyopia";
+export type TreatmentType = "LASIK" | "PRK" | "SMILE" | "ICL" | "RLE";
+export type EyeSide = "Right" | "Left";
+
+export interface PricingGridItem {
+  id: string;
+  treatment_type: TreatmentType;
+  refractive_error: RefractiveError;
+  has_astigmatism: boolean;
+  price: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QuoteDiscount {
+  id: string;
+  name: string;
+  percentage: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QuoteAddon {
+  id: string;
+  name: string;
+  price: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QuoteFinancingSetting {
+  id: string;
+  setting_key: string;
+  setting_value: number;
+  description: string | null;
+  updated_at: string;
+}
+
+export interface Quote {
+  id: string;
+  patient_name: string;
+  patient_mrn: string;
+  
+  // Right Eye
+  right_eye_refractive_error: RefractiveError | null;
+  right_eye_has_astigmatism: boolean | null;
+  right_eye_treatment: TreatmentType | null;
+  right_eye_price: number | null;
+  
+  // Left Eye
+  left_eye_refractive_error: RefractiveError | null;
+  left_eye_has_astigmatism: boolean | null;
+  left_eye_treatment: TreatmentType | null;
+  left_eye_price: number | null;
+  
+  // Pricing
+  subtotal: number;
+  bilateral_discount_amount: number;
+  discount_id: string | null;
+  discount_percentage: number;
+  discount_amount: number;
+  addons_total: number;
+  total_amount: number;
+  scheduling_deposit: number;
+  balance_due: number;
+  
+  // Metadata
+  pdf_path: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QuoteSelectedAddon {
+  id: string;
+  quote_id: string;
+  addon_id: string;
+  addon_name: string;
+  addon_price: number;
+  created_at: string;
+}
+
+export interface QuoteWithRelations extends Quote {
+  quote_discounts: QuoteDiscount | null;
+  quote_selected_addons: QuoteSelectedAddon[];
+  users: User | null;
+}
+
+export interface QuoteSettings {
+  pricing_grid: PricingGridItem[];
+  discounts: QuoteDiscount[];
+  addons: QuoteAddon[];
+  financing_settings: Record<string, number>;
+}

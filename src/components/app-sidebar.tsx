@@ -13,6 +13,7 @@ import {
   MoreHorizontal,
   PlusCircle,
   Eye,
+  FileCheck,
 } from "lucide-react";
 
 import {
@@ -92,6 +93,24 @@ export function AppSidebar({ user }: AppSidebarProps) {
     },
   ];
 
+  const quoteItems = [
+    {
+      title: "New Quote",
+      href: "/app/quotes/new",
+      icon: PlusCircle,
+    },
+    {
+      title: "View Quotes",
+      href: "/app/quotes",
+      icon: FileCheck,
+    },
+    {
+      title: "Quote Settings",
+      href: "/app/quotes/settings",
+      icon: Settings,
+    },
+  ];
+
   const getInitials = (name?: string | null, email?: string | null) => {
     if (name) {
       return name
@@ -164,6 +183,26 @@ export function AppSidebar({ user }: AppSidebarProps) {
           <SidebarGroupContent>
             <SidebarMenu>
               {referralItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === item.href}
+                  >
+                    <Link href={item.href}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Quotes</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {quoteItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
