@@ -46,7 +46,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
     }
 
-    const updateData: any = {};
+    const updateData: Record<string, string | number | boolean> = {};
     if (body.name !== undefined) updateData.name = body.name;
     if (body.percentage !== undefined) updateData.percentage = body.percentage;
     if (body.is_active !== undefined) updateData.is_active = body.is_active;

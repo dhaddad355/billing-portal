@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getServiceClient } from "@/lib/supabase";
 
 // GET /api/app/quotes/settings - Get all quote settings
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const supabase = getServiceClient();
 

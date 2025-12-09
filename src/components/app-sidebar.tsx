@@ -14,7 +14,6 @@ import {
   PlusCircle,
   Eye,
   FileCheck,
-  DollarSign,
 } from "lucide-react";
 
 import {

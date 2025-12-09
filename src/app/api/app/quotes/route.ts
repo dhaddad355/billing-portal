@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
 
     // Insert selected add-ons if provided
     if (body.selected_addons && body.selected_addons.length > 0) {
-      const addonsToInsert = body.selected_addons.map((addon: any) => ({
+      const addonsToInsert = body.selected_addons.map((addon: { addon_id: string; addon_name: string; addon_price: number }) => ({
         quote_id: quote.id,
         addon_id: addon.addon_id,
         addon_name: addon.addon_name,

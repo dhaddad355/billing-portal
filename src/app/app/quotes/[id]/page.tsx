@@ -1,18 +1,16 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { QuoteWithRelations, QuoteSelectedAddon } from "@/types/database";
 
-export default function QuoteDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function QuoteDetailPage() {
   const router = useRouter();
+  const params = useParams();
+  const id = params.id as string;
   const [quote, setQuote] = React.useState<QuoteWithRelations | null>(null);
   const [addons, setAddons] = React.useState<QuoteSelectedAddon[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -21,7 +19,7 @@ export default function QuoteDetailPage({
   React.useEffect(() => {
     const fetchQuote = async () => {
       try {
-        const res = await fetch(`/api/app/quotes/${params.id}`);
+        const res = await fetch(`/api/app/quotes/${id}`);
         if (!res.ok) {
           throw new Error("Failed to fetch quote");
         }
@@ -36,7 +34,7 @@ export default function QuoteDetailPage({
     };
 
     fetchQuote();
-  }, [params.id]);
+  }, [id]);
 
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this quote?")) {
@@ -45,7 +43,7 @@ export default function QuoteDetailPage({
 
     setDeleting(true);
     try {
-      const res = await fetch(`/api/app/quotes/${params.id}`, {
+      const res = await fetch(`/api/app/quotes/${id}`, {
         method: "DELETE",
       });
 

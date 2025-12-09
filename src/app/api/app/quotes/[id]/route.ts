@@ -1,25 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServiceClient } from "@/lib/supabase";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-
-interface ExtendedSession {
-  user: {
-    id: string;
-    azureOid: string;
-    name?: string | null;
-    email?: string | null;
-  };
-}
 
 // GET /api/app/quotes/[id] - Get a specific quote
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = getServiceClient();
-    const { id } = params;
+    const { id } = await params;
 
     const { data: quote, error: quoteError } = await supabase
       .from("quotes")
@@ -64,12 +53,11 @@ export async function GET(
 // PUT /api/app/quotes/[id] - Update a quote
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = getServiceClient();
-    const session = (await getServerSession(authOptions)) as ExtendedSession | null;
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     // Update the quote
@@ -119,7 +107,7 @@ export async function PUT(
 
       // Insert new add-ons
       if (body.selected_addons.length > 0) {
-        const addonsToInsert = body.selected_addons.map((addon: any) => ({
+        const addonsToInsert = body.selected_addons.map((addon: { addon_id: string; addon_name: string; addon_price: number }) => ({
           quote_id: id,
           addon_id: addon.addon_id,
           addon_name: addon.addon_name,
@@ -142,11 +130,11 @@ export async function PUT(
 // DELETE /api/app/quotes/[id] - Delete a quote
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = getServiceClient();
-    const { id } = params;
+    const { id } = await params;
 
     const { error } = await supabase
       .from("quotes")

@@ -78,7 +78,7 @@ export default function NewQuotePage() {
   }, []);
 
   // Find price from pricing grid
-  const findPrice = (
+  const findPrice = React.useCallback((
     refractive_error: string,
     has_astigmatism: boolean,
     treatment: string
@@ -93,7 +93,7 @@ export default function NewQuotePage() {
     );
 
     return item?.price || 0;
-  };
+  }, [settings]);
 
   // Update right eye price when selections change
   React.useEffect(() => {
@@ -107,7 +107,7 @@ export default function NewQuotePage() {
     rightEye.refractive_error,
     rightEye.has_astigmatism,
     rightEye.treatment,
-    settings,
+    findPrice,
   ]);
 
   // Update left eye price when selections change
@@ -122,7 +122,7 @@ export default function NewQuotePage() {
     leftEye.refractive_error,
     leftEye.has_astigmatism,
     leftEye.treatment,
-    settings,
+    findPrice,
   ]);
 
   // Calculate all pricing when form values change
