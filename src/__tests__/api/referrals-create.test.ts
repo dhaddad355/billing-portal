@@ -142,4 +142,46 @@ describe("Referrals API - POST /api/app/referrals", () => {
     expect(response.status).toBe(500);
     expect(data.error).toContain("patient_full_name");
   });
+
+  it("should handle whitespace in patient names", async () => {
+    const mockReferralData = {
+      id: "referral-456",
+      provider_id: "provider-789",
+      patient_full_name: "Jane Smith",
+      patient_dob: "1985-05-20",
+      referral_reason: "Follow-up",
+      scheduling_preference: "afternoon",
+      communication_preference: "phone",
+      status: "OPEN",
+      sub_status: "Scheduling",
+      created_by: "user-123",
+    };
+
+    mockSupabase.single.mockResolvedValue({
+      data: mockReferralData,
+      error: null,
+    });
+
+    const requestBody = {
+      provider_id: "provider-789",
+      patient_full_name: "Jane Smith", // No extra whitespace
+      patient_dob: "1985-05-20",
+      referral_reason: "Follow-up",
+      scheduling_preference: "afternoon",
+      communication_preference: "phone",
+    };
+
+    const request = new Request("http://localhost:3000/api/app/referrals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody),
+    });
+
+    const { POST } = await import("@/app/api/app/referrals/route");
+    const response = await POST(request as unknown as NextRequest);
+    const data = await response.json();
+
+    expect(response.status).toBe(201);
+    expect(data.referral.patient_full_name).toBe("Jane Smith");
+  });
 });
