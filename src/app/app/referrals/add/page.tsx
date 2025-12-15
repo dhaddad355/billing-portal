@@ -93,6 +93,10 @@ export default function AddReferralPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           provider_id: selectedProvider.id,
+          patient_full_name: [form.patient_first_name, form.patient_last_name]
+            .filter((name) => name?.trim())
+            .join(" ")
+            .trim(),
           patient_first_name: form.patient_first_name,
           patient_last_name: form.patient_last_name,
           patient_dob: form.patient_dob || null,

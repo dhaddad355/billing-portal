@@ -9,6 +9,9 @@
 # pnpm
 pnpm-lock.yaml
 
+# npm (project uses pnpm)
+package-lock.json
+
 # testing
 /coverage
 
