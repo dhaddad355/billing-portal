@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, ChevronUp, Upload, FileText, Download, Lock, Unlock } from "lucide-react";
+import { ChevronUp, Upload, FileText, Download, Lock, Unlock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,12 +26,7 @@ const STATUS_COLORS: Record<string, string> = {
   "Post-Op": "bg-gray-100 text-gray-800",
 };
 
-const PRIORITY_COLORS: Record<string, string> = {
-  low: "bg-gray-100 text-gray-600",
-  normal: "bg-blue-100 text-blue-600",
-  high: "bg-orange-100 text-orange-600",
-  urgent: "bg-red-100 text-red-600",
-};
+// PRIORITY_COLORS removed — not used in this file
 
 export default function ReferralDetailPage() {
   const router = useRouter();
