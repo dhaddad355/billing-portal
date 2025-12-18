@@ -162,12 +162,15 @@ export interface ReferralWithRelations extends Referral {
   practices: Practice | null;
 }
 
+export type NoteVisibility = "public" | "private";
+
 export interface ReferralNote {
   id: string;
   referral_id: string;
   user_id: string | null;
   note: string;
   note_type: "manual" | "status_change" | "system";
+  visibility: NoteVisibility;
   previous_status: ReferralStatus | null;
   new_status: ReferralStatus | null;
   previous_sub_status: ReferralSubStatus | null;
@@ -176,5 +179,20 @@ export interface ReferralNote {
 }
 
 export interface ReferralNoteWithUser extends ReferralNote {
+  users: User | null;
+}
+
+export interface ReferralAttachment {
+  id: string;
+  referral_id: string;
+  file_name: string;
+  file_type: string;
+  file_size: number;
+  storage_path: string;
+  uploaded_by: string | null;
+  created_at: string;
+}
+
+export interface ReferralAttachmentWithUser extends ReferralAttachment {
   users: User | null;
 }

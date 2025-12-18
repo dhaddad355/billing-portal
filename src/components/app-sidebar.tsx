@@ -39,6 +39,7 @@ import {
 
 interface AppSidebarProps {
   user?: {
+    id?: string;
     name?: string | null;
     email?: string | null;
     image?: string | null;
@@ -224,6 +225,11 @@ export function AppSidebar({ user }: AppSidebarProps) {
                 <span className="truncate text-xs text-muted-foreground">
                   {user?.email || ""}
                 </span>
+                {user?.id && (
+                  <span className="truncate text-[10px] text-muted-foreground/70 font-mono">
+                    ID: {user.id.slice(0, 8)}...
+                  </span>
+                )}
               </div>
               <MoreHorizontal className="ml-auto h-4 w-4" />
             </SidebarMenuButton>
@@ -247,6 +253,11 @@ export function AppSidebar({ user }: AppSidebarProps) {
                   <span className="truncate text-xs text-muted-foreground">
                     {user?.email || ""}
                   </span>
+                  {user?.id && (
+                    <span className="truncate text-[10px] text-muted-foreground/70 font-mono">
+                      ID: {user.id}
+                    </span>
+                  )}
                 </div>
               </div>
             </DropdownMenuLabel>

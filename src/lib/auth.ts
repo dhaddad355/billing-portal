@@ -54,6 +54,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account, profile }) {
       if (account?.provider !== "azure-ad") {
+        console.log("❌ Sign-in rejected: Not Azure AD provider");
         return false;
       }
 
@@ -63,8 +64,14 @@ export const authOptions: NextAuthOptions = {
         const email = user.email || "";
         const displayName = user.name || email.split("@")[0];
 
+        console.log("🔐 Attempting to upsert user:", {
+          azureOid,
+          email,
+          displayName,
+        });
+
         // Upsert user into database
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from("users")
           .upsert(
             {
@@ -76,16 +83,20 @@ export const authOptions: NextAuthOptions = {
             {
               onConflict: "azure_oid",
             }
-          );
+          )
+          .select();
 
         if (error) {
-          console.error("Error upserting user:", error);
+          console.error("❌ Error upserting user to database:", error);
+          console.error("Error details:", JSON.stringify(error, null, 2));
           // Continue with login even if upsert fails
+        } else {
+          console.log("✅ User upserted successfully:", data);
         }
 
         return true;
       } catch (error) {
-        console.error("Error in signIn callback:", error);
+        console.error("❌ Exception in signIn callback:", error);
         return true; // Still allow sign in
       }
     },
@@ -94,20 +105,27 @@ export const authOptions: NextAuthOptions = {
         const azureOid = (profile as { oid?: string })?.oid || account.providerAccountId;
         (token as ExtendedToken).azureOid = azureOid;
 
+        console.log("🔑 JWT callback - Looking up user by Azure OID:", azureOid);
+
         // Get user ID from database
         try {
           const supabase = getServiceClient();
-          const { data } = await supabase
+          const { data, error } = await supabase
             .from("users")
             .select("id")
             .eq("azure_oid", azureOid)
             .single();
 
-          if (data) {
+          if (error) {
+            console.error("❌ Error fetching user ID from database:", error);
+          } else if (data) {
+            console.log("✅ Found user in database:", data.id);
             (token as ExtendedToken).userId = data.id;
+          } else {
+            console.warn("⚠️ No user found in database for Azure OID:", azureOid);
           }
         } catch (error) {
-          console.error("Error fetching user ID:", error);
+          console.error("❌ Exception fetching user ID:", error);
         }
       }
       return token;

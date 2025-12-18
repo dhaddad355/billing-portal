@@ -2,19 +2,12 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ProviderWithPractice } from "@/types/database";
-
-const REFERRAL_STATUSES = [
-  "Scheduling",
-  "Appointment",
-  "Quote",
-  "Procedure",
-  "Post-Op",
-];
 
 export default function AddReferralPage() {
   const router = useRouter();
@@ -34,11 +27,12 @@ export default function AddReferralPage() {
     patient_dob: "",
     patient_phone: "",
     patient_email: "",
-    procedure_type: "",
-    procedure_location: "",
+    referral_reason: "Laser Vision Correction" as "Laser Vision Correction" | "Cataract Consultation" | "Other",
+    referral_reason_other: "",
+    scheduling_preference: "Call Patient" as "Call Patient" | "SMS Patient" | "Email Patient" | "Patient Instructed To Call",
+    communication_preference: "Fax" as "Email" | "Fax",
+    communication_value: "",
     notes: "",
-    status: "Scheduling",
-    priority: "normal" as "low" | "normal" | "high" | "urgent",
   });
 
   // Search providers when query is 3+ chars
@@ -72,6 +66,7 @@ export default function AddReferralPage() {
     setSelectedProvider(provider);
     setProviderSearch(`${provider.first_name} ${provider.last_name}`);
     setShowProviderDropdown(false);
+    setProviderResults([]); // Clear results to prevent dropdown from showing again
   };
 
   const clearProvider = () => {
@@ -93,20 +88,20 @@ export default function AddReferralPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           provider_id: selectedProvider.id,
+          practice_id: selectedProvider.practice_id || null,
           patient_full_name: [form.patient_first_name, form.patient_last_name]
             .filter((name) => name?.trim())
             .join(" ")
             .trim(),
-          patient_first_name: form.patient_first_name,
-          patient_last_name: form.patient_last_name,
-          patient_dob: form.patient_dob || null,
+          patient_dob: form.patient_dob,
           patient_phone: form.patient_phone || null,
           patient_email: form.patient_email || null,
-          procedure_type: form.procedure_type || null,
-          procedure_location: form.procedure_location || null,
+          referral_reason: form.referral_reason,
+          referral_reason_other: form.referral_reason === "Other" ? form.referral_reason_other : null,
+          scheduling_preference: form.scheduling_preference,
+          communication_preference: form.communication_preference,
+          communication_value: form.communication_value || null,
           notes: form.notes || null,
-          status: form.status,
-          priority: form.priority,
         }),
       });
 
@@ -141,81 +136,81 @@ export default function AddReferralPage() {
             <CardTitle>Referring Provider</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="relative">
-              <Label htmlFor="provider_search">Search Provider *</Label>
-              <div className="relative mt-1">
-                <Input
-                  id="provider_search"
-                  placeholder="Type at least 3 characters to search..."
-                  value={providerSearch}
-                  onChange={(e) => {
-                    setProviderSearch(e.target.value);
-                    if (selectedProvider) {
-                      setSelectedProvider(null);
-                    }
-                  }}
-                  onFocus={() => {
-                    if (providerResults.length > 0) {
-                      setShowProviderDropdown(true);
-                    }
-                  }}
-                />
-                {searchingProvider && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                    Searching...
-                  </div>
-                )}
-              </div>
-
-              {/* Provider dropdown */}
-              {showProviderDropdown && providerResults.length > 0 && (
-                <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover shadow-lg">
-                  {providerResults.map((provider) => (
-                    <button
-                      key={provider.id}
-                      type="button"
-                      onClick={() => selectProvider(provider)}
-                      className="flex w-full flex-col px-4 py-2 text-left hover:bg-muted"
-                    >
-                      <span className="font-medium">
-                        {provider.first_name} {provider.last_name}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        {provider.practices?.name}
-                        {provider.specialty && ` • ${provider.specialty}`}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {showProviderDropdown && providerResults.length === 0 && providerSearch.length >= 3 && !searchingProvider && (
-                <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover p-4 text-center text-sm text-muted-foreground shadow-lg">
-                  No providers found matching &ldquo;{providerSearch}&rdquo;
-                </div>
-              )}
-            </div>
-
             {/* Selected provider display */}
-            {selectedProvider && (
-              <div className="mt-4 flex items-center justify-between rounded-md border bg-muted/50 p-3">
-                <div>
-                  <div className="font-medium">
-                    {selectedProvider.first_name} {selectedProvider.last_name}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {selectedProvider.practices?.name}
-                    {selectedProvider.specialty && ` • ${selectedProvider.specialty}`}
-                  </div>
-                  {selectedProvider.phone && (
+            {selectedProvider ? (
+              <div>
+                <Label>Selected Provider</Label>
+                <div className="mt-2 flex items-center justify-between rounded-md border bg-muted/50 p-3">
+                  <div>
+                    <div className="font-medium">
+                      {selectedProvider.first_name} {selectedProvider.last_name}
+                    </div>
                     <div className="text-sm text-muted-foreground">
-                      {selectedProvider.phone}
+                      {selectedProvider.practices?.name}
+                      {selectedProvider.specialty && ` • ${selectedProvider.specialty}`}
+                    </div>
+                    {selectedProvider.phone && (
+                      <div className="text-sm text-muted-foreground">
+                        {selectedProvider.phone}
+                      </div>
+                    )}
+                  </div>
+                  <Button type="button" variant="ghost" size="sm" onClick={clearProvider}>
+                    Change
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="relative">
+                <Label htmlFor="provider_search">Search Provider *</Label>
+                <div className="relative mt-1">
+                  <Input
+                    id="provider_search"
+                    placeholder="Type at least 3 characters to search..."
+                    value={providerSearch}
+                    onChange={(e) => {
+                      setProviderSearch(e.target.value);
+                    }}
+                    onFocus={() => {
+                      if (providerResults.length > 0) {
+                        setShowProviderDropdown(true);
+                      }
+                    }}
+                  />
+                  {searchingProvider && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                      Searching...
                     </div>
                   )}
                 </div>
-                <Button type="button" variant="ghost" size="sm" onClick={clearProvider}>
-                  Change
-                </Button>
+
+                {/* Provider dropdown */}
+                {showProviderDropdown && providerResults.length > 0 && (
+                  <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover shadow-lg">
+                    {providerResults.map((provider) => (
+                      <button
+                        key={provider.id}
+                        type="button"
+                        onClick={() => selectProvider(provider)}
+                        className="flex w-full flex-col px-4 py-2 text-left hover:bg-muted"
+                      >
+                        <span className="font-medium">
+                          {provider.first_name} {provider.last_name}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          {provider.practices?.name}
+                          {provider.specialty && ` • ${provider.specialty}`}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {showProviderDropdown && providerResults.length === 0 && providerSearch.length >= 3 && !searchingProvider && (
+                  <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover p-4 text-center text-sm text-muted-foreground shadow-lg">
+                    No providers found matching &ldquo;{providerSearch}&rdquo;
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
@@ -291,60 +286,85 @@ export default function AddReferralPage() {
           <CardContent className="grid gap-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="procedure_type">Procedure Type</Label>
-                <Input
-                  id="procedure_type"
-                  placeholder="e.g., Cataract Surgery"
-                  value={form.procedure_type}
-                  onChange={(e) => setForm({ ...form, procedure_type: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="procedure_location">Location</Label>
-                <Input
-                  id="procedure_location"
-                  placeholder="e.g., Main Office"
-                  value={form.procedure_location}
-                  onChange={(e) =>
-                    setForm({ ...form, procedure_location: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="status">Status</Label>
+                <Label htmlFor="referral_reason">Referral Reason</Label>
                 <select
-                  id="status"
-                  value={form.status}
-                  onChange={(e) => setForm({ ...form, status: e.target.value })}
-                  className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
-                >
-                  {REFERRAL_STATUSES.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <Label htmlFor="priority">Priority</Label>
-                <select
-                  id="priority"
-                  value={form.priority}
+                  id="referral_reason"
+                  value={form.referral_reason}
                   onChange={(e) =>
                     setForm({
                       ...form,
-                      priority: e.target.value as "low" | "normal" | "high" | "urgent",
+                      referral_reason: e.target.value as "Laser Vision Correction" | "Cataract Consultation" | "Other",
                     })
                   }
                   className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
                 >
-                  <option value="low">Low</option>
-                  <option value="normal">Normal</option>
-                  <option value="high">High</option>
-                  <option value="urgent">Urgent</option>
+                  <option value="Laser Vision Correction">Laser Vision Correction</option>
+                  <option value="Cataract Consultation">Cataract Consultation</option>
+                  <option value="Other">Other</option>
                 </select>
+              </div>
+              {form.referral_reason === "Other" && (
+                <div>
+                  <Label htmlFor="referral_reason_other">Specify Other Reason</Label>
+                  <Input
+                    id="referral_reason_other"
+                    placeholder="Please specify..."
+                    value={form.referral_reason_other}
+                    onChange={(e) => setForm({ ...form, referral_reason_other: e.target.value })}
+                  />
+                </div>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="scheduling_preference">Scheduling Preference</Label>
+                <select
+                  id="scheduling_preference"
+                  value={form.scheduling_preference}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      scheduling_preference: e.target.value as "Call Patient" | "SMS Patient" | "Email Patient" | "Patient Instructed To Call",
+                    })
+                  }
+                  className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+                >
+                  <option value="Call Patient">Call Patient</option>
+                  <option value="SMS Patient">SMS Patient</option>
+                  <option value="Email Patient">Email Patient</option>
+                  <option value="Patient Instructed To Call">Patient Instructed To Call</option>
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="communication_preference">Communication Preference</Label>
+                <select
+                  id="communication_preference"
+                  value={form.communication_preference}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      communication_preference: e.target.value as "Email" | "Fax",
+                    })
+                  }
+                  className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+                >
+                  <option value="Fax">Fax</option>
+                  <option value="Email">Email</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="communication_value">
+                  {form.communication_preference === "Email" ? "Email Address" : "Fax Number"}
+                </Label>
+                <Input
+                  id="communication_value"
+                  type={form.communication_preference === "Email" ? "email" : "tel"}
+                  placeholder={form.communication_preference === "Email" ? "email@example.com" : "(555) 555-5555"}
+                  value={form.communication_value}
+                  onChange={(e) => setForm({ ...form, communication_value: e.target.value })}
+                />
               </div>
             </div>
             <div>
@@ -379,6 +399,7 @@ export default function AddReferralPage() {
               !form.patient_last_name
             }
           >
+            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {saving ? "Creating..." : "Create Referral"}
           </Button>
         </div>

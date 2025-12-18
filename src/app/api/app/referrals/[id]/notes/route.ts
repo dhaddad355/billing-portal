@@ -57,6 +57,12 @@ export async function POST(
       return NextResponse.json({ error: "Note content is required" }, { status: 400 });
     }
 
+    // Validate visibility if provided
+    const visibility = body.visibility || "public";
+    if (visibility !== "public" && visibility !== "private") {
+      return NextResponse.json({ error: "Invalid visibility value" }, { status: 400 });
+    }
+
     const { data, error } = await supabase
       .from("referral_notes")
       .insert({
@@ -64,6 +70,7 @@ export async function POST(
         user_id: session?.user?.id || null,
         note: body.note.trim(),
         note_type: "manual",
+        visibility: visibility,
       })
       .select(`
         *,

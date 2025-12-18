@@ -56,9 +56,24 @@ export async function GET(
       console.error("Error fetching referral notes:", notesError);
     }
 
+    // Get attachments for this referral
+    const { data: attachments, error: attachmentsError } = await supabase
+      .from("referral_attachments")
+      .select(`
+        *,
+        users (id, display_name, email)
+      `)
+      .eq("referral_id", id)
+      .order("created_at", { ascending: false });
+
+    if (attachmentsError) {
+      console.error("Error fetching referral attachments:", attachmentsError);
+    }
+
     return NextResponse.json({
       referral,
       notes: notes || [],
+      attachments: attachments || [],
     });
   } catch (error) {
     console.error("Error in referral GET:", error);
@@ -132,6 +147,7 @@ export async function PUT(
           user_id: session?.user?.id || null,
           note: `Status updated${statusChanged ? ` from ${currentReferral.status} to ${body.status}` : ""}${subStatusChanged ? ` (sub-status: ${currentReferral.sub_status} → ${body.sub_status})` : ""}`,
           note_type: "status_change",
+          visibility: "public",
           previous_status: statusChanged ? currentReferral.status : null,
           new_status: statusChanged ? body.status : null,
           previous_sub_status: subStatusChanged ? currentReferral.sub_status : null,
