@@ -19,6 +19,7 @@ interface StatementActionsProps {
   status: string;
   hasEmail: boolean;
   hasPhone: boolean;
+  sentAt: string | null;
 }
 
 export default function StatementActions({
@@ -26,6 +27,7 @@ export default function StatementActions({
   status,
   hasEmail,
   hasPhone,
+  sentAt,
 }: StatementActionsProps) {
   const router = useRouter();
   const [sending, setSending] = useState(false);
@@ -47,6 +49,15 @@ export default function StatementActions({
 
   const handleSend = async (sendEmail: boolean, sendSms: boolean) => {
     if (sending) return;
+    
+    // If already sent, show warning
+    if (status === "SENT") {
+      const confirmed = confirm(
+        "This statement has already been sent. Are you sure you want to send it again? This will create duplicate notifications for the patient."
+      );
+      if (!confirmed) return;
+    }
+    
     setSending(true);
     setDialogOpen(false);
     try {
@@ -94,9 +105,11 @@ export default function StatementActions({
     }
   };
 
-  if (status !== "PENDING") {
+  if (status !== "PENDING" && status !== "SENT") {
     return null;
   }
+
+  const isSent = status === "SENT";
 
   return (
     <div className="border-t pt-4 space-y-4">
@@ -109,14 +122,17 @@ export default function StatementActions({
               className="bg-green-600 hover:bg-green-700"
             >
               <Send className="mr-2 h-4 w-4" />
-              {sending ? "Sending..." : "Send Statement"}
+              {sending ? "Sending..." : isSent ? "Resend Statement" : "Send Statement"}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Send Statement</DialogTitle>
+              <DialogTitle>{isSent ? "Resend Statement" : "Send Statement"}</DialogTitle>
               <DialogDescription>
-                Choose how you would like to send this statement to the patient.
+                {isSent 
+                  ? "⚠️ This statement has already been sent. Sending again will create duplicate notifications."
+                  : "Choose how you would like to send this statement to the patient."
+                }
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -170,14 +186,16 @@ export default function StatementActions({
             </DialogFooter>
           </DialogContent>
         </Dialog>
-        <Button
-          variant="destructive"
-          onClick={handleReject}
-          disabled={rejecting}
-        >
-          <XCircle className="mr-2 h-4 w-4" />
-          {rejecting ? "Rejecting..." : "Reject Statement"}
-        </Button>
+        {!isSent && (
+          <Button
+            variant="destructive"
+            onClick={handleReject}
+            disabled={rejecting}
+          >
+            <XCircle className="mr-2 h-4 w-4" />
+            {rejecting ? "Rejecting..." : "Reject Statement"}
+          </Button>
+        )}
       </div>
       {!hasEmail && !hasPhone && (
         <div className="flex items-center gap-2 p-3 rounded-md border border-yellow-300 bg-yellow-50 text-yellow-800 text-sm">

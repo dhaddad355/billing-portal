@@ -116,56 +116,64 @@ export async function POST(
       );
     }
 
-    if (statement.status !== "PENDING") {
+    if (statement.status !== "PENDING" && statement.status !== "SENT") {
       return NextResponse.json(
-        { error: "Statement is not in PENDING status" },
+        { error: "Statement must be in PENDING or SENT status to send" },
         { status: 400 }
       );
     }
 
-    // Generate unique short code
-    let shortCode: string;
-    let attempts = 0;
-    do {
-      shortCode = generateShortCode();
-      const { data: existing } = await supabase
-        .from("statements")
-        .select("id")
-        .eq("short_code", shortCode)
-        .single();
-      
-      if (!existing) break;
-      attempts++;
-    } while (attempts < 10);
+    const isResend = statement.status === "SENT";
 
-    if (attempts >= 10) {
-      return NextResponse.json(
-        { error: "Failed to generate unique short code" },
-        { status: 500 }
-      );
+    // Generate unique short code (only if not already sent)
+    let shortCode: string;
+    if (isResend && statement.short_code) {
+      shortCode = statement.short_code;
+    } else {
+      let attempts = 0;
+      do {
+        shortCode = generateShortCode();
+        const { data: existing } = await supabase
+          .from("statements")
+          .select("id")
+          .eq("short_code", shortCode)
+          .single();
+        
+        if (!existing) break;
+        attempts++;
+      } while (attempts < 10);
+
+      if (attempts >= 10) {
+        return NextResponse.json(
+          { error: "Failed to generate unique short code" },
+          { status: 500 }
+        );
+      }
     }
 
     const now = new Date().toISOString();
     const viewUrl = `https://bill.lasereyeinstitute.com/view/${shortCode}`;
 
-    // Update statement
-    const { error: updateError } = await supabase
-      .from("statements")
-      .update({
-        short_code: shortCode,
-        short_code_created_at: now,
-        status: "SENT",
-        sent_at: now,
-        sent_by_user_id: session.user.id,
-      })
-      .eq("id", statementId);
+    // Update statement (only update status/dates if not a resend)
+    if (!isResend) {
+      const { error: updateError } = await supabase
+        .from("statements")
+        .update({
+          short_code: shortCode,
+          short_code_created_at: now,
+          status: "SENT",
+          sent_at: now,
+          sent_by_user_id: session.user.id,
+        })
+        .eq("id", statementId);
 
-    if (updateError) {
-      console.error("Error updating statement:", updateError);
-      return NextResponse.json(
-        { error: "Failed to update statement" },
-        { status: 500 }
-      );
+      if (updateError) {
+        console.error("Error updating statement:", updateError);
+        return NextResponse.json(
+          { error: "Failed to update statement" },
+          { status: 500 }
+        );
+      }
     }
 
     const messageResults: Array<{ channel: string; success: boolean; messageId?: string; error?: string }> = [];
@@ -236,15 +244,16 @@ export async function POST(
       });
     }
 
-    // Log status change event
+    // Log status change event (only if not a resend)
     await supabase.from("statement_events").insert({
       statement_id: statementId,
-      event_type: "STATUS_CHANGE",
-      old_status: "PENDING",
+      event_type: isResend ? "RESEND" : "STATUS_CHANGE",
+      old_status: isResend ? "SENT" : "PENDING",
       new_status: "SENT",
       metadata_json: {
         short_code: shortCode,
         messages_sent: messageResults,
+        is_resend: isResend,
       },
       created_by_user_id: session.user.id,
     });
