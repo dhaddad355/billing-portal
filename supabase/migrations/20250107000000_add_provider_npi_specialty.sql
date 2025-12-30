@@ -9,10 +9,7 @@ ADD COLUMN npi VARCHAR(10);
 ALTER TABLE providers
 ADD COLUMN specialty VARCHAR(100);
 
--- Add index on NPI for faster lookups and duplicate detection
-CREATE INDEX idx_providers_npi ON providers(npi) WHERE npi IS NOT NULL;
-
--- Add constraint to ensure NPI is unique when not null
+-- Add unique constraint to ensure NPI is unique when not null
 CREATE UNIQUE INDEX idx_providers_npi_unique ON providers(npi) WHERE npi IS NOT NULL;
 
 -- Add comment

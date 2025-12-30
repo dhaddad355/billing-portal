@@ -806,7 +806,7 @@ export default function ManageProvidersPage() {
                   <Input
                     id="csv-file"
                     type="file"
-                    accept=".csv,.xls"
+                    accept=".csv"
                     onChange={handleFileChange}
                     disabled={importing}
                     className="mt-1"

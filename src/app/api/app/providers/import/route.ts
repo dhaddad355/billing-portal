@@ -42,9 +42,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file type
-    if (!file.name.endsWith(".csv") && !file.name.endsWith(".xls")) {
+    if (!file.name.endsWith(".csv")) {
       return NextResponse.json(
-        { error: "Invalid file type. Please upload a CSV or XLS file." },
+        { error: "Invalid file type. Please upload a CSV file." },
         { status: 400 }
       );
     }
@@ -83,6 +83,20 @@ export async function POST(request: NextRequest) {
       .from("practices")
       .select("id, name, address_line1, city, state, zip_code");
 
+    // Create lookup maps for O(1) duplicate detection
+    const npiMap = new Map<string, boolean>();
+    const nameEmailMap = new Map<string, boolean>();
+    
+    existingProviders?.forEach((p) => {
+      if (p.npi) {
+        npiMap.set(p.npi.toLowerCase(), true);
+      }
+      if (p.first_name && p.last_name && p.email) {
+        const key = `${p.first_name.toLowerCase()}_${p.last_name.toLowerCase()}_${p.email.toLowerCase()}`;
+        nameEmailMap.set(key, true);
+      }
+    });
+
     // Process each row
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
@@ -102,21 +116,16 @@ export async function POST(request: NextRequest) {
         }
 
         // Check for duplicate provider by NPI or name+email combination
-        const isDuplicate = existingProviders?.some((p) => {
-          if (row.NPI && p.npi && row.NPI.trim() === p.npi) {
-            return true;
+        let isDuplicate = false;
+        
+        if (row.NPI && npiMap.has(row.NPI.trim().toLowerCase())) {
+          isDuplicate = true;
+        } else if (row.Email) {
+          const key = `${row["First Name"].toLowerCase()}_${row["Last Name"].toLowerCase()}_${row.Email.toLowerCase()}`;
+          if (nameEmailMap.has(key)) {
+            isDuplicate = true;
           }
-          if (
-            p.first_name?.toLowerCase() === row["First Name"].toLowerCase() &&
-            p.last_name?.toLowerCase() === row["Last Name"].toLowerCase() &&
-            row.Email &&
-            p.email &&
-            row.Email.toLowerCase() === p.email.toLowerCase()
-          ) {
-            return true;
-          }
-          return false;
-        });
+        }
 
         if (isDuplicate) {
           result.skipped++;
@@ -138,10 +147,15 @@ export async function POST(request: NextRequest) {
             if (p.name.toLowerCase() !== row["Practice Name"]!.toLowerCase()) {
               return false;
             }
-            // If address or city is provided, match on those too
+            // If both have city, they must match
             if (row["Practice City"] && p.city) {
               return p.city.toLowerCase() === row["Practice City"].toLowerCase();
             }
+            // If only one has city, they don't match (different locations)
+            if (row["Practice City"] || p.city) {
+              return false;
+            }
+            // Neither has city - match on name only
             return true;
           });
 
@@ -166,6 +180,14 @@ export async function POST(request: NextRequest) {
 
             if (practiceError) {
               console.error("Error creating practice:", practiceError);
+              result.errors++;
+              result.details.push({
+                row: rowNum,
+                status: "error",
+                message: `Failed to create practice: ${practiceError.message}`,
+                provider: `${row["First Name"]} ${row["Last Name"]}`,
+              });
+              continue;
             } else if (newPractice) {
               practiceId = newPractice.id;
               // Add to existing practices list for future rows
@@ -210,7 +232,7 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        // Add to existing providers list for duplicate checking
+        // Add to lookup maps for duplicate checking in subsequent rows
         if (existingProviders && newProvider) {
           existingProviders.push({
             id: newProvider.id,
@@ -219,6 +241,15 @@ export async function POST(request: NextRequest) {
             npi: row.NPI?.trim() || null,
             email: row.Email?.trim() || null,
           });
+          
+          // Update lookup maps
+          if (row.NPI) {
+            npiMap.set(row.NPI.trim().toLowerCase(), true);
+          }
+          if (row.Email) {
+            const key = `${row["First Name"].toLowerCase()}_${row["Last Name"].toLowerCase()}_${row.Email.toLowerCase()}`;
+            nameEmailMap.set(key, true);
+          }
         }
 
         result.success++;
