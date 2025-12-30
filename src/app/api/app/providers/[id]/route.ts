@@ -51,6 +51,8 @@ export async function PUT(
         first_name: body.first_name,
         last_name: body.last_name,
         degree: body.degree,
+        npi: body.npi,
+        specialty: body.specialty,
         email: body.email,
         phone: body.phone,
         notes: body.notes,

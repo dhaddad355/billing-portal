@@ -1,0 +1,5 @@
+First Name,Last Name,NPI,Specialty,Email,Phone,Practice Name,Practice Address,Practice City,Practice State,Practice ZIP,Practice Phone,Practice Fax
+John,Smith,1234567890,Optometry,john.smith@example.com,555-1234,Vision Care Center,123 Main St,Portland,OR,97201,555-1000,555-1001
+Jane,Doe,2345678901,Ophthalmology,jane.doe@example.com,555-2345,Eye Associates,456 Oak Ave,Seattle,WA,98101,555-2000,555-2001
+Robert,Johnson,3456789012,Optometry,robert.j@example.com,555-3456,Clear Vision Clinic,789 Pine Rd,Tacoma,WA,98402,555-3000,555-3001
+Mary,Williams,4567890123,Ophthalmology,mary.w@example.com,555-4567,Vision Care Center,123 Main St,Portland,OR,97201,555-1000,555-1001

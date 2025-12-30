@@ -57,6 +57,25 @@ export default function ManageProvidersPage() {
     name: string;
   } | null>(null);
 
+  // CSV Import state
+  const [showImportModal, setShowImportModal] = React.useState(false);
+  const [importFile, setImportFile] = React.useState<File | null>(null);
+  const [importing, setImporting] = React.useState(false);
+  const [importResult, setImportResult] = React.useState<{
+    success: number;
+    skipped: number;
+    errors: number;
+    details: {
+      row: number;
+      status: "success" | "skipped" | "error";
+      message: string;
+      provider?: string;
+    }[];
+  } | null>(null);
+
+  // Filter state
+  const [showUnmappedOnly, setShowUnmappedOnly] = React.useState(false);
+
   React.useEffect(() => {
     fetchData();
   }, []);
@@ -234,6 +253,58 @@ export default function ManageProvidersPage() {
     }
   };
 
+  // CSV Import handlers
+  const openImportModal = () => {
+    setImportFile(null);
+    setImportResult(null);
+    setShowImportModal(true);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImportFile(file);
+      setImportResult(null);
+    }
+  };
+
+  const handleImport = async () => {
+    if (!importFile) return;
+
+    setImporting(true);
+    setImportResult(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", importFile);
+
+      const res = await fetch("/api/app/providers/import", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setImportResult(data.result);
+        // Refresh providers list
+        fetchData();
+      } else {
+        alert(data.error || "Failed to import providers");
+      }
+    } catch (error) {
+      console.error("Error importing providers:", error);
+      alert("An error occurred during import");
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  // Filter providers based on unmapped filter
+  const filteredProviders = showUnmappedOnly
+    ? providers.filter((p) => !p.practice_id)
+    : providers;
+
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -280,9 +351,31 @@ export default function ManageProvidersPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Referring Physicians</CardTitle>
-            <Button onClick={openAddProvider}>Add Provider</Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={openImportModal}>
+                Import CSV
+              </Button>
+              <Button onClick={openAddProvider}>Add Provider</Button>
+            </div>
           </CardHeader>
           <CardContent>
+            {/* Filter controls */}
+            <div className="mb-4 flex items-center gap-4">
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={showUnmappedOnly}
+                  onChange={(e) => setShowUnmappedOnly(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300"
+                />
+                Show unmapped providers only
+              </label>
+              {showUnmappedOnly && (
+                <Badge variant="secondary">
+                  {filteredProviders.length} unmapped provider{filteredProviders.length !== 1 ? "s" : ""}
+                </Badge>
+              )}
+            </div>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -296,15 +389,21 @@ export default function ManageProvidersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {providers.map((provider) => (
+                {filteredProviders.map((provider) => (
                   <TableRow key={provider.id}>
                     <TableCell className="font-medium">
                       {provider.first_name} {provider.last_name}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary">
-                        {provider.practices?.name || "—"}
-                      </Badge>
+                      {provider.practices?.name ? (
+                        <Badge variant="secondary">
+                          {provider.practices.name}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-orange-600 border-orange-300">
+                          Unmapped
+                        </Badge>
+                      )}
                     </TableCell>
                     <TableCell>{provider.specialty || "—"}</TableCell>
                     <TableCell>{provider.npi || "—"}</TableCell>
@@ -335,10 +434,12 @@ export default function ManageProvidersPage() {
                     </TableCell>
                   </TableRow>
                 ))}
-                {providers.length === 0 && (
+                {filteredProviders.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center text-muted-foreground">
-                      No providers found. Add your first provider to get started.
+                      {showUnmappedOnly
+                        ? "No unmapped providers found."
+                        : "No providers found. Add your first provider to get started."}
                     </TableCell>
                   </TableRow>
                 )}
@@ -664,6 +765,152 @@ export default function ManageProvidersPage() {
                 Delete
               </Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* CSV Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => !importing && setShowImportModal(false)}
+          />
+          <div className="z-10 w-full max-w-2xl rounded-lg border bg-popover p-6 shadow-lg max-h-[90vh] overflow-y-auto">
+            <h2 className="mb-4 text-lg font-semibold">Import Providers from CSV</h2>
+            
+            <div className="mb-4 rounded-md bg-blue-50 border border-blue-200 p-4 text-sm text-blue-900">
+              <p className="font-medium mb-2">CSV Format Requirements:</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Required columns: <strong>First Name</strong>, <strong>Last Name</strong></li>
+                <li>Optional columns: NPI, Specialty, Email, Phone</li>
+                <li>Practice columns: Practice Name, Practice Address, Practice City, Practice State, Practice ZIP, Practice Phone, Practice Fax</li>
+                <li>Duplicate providers (by NPI or name+email) will be skipped</li>
+                <li>Practices will be auto-created or matched by name and city</li>
+              </ul>
+              <p className="mt-2">
+                <a 
+                  href="/sample-providers.csv" 
+                  download 
+                  className="text-blue-700 underline hover:text-blue-800"
+                >
+                  Download sample CSV template
+                </a>
+              </p>
+            </div>
+
+            {!importResult ? (
+              <>
+                <div className="mb-4">
+                  <Label htmlFor="csv-file">Select CSV File</Label>
+                  <Input
+                    id="csv-file"
+                    type="file"
+                    accept=".csv,.xls"
+                    onChange={handleFileChange}
+                    disabled={importing}
+                    className="mt-1"
+                  />
+                  {importFile && (
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Selected: {importFile.name} ({(importFile.size / 1024).toFixed(2)} KB)
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowImportModal(false)}
+                    disabled={importing}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleImport}
+                    disabled={!importFile || importing}
+                  >
+                    {importing ? "Importing..." : "Import Providers"}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mb-4 space-y-3">
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="rounded-md bg-green-50 border border-green-200 p-3 text-center">
+                      <div className="text-2xl font-bold text-green-700">
+                        {importResult.success}
+                      </div>
+                      <div className="text-sm text-green-600">Imported</div>
+                    </div>
+                    <div className="rounded-md bg-yellow-50 border border-yellow-200 p-3 text-center">
+                      <div className="text-2xl font-bold text-yellow-700">
+                        {importResult.skipped}
+                      </div>
+                      <div className="text-sm text-yellow-600">Skipped</div>
+                    </div>
+                    <div className="rounded-md bg-red-50 border border-red-200 p-3 text-center">
+                      <div className="text-2xl font-bold text-red-700">
+                        {importResult.errors}
+                      </div>
+                      <div className="text-sm text-red-600">Errors</div>
+                    </div>
+                  </div>
+
+                  {importResult.details.length > 0 && (
+                    <div className="rounded-md border max-h-64 overflow-y-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-50 sticky top-0">
+                          <tr>
+                            <th className="px-3 py-2 text-left font-medium">Row</th>
+                            <th className="px-3 py-2 text-left font-medium">Provider</th>
+                            <th className="px-3 py-2 text-left font-medium">Status</th>
+                            <th className="px-3 py-2 text-left font-medium">Message</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {importResult.details.map((detail, idx) => (
+                            <tr key={idx} className="border-t">
+                              <td className="px-3 py-2">{detail.row}</td>
+                              <td className="px-3 py-2">{detail.provider || "—"}</td>
+                              <td className="px-3 py-2">
+                                <Badge
+                                  variant={
+                                    detail.status === "success"
+                                      ? "secondary"
+                                      : detail.status === "skipped"
+                                      ? "outline"
+                                      : "destructive"
+                                  }
+                                >
+                                  {detail.status}
+                                </Badge>
+                              </td>
+                              <td className="px-3 py-2 text-muted-foreground">
+                                {detail.message}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button
+                    onClick={() => {
+                      setShowImportModal(false);
+                      setImportResult(null);
+                      setImportFile(null);
+                    }}
+                  >
+                    Close
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
