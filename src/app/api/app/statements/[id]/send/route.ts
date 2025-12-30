@@ -116,14 +116,14 @@ export async function POST(
       );
     }
 
-    if (statement.status !== "PENDING" && statement.status !== "SENT") {
+    if (statement.status !== "PENDING" && statement.status !== "SENT" && statement.status !== "ERROR") {
       return NextResponse.json(
-        { error: "Statement must be in PENDING or SENT status to send" },
+        { error: "Statement must be in PENDING, SENT, or ERROR status to send" },
         { status: 400 }
       );
     }
 
-    const isResend = statement.status === "SENT";
+    const isResend = statement.status === "SENT" || statement.status === "ERROR";
 
     // Generate unique short code (only if not already sent)
     let shortCode: string;

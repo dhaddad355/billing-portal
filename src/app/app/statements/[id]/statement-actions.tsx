@@ -50,14 +50,6 @@ export default function StatementActions({
   const handleSend = async (sendEmail: boolean, sendSms: boolean) => {
     if (sending) return;
     
-    // If already sent, show warning
-    if (status === "SENT") {
-      const confirmed = confirm(
-        "This statement has already been sent. Are you sure you want to send it again? This will create duplicate notifications for the patient."
-      );
-      if (!confirmed) return;
-    }
-    
     setSending(true);
     setDialogOpen(false);
     try {
@@ -105,11 +97,12 @@ export default function StatementActions({
     }
   };
 
-  if (status !== "PENDING" && status !== "SENT") {
+  if (status !== "PENDING" && status !== "SENT" && status !== "ERROR") {
     return null;
   }
 
   const isSent = status === "SENT";
+  const isError = status === "ERROR";
 
   return (
     <div className="border-t pt-4 space-y-4">
@@ -122,16 +115,20 @@ export default function StatementActions({
               className="bg-green-600 hover:bg-green-700"
             >
               <Send className="mr-2 h-4 w-4" />
-              {sending ? "Sending..." : isSent ? "Resend Statement" : "Send Statement"}
+              {sending ? "Sending..." : isError ? "Retry Send" : isSent ? "Resend Statement" : "Send Statement"}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{isSent ? "Resend Statement" : "Send Statement"}</DialogTitle>
+              <DialogTitle>
+                {isError ? "Retry Sending Statement" : isSent ? "Resend Statement" : "Send Statement"}
+              </DialogTitle>
               <DialogDescription>
-                {isSent 
-                  ? "⚠️ This statement has already been sent. Sending again will create duplicate notifications."
-                  : "Choose how you would like to send this statement to the patient."
+                {isError
+                  ? "⚠️ Previous send attempt failed. Select a send method to retry."
+                  : isSent 
+                    ? "⚠️ This statement has already been sent. Sending again will create duplicate notifications."
+                    : "Choose how you would like to send this statement to the patient."
                 }
               </DialogDescription>
             </DialogHeader>
@@ -186,7 +183,7 @@ export default function StatementActions({
             </DialogFooter>
           </DialogContent>
         </Dialog>
-        {!isSent && (
+        {!isSent && !isError && (
           <Button
             variant="destructive"
             onClick={handleReject}
