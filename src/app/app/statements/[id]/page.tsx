@@ -2,7 +2,7 @@ import { getServiceClient, STORAGE_BUCKET } from "@/lib/supabase";
 import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -194,7 +194,7 @@ export default async function StatementPage({ params }: StatementPageProps) {
                 <h4 className="text-sm font-semibold mb-2">Send History</h4>
                 <div className="mb-2">
                   <label className="text-sm text-muted-foreground">Sent At</label>
-                  <p className="font-medium">{formatDate(statement.sent_at)}</p>
+                  <p className="font-medium">{formatDateTime(statement.sent_at)}</p>
                 </div>
                 {messages && messages.length > 0 && (
                   <div className="space-y-2">
@@ -218,7 +218,7 @@ export default async function StatementPage({ params }: StatementPageProps) {
                             {msg.status}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
-                            {formatDate(msg.sent_at || msg.created_at)}
+                            {formatDateTime(msg.sent_at || msg.created_at)}
                           </span>
                         </div>
                       </div>
