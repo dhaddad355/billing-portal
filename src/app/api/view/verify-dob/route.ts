@@ -9,7 +9,7 @@ interface VerifyDobRequest {
 
 interface StatementWithPerson {
   id: string;
-  person_id: number;
+  person_id: string;
   status: string;
   first_view_at: string | null;
   view_count: number;

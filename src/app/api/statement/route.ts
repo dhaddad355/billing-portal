@@ -3,7 +3,7 @@ import { getServiceClient, STORAGE_BUCKET } from "@/lib/supabase";
 
 interface StatementPayload {
   statement_date?: string;
-  person_id?: number;
+  person_id?: string;
   account_number_suffix?: number;
   account_number_full?: string;
   cell_phone?: string;
@@ -16,6 +16,21 @@ interface StatementPayload {
   patient_balance?: number;
   pdf_base64?: string;
 }
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const normalizeToString = (value: unknown): string | undefined => {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+  }
+
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value.toString();
+  }
+
+  return undefined;
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,10 +54,12 @@ export async function POST(request: NextRequest) {
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
-      
+
+      const personId = normalizeToString(formData.get("person_id"));
+
       payload = {
         statement_date: formData.get("statement_date")?.toString(),
-        person_id: parseInt(formData.get("person_id")?.toString() || "0"),
+        person_id: personId,
         account_number_suffix: parseInt(formData.get("account_number_suffix")?.toString() || "0"),
         account_number_full: formData.get("account_number_full")?.toString(),
         cell_phone: formData.get("cell_phone")?.toString(),
@@ -77,8 +94,16 @@ export async function POST(request: NextRequest) {
       }
     } else {
       // JSON payload
-      payload = await request.json();
-      
+      const rawBody = await request.json();
+
+      if (typeof rawBody === "object" && rawBody !== null) {
+        const body = rawBody as Record<string, unknown>;
+        payload = body as StatementPayload;
+        payload.person_id = normalizeToString(body.person_id);
+      } else {
+        payload = {};
+      }
+
       if (payload.pdf_base64) {
         pdfBuffer = Buffer.from(payload.pdf_base64, "base64");
         
@@ -93,12 +118,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate required fields
-    if (!payload.person_id) {
+    const normalizedPersonId = payload.person_id?.toLowerCase();
+
+    if (!normalizedPersonId) {
       return NextResponse.json(
         { success: false, error: "person_id is required" },
         { status: 400 }
       );
     }
+
+    if (!UUID_PATTERN.test(normalizedPersonId)) {
+      return NextResponse.json(
+        { success: false, error: "person_id must be a valid UUID" },
+        { status: 400 }
+      );
+    }
+
+    payload.person_id = normalizedPersonId;
 
     if (!payload.account_number_full) {
       return NextResponse.json(

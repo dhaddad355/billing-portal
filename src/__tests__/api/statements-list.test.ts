@@ -63,10 +63,11 @@ describe("Statements List API - GET /api/app/statements", () => {
   });
 
   it("should return paginated statements", async () => {
+    const PERSON_ID = "11111111-2222-3333-4444-555555555555";
     const mockStatements = [
       {
         id: "stmt-1",
-        person_id: 12345,
+        person_id: PERSON_ID,
         patient_balance: 100.0,
         status: "PENDING",
         created_at: "2025-01-01T00:00:00Z",

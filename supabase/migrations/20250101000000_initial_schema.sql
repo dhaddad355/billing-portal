@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS public.users (
 
 -- 2. Persons table (guarantors/patients from NGProd)
 CREATE TABLE IF NOT EXISTS public.persons (
-  person_id        integer PRIMARY KEY,         -- NGProd.person.person_id (guar_id)
+  person_id        uuid PRIMARY KEY,            -- NextGen person identifier (GUID)
   full_name        text NOT NULL,
   first_name       text,
   last_name        text,
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS public.persons (
 -- 3. Statements table
 CREATE TABLE IF NOT EXISTS public.statements (
   id                    uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  person_id             integer NOT NULL REFERENCES public.persons(person_id),
+  person_id             uuid NOT NULL REFERENCES public.persons(person_id),
   statement_date        date NOT NULL,
   account_number_full   text NOT NULL,
   account_number_suffix integer NOT NULL,
@@ -63,7 +63,7 @@ CREATE INDEX IF NOT EXISTS idx_statements_short_code ON public.statements (short
 CREATE TABLE IF NOT EXISTS public.messages (
   id                   uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   statement_id         uuid REFERENCES public.statements(id),
-  person_id            integer REFERENCES public.persons(person_id),
+  person_id            uuid REFERENCES public.persons(person_id),
   channel              text NOT NULL CHECK (channel IN ('EMAIL','SMS')),
   to_address           text NOT NULL,
   subject              text,

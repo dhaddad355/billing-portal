@@ -86,6 +86,8 @@ describe("Patient View API - GET /api/view/[shortcode]/pdf", () => {
 });
 
 describe("Patient View API - DOB Verification", () => {
+  const PERSON_ID = "11111111-2222-3333-4444-555555555555";
+
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
@@ -146,7 +148,7 @@ describe("Patient View API - DOB Verification", () => {
     mockSupabase.single.mockResolvedValue({
       data: {
         id: "stmt-1",
-        person_id: 12345,
+        person_id: PERSON_ID,
         status: "PENDING",
         first_view_at: null,
         view_count: 0,

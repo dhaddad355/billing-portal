@@ -45,7 +45,7 @@ interface Person {
 
 interface Statement {
   id: string;
-  person_id: number;
+  person_id: string;
   statement_date: string;
   account_number_suffix: number;
   patient_balance: number;

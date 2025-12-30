@@ -1,5 +1,5 @@
 export interface Person {
-  person_id: number;
+  person_id: string;
   full_name: string;
   first_name: string | null;
   last_name: string | null;
@@ -14,7 +14,7 @@ export interface Person {
 
 export interface Statement {
   id: string;
-  person_id: number;
+  person_id: string;
   statement_date: string;
   account_number_full: string;
   account_number_suffix: number;
@@ -54,7 +54,7 @@ export interface User {
 export interface Message {
   id: string;
   statement_id: string | null;
-  person_id: number | null;
+  person_id: string | null;
   channel: "EMAIL" | "SMS";
   to_address: string;
   subject: string | null;

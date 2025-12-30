@@ -71,6 +71,8 @@ vi.mock("@/lib/auth", () => ({
 import { getServerSession } from "next-auth";
 
 describe("Send Statement API - Basic Tests", () => {
+  const PERSON_ID = "11111111-2222-3333-4444-555555555555";
+
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
@@ -150,7 +152,7 @@ describe("Send Statement API - Basic Tests", () => {
           data: {
             id: "stmt-1",
             status: "PENDING",
-            person_id: 12345,
+            person_id: PERSON_ID,
             patient_balance: 100,
             persons: {
               full_name: "John Doe",

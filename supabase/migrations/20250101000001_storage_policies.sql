@@ -51,7 +51,7 @@ USING (
 -- PDF files are stored with the following path structure:
 -- {person_id}/{statement_date}/{statement_uuid}.pdf
 --
--- Example: 12345/2024-01-15/a1b2c3d4-e5f6-7890-abcd-ef1234567890.pdf
+-- Example: 11111111-2222-3333-4444-555555555555/2025-01-15/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee.pdf
 --
 -- This allows for:
 -- - Easy organization by patient

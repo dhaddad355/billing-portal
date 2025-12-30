@@ -35,6 +35,8 @@ const createInvalidPdfBuffer = () => {
 };
 
 describe("Statement Ingest API - POST /api/statement", () => {
+  const PERSON_ID = "11111111-2222-3333-4444-555555555555";
+
   beforeEach(() => {
     vi.clearAllMocks();
     
@@ -113,7 +115,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
           "x-api-key": "test-api-key",
         },
         body: JSON.stringify({
-          person_id: 12345,
+          person_id: PERSON_ID,
           patient_balance: 100.0,
           pdf_base64: createValidPdfBuffer().toString("base64"),
         }),
@@ -135,7 +137,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
           "x-api-key": "test-api-key",
         },
         body: JSON.stringify({
-          person_id: 12345,
+          person_id: PERSON_ID,
           account_number_full: "ACC-001",
           pdf_base64: createValidPdfBuffer().toString("base64"),
         }),
@@ -157,7 +159,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
           "x-api-key": "test-api-key",
         },
         body: JSON.stringify({
-          person_id: 12345,
+          person_id: PERSON_ID,
           account_number_full: "ACC-001",
           patient_balance: 100.0,
         }),
@@ -179,7 +181,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
           "x-api-key": "test-api-key",
         },
         body: JSON.stringify({
-          person_id: 12345,
+          person_id: PERSON_ID,
           account_number_full: "ACC-001",
           patient_balance: 100.0,
           pdf_base64: createInvalidPdfBuffer().toString("base64"),
@@ -204,7 +206,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
           "x-api-key": "test-api-key",
         },
         body: JSON.stringify({
-          person_id: 12345,
+          person_id: PERSON_ID,
           account_number_full: "ACC-001",
           account_number_suffix: 1,
           patient_balance: 250.0,
@@ -234,7 +236,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
           "x-api-key": "test-api-key",
         },
         body: JSON.stringify({
-          person_id: 12345,
+          person_id: PERSON_ID,
           account_number_full: "ACC-001",
           patient_balance: 100.0,
           last_statement_date: "2024-12-15",
@@ -262,7 +264,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
           "x-api-key": "test-api-key",
         },
         body: JSON.stringify({
-          person_id: 12345,
+          person_id: PERSON_ID,
           account_number_full: "ACC-001",
           patient_balance: 100.0,
           first_name: "John",
@@ -286,7 +288,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
           "x-api-key": "test-api-key",
         },
         body: JSON.stringify({
-          person_id: 12345,
+          person_id: PERSON_ID,
           account_number_full: "ACC-001",
           patient_balance: 100.0,
           pdf_base64: createValidPdfBuffer().toString("base64"),
@@ -307,7 +309,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
           "x-api-key": "test-api-key",
         },
         body: JSON.stringify({
-          person_id: 12345,
+          person_id: PERSON_ID,
           account_number_full: "ACC-001",
           patient_balance: 100.0,
           pdf_base64: createValidPdfBuffer().toString("base64"),
