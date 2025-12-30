@@ -1,0 +1,5 @@
+Name,NPI,Degree,Taxonomy,Email Addr,Bus Phone,Addr 1,Addr 2,City,State,Zip,Bus Fax,Hsp Affil
+"Smith, John",1234567890,MD,Allopathic & Osteopathic Physicians : Optometry,john.smith@example.com,(555) 123-4567,123 Main St,Suite 100,Portland,OR,97201,(555) 123-4568,Vision Care Center
+"Doe, Jane",2345678901,MD,Allopathic & Osteopathic Physicians : Ophthalmology,jane.doe@example.com,(555) 234-5678,456 Oak Ave,Suite 200,Seattle,WA,98101,(555) 234-5679,Eye Associates
+"Johnson, Robert",3456789012,OD,Eye and Vision Services Providers : Optometrist,robert.j@example.com,(555) 345-6789,789 Pine Rd,,Tacoma,WA,98402,(555) 345-6790,Clear Vision Clinic
+"Williams, Mary",4567890123,MD,Allopathic & Osteopathic Physicians : Ophthalmology,mary.w@example.com,(555) 456-7890,123 Main St,Suite 100,Portland,OR,97201,(555) 456-7891,Vision Care Center

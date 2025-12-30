@@ -780,23 +780,38 @@ export default function ManageProvidersPage() {
             <h2 className="mb-4 text-lg font-semibold">Import Providers from CSV</h2>
             
             <div className="mb-4 rounded-md bg-blue-50 border border-blue-200 p-4 text-sm text-blue-900">
-              <p className="font-medium mb-2">CSV Format Requirements:</p>
-              <ul className="list-disc list-inside space-y-1">
-                <li>Required columns: <strong>First Name</strong>, <strong>Last Name</strong></li>
-                <li>Optional columns: NPI, Specialty, Email, Phone</li>
-                <li>Practice columns: Practice Name, Practice Address, Practice City, Practice State, Practice ZIP, Practice Phone, Practice Fax</li>
-                <li>Duplicate providers (by NPI or name+email) will be skipped</li>
-                <li>Practices will be auto-created or matched by name and city</li>
-              </ul>
-              <p className="mt-2">
+              <p className="font-medium mb-2">Supported CSV Formats:</p>
+              <div className="mb-3">
+                <p className="font-medium text-xs mb-1">Format 1 - Simple (First Name, Last Name):</p>
+                <ul className="list-disc list-inside space-y-1 ml-2">
+                  <li>Required: <strong>First Name</strong>, <strong>Last Name</strong></li>
+                  <li>Optional: NPI, Specialty, Email, Phone, Practice Name, etc.</li>
+                </ul>
+              </div>
+              <div className="mb-3">
+                <p className="font-medium text-xs mb-1">Format 2 - Internal System (Name as &quot;Last, First&quot;):</p>
+                <ul className="list-disc list-inside space-y-1 ml-2">
+                  <li>Required: <strong>Name</strong> (format: &quot;Last, First&quot;)</li>
+                  <li>Optional: NPI, Degree, Taxonomy, Email Addr, Bus Phone, Hsp Affil, etc.</li>
+                </ul>
+              </div>
+              <p className="text-xs mb-2">Duplicate providers (by NPI or name+email) will be skipped. Practices will be auto-created or matched by name and city.</p>
+              <div className="flex gap-3">
                 <a 
                   href="/sample-providers.csv" 
                   download 
-                  className="text-blue-700 underline hover:text-blue-800"
+                  className="text-blue-700 underline hover:text-blue-800 text-xs"
                 >
-                  Download sample CSV template
+                  Download simple format template
                 </a>
-              </p>
+                <a 
+                  href="/sample-providers-internal-format.csv" 
+                  download 
+                  className="text-blue-700 underline hover:text-blue-800 text-xs"
+                >
+                  Download internal system format template
+                </a>
+              </div>
             </div>
 
             {!importResult ? (

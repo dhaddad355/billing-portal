@@ -3,12 +3,26 @@ import { getServiceClient } from "@/lib/supabase";
 import Papa from "papaparse";
 
 interface CSVRow {
-  "First Name": string;
-  "Last Name": string;
+  // Support both formats - user's internal system format and simple format
+  Name?: string; // User format: "Last, First" or "Last, First M."
+  "First Name"?: string; // Simple format
+  "Last Name"?: string; // Simple format
   NPI?: string;
-  Specialty?: string;
-  Email?: string;
-  Phone?: string;
+  Degree?: string; // User format
+  Specialty?: string; // Simple format
+  Taxonomy?: string; // User format - contains specialty information
+  "Email Addr"?: string; // User format
+  Email?: string; // Simple format
+  "Bus Phone"?: string; // User format
+  Phone?: string; // Simple format
+  "Addr 1"?: string; // User format
+  "Addr 2"?: string; // User format
+  City?: string; // Both formats
+  State?: string; // Both formats
+  Zip?: string; // Both formats
+  "Bus Fax"?: string; // User format
+  "Hsp Affil"?: string; // User format - hospital affiliation (practice name)
+  // Simple format fields
   "Practice Name"?: string;
   "Practice Address"?: string;
   "Practice City"?: string;
@@ -28,6 +42,44 @@ interface ImportResult {
     message: string;
     provider?: string;
   }[];
+}
+
+// Helper function to parse "Last, First M." format
+function parseName(nameStr: string): { firstName: string; lastName: string } | null {
+  if (!nameStr || typeof nameStr !== "string") return null;
+  
+  // Handle "Last, First" or "Last, First M." format
+  const parts = nameStr.split(",").map((p) => p.trim());
+  if (parts.length >= 2) {
+    return {
+      lastName: parts[0],
+      firstName: parts[1],
+    };
+  }
+  
+  // Handle "First Last" format as fallback
+  const spaceParts = nameStr.trim().split(/\s+/);
+  if (spaceParts.length >= 2) {
+    return {
+      firstName: spaceParts[0],
+      lastName: spaceParts.slice(1).join(" "),
+    };
+  }
+  
+  return null;
+}
+
+// Helper function to extract specialty from Taxonomy field
+function extractSpecialty(taxonomy: string): string | null {
+  if (!taxonomy || typeof taxonomy !== "string") return null;
+  
+  // Taxonomy format: "Category : Specialty : Subspecialty"
+  // We want the second part (Specialty)
+  const parts = taxonomy.split(":").map((p) => p.trim());
+  if (parts.length >= 2) {
+    return parts[1];
+  }
+  return taxonomy; // Return as-is if format is different
 }
 
 // POST /api/app/providers/import - Import providers from CSV
@@ -103,25 +155,54 @@ export async function POST(request: NextRequest) {
       const rowNum = i + 2; // +2 because of header row and 0-indexing
 
       try {
-        // Validate required fields
-        if (!row["First Name"] || !row["Last Name"]) {
+        // Parse provider name from either format
+        let firstName: string;
+        let lastName: string;
+        
+        if (row.Name) {
+          // User's internal system format: "Last, First"
+          const parsed = parseName(row.Name);
+          if (!parsed) {
+            result.errors++;
+            result.details.push({
+              row: rowNum,
+              status: "error",
+              message: "Unable to parse provider name",
+              provider: row.Name,
+            });
+            continue;
+          }
+          firstName = parsed.firstName;
+          lastName = parsed.lastName;
+        } else if (row["First Name"] && row["Last Name"]) {
+          // Simple format
+          firstName = row["First Name"];
+          lastName = row["Last Name"];
+        } else {
           result.errors++;
           result.details.push({
             row: rowNum,
             status: "error",
-            message: "Missing required fields: First Name and Last Name",
-            provider: `${row["First Name"] || ""} ${row["Last Name"] || ""}`.trim(),
+            message: "Missing required fields: Name or (First Name and Last Name)",
+            provider: "",
           });
           continue;
         }
 
+        // Extract other fields from appropriate columns
+        const npi = row.NPI?.trim() || null;
+        const degree = row.Degree?.trim() || null;
+        const specialty = row.Specialty?.trim() || (row.Taxonomy ? extractSpecialty(row.Taxonomy) : null);
+        const email = (row["Email Addr"] || row.Email)?.trim() || null;
+        const phone = (row["Bus Phone"] || row.Phone)?.trim() || null;
+
         // Check for duplicate provider by NPI or name+email combination
         let isDuplicate = false;
         
-        if (row.NPI && npiMap.has(row.NPI.trim().toLowerCase())) {
+        if (npi && npiMap.has(npi.toLowerCase())) {
           isDuplicate = true;
-        } else if (row.Email) {
-          const key = `${row["First Name"].toLowerCase()}_${row["Last Name"].toLowerCase()}_${row.Email.toLowerCase()}`;
+        } else if (email) {
+          const key = `${firstName.toLowerCase()}_${lastName.toLowerCase()}_${email.toLowerCase()}`;
           if (nameEmailMap.has(key)) {
             isDuplicate = true;
           }
@@ -133,7 +214,7 @@ export async function POST(request: NextRequest) {
             row: rowNum,
             status: "skipped",
             message: "Provider already exists (duplicate NPI or name+email)",
-            provider: `${row["First Name"]} ${row["Last Name"]}`,
+            provider: `${firstName} ${lastName}`,
           });
           continue;
         }
@@ -141,18 +222,27 @@ export async function POST(request: NextRequest) {
         // Handle practice - find or create
         let practiceId: string | null = null;
 
-        if (row["Practice Name"]) {
+        // Determine practice name and details from either format
+        const practiceName = row["Practice Name"] || row["Hsp Affil"] || null;
+        const practiceAddress = row["Practice Address"] || row["Addr 1"] || null;
+        const practiceCity = row["Practice City"] || row.City || null;
+        const practiceState = row["Practice State"] || row.State || null;
+        const practiceZip = row["Practice ZIP"] || row.Zip || null;
+        const practicePhone = row["Practice Phone"] || row["Bus Phone"] || null;
+        const practiceFax = row["Practice Fax"] || row["Bus Fax"] || null;
+
+        if (practiceName) {
           // Try to find existing practice by name and location
           const existingPractice = existingPractices?.find((p) => {
-            if (p.name.toLowerCase() !== row["Practice Name"]!.toLowerCase()) {
+            if (p.name.toLowerCase() !== practiceName.toLowerCase()) {
               return false;
             }
             // If both have city, they must match
-            if (row["Practice City"] && p.city) {
-              return p.city.toLowerCase() === row["Practice City"].toLowerCase();
+            if (practiceCity && p.city) {
+              return p.city.toLowerCase() === practiceCity.toLowerCase();
             }
             // If only one has city, they don't match (different locations)
-            if (row["Practice City"] || p.city) {
+            if (practiceCity || p.city) {
               return false;
             }
             // Neither has city - match on name only
@@ -166,13 +256,13 @@ export async function POST(request: NextRequest) {
             const { data: newPractice, error: practiceError } = await supabase
               .from("practices")
               .insert({
-                name: row["Practice Name"],
-                address_line1: row["Practice Address"] || null,
-                city: row["Practice City"] || null,
-                state: row["Practice State"] || null,
-                zip_code: row["Practice ZIP"] || null,
-                phone: row["Practice Phone"] || null,
-                fax: row["Practice Fax"] || null,
+                name: practiceName,
+                address_line1: practiceAddress,
+                city: practiceCity,
+                state: practiceState,
+                zip_code: practiceZip,
+                phone: practicePhone,
+                fax: practiceFax,
                 is_active: true,
               })
               .select("id")
@@ -185,7 +275,7 @@ export async function POST(request: NextRequest) {
                 row: rowNum,
                 status: "error",
                 message: `Failed to create practice: ${practiceError.message}`,
-                provider: `${row["First Name"]} ${row["Last Name"]}`,
+                provider: `${firstName} ${lastName}`,
               });
               continue;
             } else if (newPractice) {
@@ -194,11 +284,11 @@ export async function POST(request: NextRequest) {
               if (existingPractices) {
                 existingPractices.push({
                   id: newPractice.id,
-                  name: row["Practice Name"],
-                  address_line1: row["Practice Address"] || null,
-                  city: row["Practice City"] || null,
-                  state: row["Practice State"] || null,
-                  zip_code: row["Practice ZIP"] || null,
+                  name: practiceName,
+                  address_line1: practiceAddress,
+                  city: practiceCity,
+                  state: practiceState,
+                  zip_code: practiceZip,
                 });
               }
             }
@@ -210,12 +300,13 @@ export async function POST(request: NextRequest) {
           .from("providers")
           .insert({
             practice_id: practiceId,
-            first_name: row["First Name"],
-            last_name: row["Last Name"],
-            npi: row.NPI?.trim() || null,
-            specialty: row.Specialty?.trim() || null,
-            email: row.Email?.trim() || null,
-            phone: row.Phone?.trim() || null,
+            first_name: firstName,
+            last_name: lastName,
+            npi: npi,
+            specialty: specialty,
+            degree: degree,
+            email: email,
+            phone: phone,
             is_active: true,
           })
           .select("id, first_name, last_name")
@@ -227,7 +318,7 @@ export async function POST(request: NextRequest) {
             row: rowNum,
             status: "error",
             message: `Failed to create provider: ${providerError.message}`,
-            provider: `${row["First Name"]} ${row["Last Name"]}`,
+            provider: `${firstName} ${lastName}`,
           });
           continue;
         }
@@ -238,16 +329,16 @@ export async function POST(request: NextRequest) {
             id: newProvider.id,
             first_name: newProvider.first_name,
             last_name: newProvider.last_name,
-            npi: row.NPI?.trim() || null,
-            email: row.Email?.trim() || null,
+            npi: npi,
+            email: email,
           });
           
           // Update lookup maps
-          if (row.NPI) {
-            npiMap.set(row.NPI.trim().toLowerCase(), true);
+          if (npi) {
+            npiMap.set(npi.toLowerCase(), true);
           }
-          if (row.Email) {
-            const key = `${row["First Name"].toLowerCase()}_${row["Last Name"].toLowerCase()}_${row.Email.toLowerCase()}`;
+          if (email) {
+            const key = `${firstName.toLowerCase()}_${lastName.toLowerCase()}_${email.toLowerCase()}`;
             nameEmailMap.set(key, true);
           }
         }
@@ -259,7 +350,7 @@ export async function POST(request: NextRequest) {
           message: practiceId
             ? "Provider created and linked to practice"
             : "Provider created (no practice)",
-          provider: `${row["First Name"]} ${row["Last Name"]}`,
+          provider: `${firstName} ${lastName}`,
         });
       } catch (error) {
         result.errors++;
@@ -267,7 +358,7 @@ export async function POST(request: NextRequest) {
           row: rowNum,
           status: "error",
           message: `Unexpected error: ${error instanceof Error ? error.message : "Unknown error"}`,
-          provider: `${row["First Name"] || ""} ${row["Last Name"] || ""}`.trim(),
+          provider: row.Name || `${row["First Name"] || ""} ${row["Last Name"] || ""}`.trim(),
         });
       }
     }

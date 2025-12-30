@@ -2,13 +2,13 @@
 
 ## Overview
 
-This feature allows you to import providers (referring physicians) from a CSV file exported from your internal system. It includes smart duplicate detection and automatic practice matching/creation.
+This feature allows you to import providers (referring physicians) from a CSV file exported from your internal system. It supports multiple CSV formats and includes smart duplicate detection and automatic practice matching/creation.
 
-## How to Use
+## Supported CSV Formats
 
-### 1. Prepare Your CSV File
+The import tool supports two CSV formats:
 
-Create a CSV file with the following columns:
+### Format 1: Simple Format (Separate First/Last Name)
 
 **Required Columns:**
 - `First Name` - Provider's first name
@@ -29,15 +29,54 @@ Create a CSV file with the following columns:
 - `Practice Phone` - Practice phone number
 - `Practice Fax` - Practice fax number
 
-### 2. Sample CSV Format
-
+**Example:**
 ```csv
-First Name,Last Name,NPI,Specialty,Email,Phone,Practice Name,Practice Address,Practice City,Practice State,Practice ZIP,Practice Phone,Practice Fax
-John,Smith,1234567890,Optometry,john.smith@example.com,555-1234,Vision Care Center,123 Main St,Portland,OR,97201,555-1000,555-1001
-Jane,Doe,2345678901,Ophthalmology,jane.doe@example.com,555-2345,Eye Associates,456 Oak Ave,Seattle,WA,98101,555-2000,555-2001
+First Name,Last Name,NPI,Specialty,Email,Phone,Practice Name,Practice Address,Practice City,Practice State,Practice ZIP
+John,Smith,1234567890,Optometry,john.smith@example.com,555-1234,Vision Care Center,123 Main St,Portland,OR,97201
 ```
 
-A sample template is available for download in the import modal.
+### Format 2: Internal System Format (Combined Name)
+
+**Required Columns:**
+- `Name` - Provider's name in "Last, First" format (e.g., "Smith, John")
+
+**Optional Provider Columns:**
+- `NPI` - National Provider Identifier
+- `Degree` - Provider's degree (MD, DO, OD, etc.)
+- `Taxonomy` - Medical taxonomy (specialty will be extracted from middle section)
+- `Email Addr` - Provider's email address
+- `Bus Phone` - Provider's business phone number
+
+**Optional Practice/Location Columns:**
+- `Hsp Affil` - Hospital affiliation (used as practice name)
+- `Addr 1` - Street address line 1
+- `Addr 2` - Street address line 2
+- `City` - City
+- `State` - State
+- `Zip` - ZIP code
+- `Bus Fax` - Business fax number
+
+**Example:**
+```csv
+Name,NPI,Degree,Taxonomy,Email Addr,Bus Phone,Addr 1,City,State,Zip,Hsp Affil
+"Smith, John",1234567890,MD,Allopathic & Osteopathic Physicians : Optometry,john.smith@example.com,(555) 123-4567,123 Main St,Portland,OR,97201,Vision Care Center
+```
+
+**Note:** The Taxonomy field is parsed to extract the specialty. For example:
+- `Allopathic & Osteopathic Physicians : Optometry` → Specialty: "Optometry"
+- `Eye and Vision Services Providers : Optometrist` → Specialty: "Optometrist"
+
+## How to Use
+
+### 1. Prepare Your CSV File
+
+Export your provider data from your internal system. The tool will automatically detect which format you're using based on the column headers.
+
+### 2. Sample CSV Templates
+
+Two sample templates are available for download in the import modal:
+- `sample-providers.csv` - Simple format
+- `sample-providers-internal-format.csv` - Internal system format
 
 ### 3. Import Process
 
