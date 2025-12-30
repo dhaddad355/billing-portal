@@ -24,16 +24,10 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  MoreHorizontal,
   TrendingUp,
   TrendingDown,
+  Eye,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface Person {
   full_name: string;
@@ -77,9 +71,20 @@ export default function DashboardPage() {
   });
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("PENDING");
-  const [sendingId, setSendingId] = useState<string | null>(null);
-  const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+
+  const handleRowClick = (statementId: string, event: React.MouseEvent) => {
+    // Don't navigate if clicking on checkbox or button
+    const target = event.target as HTMLElement;
+    if (
+      target.closest('button') ||
+      target.closest('[role="checkbox"]') ||
+      target.closest('input[type="checkbox"]')
+    ) {
+      return;
+    }
+    window.location.href = `/app/statements/${statementId}`;
+  };
 
   const fetchStatements = useCallback(async () => {
     setLoading(true);
@@ -103,51 +108,6 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchStatements();
   }, [fetchStatements]);
-
-  const handleSend = async (id: string) => {
-    if (sendingId) return;
-    setSendingId(id);
-    try {
-      const response = await fetch(`/api/app/statements/${id}/send`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      });
-      if (response.ok) {
-        fetchStatements();
-      } else {
-        const error = await response.json();
-        alert(`Error: ${error.error}`);
-      }
-    } catch (error) {
-      console.error("Error sending statement:", error);
-      alert("Failed to send statement");
-    } finally {
-      setSendingId(null);
-    }
-  };
-
-  const handleReject = async (id: string) => {
-    if (rejectingId) return;
-    if (!confirm("Are you sure you want to reject this statement?")) return;
-    setRejectingId(id);
-    try {
-      const response = await fetch(`/api/app/statements/${id}/reject`, {
-        method: "POST",
-      });
-      if (response.ok) {
-        fetchStatements();
-      } else {
-        const error = await response.json();
-        alert(`Error: ${error.error}`);
-      }
-    } catch (error) {
-      console.error("Error rejecting statement:", error);
-      alert("Failed to reject statement");
-    } finally {
-      setRejectingId(null);
-    }
-  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -354,17 +314,18 @@ export default function DashboardPage() {
                       <TableHead className="font-medium text-right">Amount Due</TableHead>
                       <TableHead className="font-medium">Statement Date</TableHead>
                       <TableHead className="font-medium">Reviewer</TableHead>
-                      <TableHead className="font-medium w-10"></TableHead>
+                      <TableHead className="font-medium text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {statements.map((statement) => (
                       <TableRow 
                         key={statement.id} 
-                        className="group"
+                        className="group cursor-pointer hover:bg-gray-50"
                         data-state={selectedRows.has(statement.id) ? "selected" : undefined}
+                        onClick={(e) => handleRowClick(statement.id, e)}
                       >
-                        <TableCell>
+                        <TableCell onClick={(e) => e.stopPropagation()}>
                           <Checkbox
                             checked={selectedRows.has(statement.id)}
                             onCheckedChange={() => toggleRow(statement.id)}
@@ -389,44 +350,17 @@ export default function DashboardPage() {
                         <TableCell className="text-muted-foreground">
                           Staff
                         </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Actions</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem asChild>
-                                <Link href={`/app/statements/${statement.id}`}>
-                                  View Details
-                                </Link>
-                              </DropdownMenuItem>
-                              {statement.status === "PENDING" && (
-                                <>
-                                  <DropdownMenuItem
-                                    onClick={() => handleSend(statement.id)}
-                                    disabled={sendingId === statement.id}
-                                    className="text-green-600"
-                                  >
-                                    {sendingId === statement.id ? "Sending..." : "Send Statement"}
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => handleReject(statement.id)}
-                                    disabled={rejectingId === statement.id}
-                                    className="text-red-600"
-                                  >
-                                    {rejectingId === statement.id ? "Rejecting..." : "Reject"}
-                                  </DropdownMenuItem>
-                                </>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                        <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                          >
+                            <Link href={`/app/statements/${statement.id}`}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              View Details
+                            </Link>
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}

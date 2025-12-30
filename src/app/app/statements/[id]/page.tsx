@@ -5,8 +5,10 @@ import { authOptions } from "@/lib/auth";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import StatementActions from "./statement-actions";
-import { Clock, CheckCircle2, XCircle, ExternalLink } from "lucide-react";
+import { Clock, CheckCircle2, XCircle, ExternalLink, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 interface StatementPageProps {
   params: Promise<{ id: string }>;
@@ -87,7 +89,15 @@ export default async function StatementPage({ params }: StatementPageProps) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight">Statement Details</h1>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/app/statements-processing">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Statements
+            </Link>
+          </Button>
+          <h1 className="text-2xl font-bold tracking-tight">Statement Details</h1>
+        </div>
         {getStatusBadge(statement.status)}
       </div>
 
