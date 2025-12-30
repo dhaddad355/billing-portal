@@ -244,11 +244,11 @@ export async function POST(
       });
     }
 
-    // Log status change event (only if not a resend)
+    // Log status change event
     await supabase.from("statement_events").insert({
       statement_id: statementId,
       event_type: isResend ? "RESEND" : "STATUS_CHANGE",
-      old_status: isResend ? "SENT" : "PENDING",
+      old_status: isResend ? statement.status : "PENDING",
       new_status: "SENT",
       metadata_json: {
         short_code: shortCode,
