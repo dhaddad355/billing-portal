@@ -32,6 +32,19 @@ export default function StatementActions({
   const [rejecting, setRejecting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  const getSendBothDescription = () => {
+    if (hasEmail && hasPhone) {
+      return "Send via both email and SMS";
+    }
+    if (!hasEmail && !hasPhone) {
+      return "No email or phone number on file";
+    }
+    if (!hasEmail) {
+      return "No email address on file (SMS only available)";
+    }
+    return "No phone number on file (Email only available)";
+  };
+
   const handleSend = async (sendEmail: boolean, sendSms: boolean) => {
     if (sending) return;
     setSending(true);
@@ -139,19 +152,13 @@ export default function StatementActions({
                 variant="outline"
                 className="justify-start h-auto py-4"
                 onClick={() => handleSend(true, true)}
-                disabled={!hasEmail && !hasPhone}
+                disabled={!hasEmail || !hasPhone}
               >
                 <Send className="mr-2 h-5 w-5" />
                 <div className="text-left">
                   <div className="font-semibold">Send Both</div>
                   <div className="text-sm text-muted-foreground">
-                    {hasEmail && hasPhone
-                      ? "Send via both email and SMS"
-                      : !hasEmail && !hasPhone
-                      ? "No email or phone number on file"
-                      : !hasEmail
-                      ? "No email address on file (SMS only available)"
-                      : "No phone number on file (Email only available)"}
+                    {getSendBothDescription()}
                   </div>
                 </div>
               </Button>

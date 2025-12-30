@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -62,6 +63,7 @@ interface Pagination {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [statements, setStatements] = useState<Statement[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
@@ -83,7 +85,14 @@ export default function DashboardPage() {
     ) {
       return;
     }
-    window.location.href = `/app/statements/${statementId}`;
+    router.push(`/app/statements/${statementId}`);
+  };
+
+  const handleRowKeyDown = (statementId: string, event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      router.push(`/app/statements/${statementId}`);
+    }
   };
 
   const fetchStatements = useCallback(async () => {
@@ -324,6 +333,10 @@ export default function DashboardPage() {
                         className="group cursor-pointer hover:bg-gray-50"
                         data-state={selectedRows.has(statement.id) ? "selected" : undefined}
                         onClick={(e) => handleRowClick(statement.id, e)}
+                        onKeyDown={(e) => handleRowKeyDown(statement.id, e)}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`View details for ${statement.persons?.full_name || 'statement'}`}
                       >
                         <TableCell onClick={(e) => e.stopPropagation()}>
                           <Checkbox
