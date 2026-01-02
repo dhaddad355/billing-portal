@@ -146,7 +146,8 @@ export async function POST(
     }
 
     const now = new Date().toISOString();
-    const viewUrl = `https://bill.lasereyeinstitute.com/view/${shortCode}`;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "app.mylei.com";
+    const viewUrl = `https://${baseUrl}/view/${shortCode}`;
 
     // Update statement
     const { error: updateError } = await supabase

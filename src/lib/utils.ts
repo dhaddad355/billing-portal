@@ -32,8 +32,9 @@ export function generateShortCode(length = 6): string {
 }
 
 export function parseDateOfBirth(input: string): Date | null {
-  // Support MM/DD/YYYY, YYYY-MM-DD, MM-DD-YYYY
+  // Support MMDDYYYY (8 digits), MM/DD/YYYY, YYYY-MM-DD, MM-DD-YYYY
   const patterns = [
+    /^(\d{2})(\d{2})(\d{4})$/, // MMDDYYYY (8 digits, mobile-friendly)
     /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, // MM/DD/YYYY
     /^(\d{4})-(\d{1,2})-(\d{1,2})$/, // YYYY-MM-DD
     /^(\d{1,2})-(\d{1,2})-(\d{4})$/, // MM-DD-YYYY
@@ -42,7 +43,7 @@ export function parseDateOfBirth(input: string): Date | null {
   for (const pattern of patterns) {
     const match = input.match(pattern);
     if (match) {
-      if (pattern === patterns[1]) {
+      if (pattern === patterns[2]) {
         // YYYY-MM-DD
         return new Date(
           parseInt(match[1]),
@@ -50,7 +51,7 @@ export function parseDateOfBirth(input: string): Date | null {
           parseInt(match[3])
         );
       } else {
-        // MM/DD/YYYY or MM-DD-YYYY
+        // MMDDYYYY, MM/DD/YYYY or MM-DD-YYYY
         return new Date(
           parseInt(match[3]),
           parseInt(match[1]) - 1,
