@@ -178,7 +178,7 @@ export default async function StatementPage({ params }: StatementPageProps) {
                 <div className="mt-2">
                   <label className="text-sm text-muted-foreground">View URL</label>
                   <p className="font-mono text-sm text-primary">
-                    https://bill.lasereyeinstitute.com/view/{statement.short_code}
+                    https://{process.env.NEXT_PUBLIC_BASE_URL || "app.mylei.com"}/view/{statement.short_code}
                   </p>
                 </div>
                 <div className="mt-2">

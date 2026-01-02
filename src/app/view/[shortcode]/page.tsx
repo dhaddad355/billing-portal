@@ -15,7 +15,7 @@ interface StatementWithPerson {
   patient_balance: number;
   currency_code: string;
   status: string;
-  persons: { full_name: string } | null;
+  persons: { full_name: string; date_of_birth: string | null } | null;
 }
 
 export default async function ViewPage({ params }: ViewPageProps) {
@@ -33,7 +33,8 @@ export default async function ViewPage({ params }: ViewPageProps) {
       currency_code,
       status,
       persons (
-        full_name
+        full_name,
+        date_of_birth
       )
     `)
     .eq("short_code", shortcode)
@@ -79,6 +80,7 @@ export default async function ViewPage({ params }: ViewPageProps) {
     <PatientViewClient
       shortcode={shortcode}
       patientName={statement.persons?.full_name || undefined}
+      patientDob={statement.persons?.date_of_birth || undefined}
       statementDate={statement.statement_date}
       patientBalance={statement.patient_balance}
       currencyCode={statement.currency_code}
