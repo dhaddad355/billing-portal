@@ -22,6 +22,19 @@ export function formatDate(date: Date | string | null): string {
   });
 }
 
+export function formatDateTime(date: Date | string | null): string {
+  if (!date) return "N/A";
+  const d = typeof date === "string" ? new Date(date) : date;
+  return d.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 export function generateShortCode(length = 6): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
   let result = "";

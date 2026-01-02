@@ -2,11 +2,13 @@ import { getServiceClient, STORAGE_BUCKET } from "@/lib/supabase";
 import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import StatementActions from "./statement-actions";
-import { Clock, CheckCircle2, XCircle, ExternalLink } from "lucide-react";
+import { Clock, CheckCircle2, XCircle, ExternalLink, ArrowLeft, Mail, MessageSquare } from "lucide-react";
+import Link from "next/link";
 
 interface StatementPageProps {
   params: Promise<{ id: string }>;
@@ -41,6 +43,13 @@ export default async function StatementPage({ params }: StatementPageProps) {
   if (error || !statement) {
     notFound();
   }
+
+  // Fetch messages sent for this statement
+  const { data: messages } = await supabase
+    .from("messages")
+    .select("*")
+    .eq("statement_id", id)
+    .order("created_at", { ascending: false });
 
   // Generate signed URL for PDF preview
   const { data: signedUrlData } = await supabase.storage
@@ -87,7 +96,15 @@ export default async function StatementPage({ params }: StatementPageProps) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight">Statement Details</h1>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/app/statements-processing">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Statements
+            </Link>
+          </Button>
+          <h1 className="text-2xl font-bold tracking-tight">Statement Details</h1>
+        </div>
         {getStatusBadge(statement.status)}
       </div>
 
@@ -168,6 +185,46 @@ export default async function StatementPage({ params }: StatementPageProps) {
                   <label className="text-sm text-muted-foreground">View Count</label>
                   <p className="font-medium">{statement.view_count}</p>
                 </div>
+              </div>
+            )}
+
+            {/* Send History */}
+            {statement.sent_at && (
+              <div className="border-t pt-4">
+                <h4 className="text-sm font-semibold mb-2">Send History</h4>
+                <div className="mb-2">
+                  <label className="text-sm text-muted-foreground">Sent At</label>
+                  <p className="font-medium">{formatDateTime(statement.sent_at)}</p>
+                </div>
+                {messages && messages.length > 0 && (
+                  <div className="space-y-2">
+                    <label className="text-sm text-muted-foreground">Messages Sent</label>
+                    {messages.map((msg) => (
+                      <div key={msg.id} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+                        <div className="flex items-center gap-2">
+                          {msg.channel === "EMAIL" ? (
+                            <Mail className="h-4 w-4 text-blue-600" />
+                          ) : (
+                            <MessageSquare className="h-4 w-4 text-green-600" />
+                          )}
+                          <span className="font-medium">{msg.channel}</span>
+                          <span className="text-muted-foreground">to {msg.to_address}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge 
+                            variant={msg.status === "SENT" ? "outline" : msg.status === "FAILED" ? "destructive" : "secondary"}
+                            className={msg.status === "SENT" ? "text-green-700 border-green-300 bg-green-50" : ""}
+                          >
+                            {msg.status}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {formatDateTime(msg.sent_at || msg.created_at)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
