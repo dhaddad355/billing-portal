@@ -234,7 +234,6 @@ export default async function StatementPage({ params }: StatementPageProps) {
               status={statement.status}
               hasEmail={!!statement.persons?.email_address}
               hasPhone={!!statement.persons?.cell_phone}
-              sentAt={statement.sent_at}
             />
           </CardContent>
         </Card>

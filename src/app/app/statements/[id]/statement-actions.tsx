@@ -19,7 +19,6 @@ interface StatementActionsProps {
   status: string;
   hasEmail: boolean;
   hasPhone: boolean;
-  sentAt: string | null;
 }
 
 export default function StatementActions({
@@ -27,7 +26,6 @@ export default function StatementActions({
   status,
   hasEmail,
   hasPhone,
-  sentAt,
 }: StatementActionsProps) {
   const router = useRouter();
   const [sending, setSending] = useState(false);
