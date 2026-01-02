@@ -33,33 +33,34 @@ export function generateShortCode(length = 6): string {
 
 export function parseDateOfBirth(input: string): Date | null {
   // Support MMDDYYYY (8 digits), MM/DD/YYYY, YYYY-MM-DD, MM-DD-YYYY
-  const patterns = [
-    /^(\d{2})(\d{2})(\d{4})$/, // MMDDYYYY (8 digits, mobile-friendly)
-    /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, // MM/DD/YYYY
-    /^(\d{4})-(\d{1,2})-(\d{1,2})$/, // YYYY-MM-DD
-    /^(\d{1,2})-(\d{1,2})-(\d{4})$/, // MM-DD-YYYY
-  ];
+  const mmddyyyyPattern = /^(\d{2})(\d{2})(\d{4})$/; // MMDDYYYY (8 digits, mobile-friendly)
+  const mmSlashDdSlashYyyy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/; // MM/DD/YYYY
+  const yyyyDashMmDashDd = /^(\d{4})-(\d{1,2})-(\d{1,2})$/; // YYYY-MM-DD
+  const mmDashDdDashYyyy = /^(\d{1,2})-(\d{1,2})-(\d{4})$/; // MM-DD-YYYY
 
+  // Check YYYY-MM-DD format first (year is first)
+  let match = input.match(yyyyDashMmDashDd);
+  if (match) {
+    return new Date(
+      parseInt(match[1]),
+      parseInt(match[2]) - 1,
+      parseInt(match[3])
+    );
+  }
+
+  // Check other formats (month is first)
+  const patterns = [mmddyyyyPattern, mmSlashDdSlashYyyy, mmDashDdDashYyyy];
   for (const pattern of patterns) {
-    const match = input.match(pattern);
+    match = input.match(pattern);
     if (match) {
-      if (pattern === patterns[2]) {
-        // YYYY-MM-DD
-        return new Date(
-          parseInt(match[1]),
-          parseInt(match[2]) - 1,
-          parseInt(match[3])
-        );
-      } else {
-        // MMDDYYYY, MM/DD/YYYY or MM-DD-YYYY
-        return new Date(
-          parseInt(match[3]),
-          parseInt(match[1]) - 1,
-          parseInt(match[2])
-        );
-      }
+      return new Date(
+        parseInt(match[3]), // year
+        parseInt(match[1]) - 1, // month (0-based)
+        parseInt(match[2]) // day
+      );
     }
   }
+
   return null;
 }
 

@@ -106,7 +106,7 @@ export default function PatientViewClient({
                     value={dob}
                     onChange={(e) => setDob(e.target.value)}
                     className="pl-10"
-                    maxLength={10}
+                    maxLength={8}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">Enter as 8 digits (e.g., 01012019)</p>
