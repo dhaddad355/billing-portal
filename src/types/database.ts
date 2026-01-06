@@ -196,3 +196,43 @@ export interface ReferralAttachment {
 export interface ReferralAttachmentWithUser extends ReferralAttachment {
   users: User | null;
 }
+
+// Letter Templates Feature Types
+
+export interface LetterSettings {
+  id: string;
+  header_html: string;
+  footer_html: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LetterTemplate {
+  id: string;
+  name: string;
+  body: string;
+  is_active: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LetterTemplateWithUser extends LetterTemplate {
+  users: User | null;
+}
+
+export interface GeneratedLetter {
+  id: string;
+  referral_id: string;
+  template_id: string | null;
+  template_name: string;
+  merged_html: string;
+  storage_path: string;
+  custom_variables: Record<string, string>;
+  created_by: string | null;
+  created_at: string;
+}
+
+export interface GeneratedLetterWithUser extends GeneratedLetter {
+  users: User | null;
+}

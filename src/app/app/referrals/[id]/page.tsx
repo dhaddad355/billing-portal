@@ -3,12 +3,21 @@
 import * as React from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { ChevronUp, Upload, FileText, Download, Lock, Unlock } from "lucide-react";
+import { ChevronUp, Upload, FileText, Download, Lock, Unlock, Mail, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { ReferralWithRelations, ReferralNoteWithUser, ReferralAttachmentWithUser } from "@/types/database";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import type { ReferralWithRelations, ReferralNoteWithUser, ReferralAttachmentWithUser, LetterTemplate, GeneratedLetterWithUser } from "@/types/database";
 
 const REFERRAL_STATUSES = [
   "Scheduling",
@@ -63,6 +72,17 @@ export default function ReferralDetailPage() {
   // Expandable referral notes state
   const [notesExpanded, setNotesExpanded] = React.useState(false);
 
+  // Generate Letter state
+  const [letterDialogOpen, setLetterDialogOpen] = React.useState(false);
+  const [letterTemplates, setLetterTemplates] = React.useState<LetterTemplate[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = React.useState("");
+  const [unknownVariables, setUnknownVariables] = React.useState<string[]>([]);
+  const [customVariableValues, setCustomVariableValues] = React.useState<Record<string, string>>({});
+  const [generatingLetter, setGeneratingLetter] = React.useState(false);
+  const [generatedLetters, setGeneratedLetters] = React.useState<GeneratedLetterWithUser[]>([]);
+  const [letterStep, setLetterStep] = React.useState<"select" | "variables" | "preview">("select");
+  const [generatedHtml, setGeneratedHtml] = React.useState("");
+
   const fetchReferral = React.useCallback(async () => {
     try {
       const res = await fetch(`/api/app/referrals/${referralId}`);
@@ -93,6 +113,154 @@ export default function ReferralDetailPage() {
   React.useEffect(() => {
     fetchReferral();
   }, [fetchReferral]);
+
+  // Fetch letter templates and generated letters
+  React.useEffect(() => {
+    const fetchLetterData = async () => {
+      try {
+        const [templatesRes, lettersRes] = await Promise.all([
+          fetch("/api/app/settings/letter-templates"),
+          fetch(`/api/app/referrals/${referralId}/letters`),
+        ]);
+
+        if (templatesRes.ok) {
+          const data = await templatesRes.json();
+          setLetterTemplates((data.templates || []).filter((t: LetterTemplate) => t.is_active));
+        }
+
+        if (lettersRes.ok) {
+          const data = await lettersRes.json();
+          setGeneratedLetters(data.letters || []);
+        }
+      } catch (error) {
+        console.error("Error fetching letter data:", error);
+      }
+    };
+
+    if (referralId) {
+      fetchLetterData();
+    }
+  }, [referralId]);
+
+  const openLetterDialog = () => {
+    setLetterStep("select");
+    setSelectedTemplateId("");
+    setUnknownVariables([]);
+    setCustomVariableValues({});
+    setGeneratedHtml("");
+    setLetterDialogOpen(true);
+  };
+
+  const handleTemplateSelect = async (templateId: string) => {
+    setSelectedTemplateId(templateId);
+    
+    // Get template variables
+    try {
+      const res = await fetch(`/api/app/referrals/${referralId}/letters`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ template_id: templateId }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const unknownVars = data.unknown_variables || [];
+        setUnknownVariables(unknownVars);
+        
+        // Initialize empty values for unknown variables
+        const initialValues: Record<string, string> = {};
+        unknownVars.forEach((v: string) => {
+          initialValues[v] = "";
+        });
+        setCustomVariableValues(initialValues);
+        
+        if (unknownVars.length > 0) {
+          setLetterStep("variables");
+        } else {
+          // No unknown variables, generate directly
+          await generateLetter(templateId, {});
+        }
+      }
+    } catch (error) {
+      console.error("Error checking template variables:", error);
+      alert("Failed to load template");
+    }
+  };
+
+  const generateLetter = async (templateId: string, customVariables: Record<string, string>) => {
+    setGeneratingLetter(true);
+    try {
+      const res = await fetch(`/api/app/referrals/${referralId}/letters`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          template_id: templateId,
+          custom_variables: customVariables,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setGeneratedHtml(data.html);
+        setLetterStep("preview");
+        
+        // Refresh letters list
+        const lettersRes = await fetch(`/api/app/referrals/${referralId}/letters`);
+        if (lettersRes.ok) {
+          const lettersData = await lettersRes.json();
+          setGeneratedLetters(lettersData.letters || []);
+        }
+        
+        // Refresh notes to show the system note
+        fetchReferral();
+      } else {
+        const error = await res.json();
+        alert(error.error || "Failed to generate letter");
+      }
+    } catch (error) {
+      console.error("Error generating letter:", error);
+      alert("Failed to generate letter");
+    } finally {
+      setGeneratingLetter(false);
+    }
+  };
+
+  const printLetter = () => {
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(generatedHtml);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+    }
+  };
+
+  const downloadLetterHtml = () => {
+    const blob = new Blob([generatedHtml], { type: "text/html" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `letter-${new Date().toISOString().split("T")[0]}.html`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  };
+
+  const viewExistingLetter = async (letterId: string) => {
+    try {
+      const res = await fetch(`/api/app/referrals/${referralId}/letters/${letterId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setGeneratedHtml(data.html);
+        setLetterStep("preview");
+        setLetterDialogOpen(true);
+      }
+    } catch (error) {
+      console.error("Error fetching letter:", error);
+      alert("Failed to load letter");
+    }
+  };
 
   const saveChanges = async () => {
     setSaving(true);
@@ -444,7 +612,12 @@ export default function ReferralDetailPage() {
         </CardHeader>
         <CardContent className="pt-4">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Button variant="outline" className="w-full" disabled>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={openLetterDialog}
+              disabled={letterTemplates.length === 0}
+            >
               <FileText className="mr-2 h-4 w-4" />
               Generate Letter
             </Button>
@@ -480,6 +653,14 @@ export default function ReferralDetailPage() {
               Public Note
             </Button>
           </div>
+          {letterTemplates.length === 0 && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              No letter templates available. Configure templates in{" "}
+              <a href="/app/settings/referrals" className="text-primary underline">
+                Settings → Referrals
+              </a>
+            </p>
+          )}
           <input
             ref={fileInputRef}
             type="file"
@@ -661,6 +842,144 @@ export default function ReferralDetailPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Generate Letter Dialog */}
+      <Dialog open={letterDialogOpen} onOpenChange={setLetterDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {letterStep === "select" && "Generate Letter"}
+              {letterStep === "variables" && "Enter Custom Values"}
+              {letterStep === "preview" && "Letter Preview"}
+            </DialogTitle>
+            <DialogDescription>
+              {letterStep === "select" && "Select a letter template to generate"}
+              {letterStep === "variables" && "Please provide values for the following custom variables"}
+              {letterStep === "preview" && "Your letter has been generated. You can print or download it."}
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Step 1: Template Selection */}
+          {letterStep === "select" && (
+            <div className="space-y-4 py-4">
+              <Label>Select Template</Label>
+              <div className="space-y-2">
+                {letterTemplates.map((template) => (
+                  <button
+                    key={template.id}
+                    type="button"
+                    onClick={() => handleTemplateSelect(template.id)}
+                    className="w-full text-left p-4 rounded-lg border hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="font-medium">{template.name}</div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {template.body ? `${template.body.substring(0, 100)}...` : "No preview available"}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Custom Variable Input */}
+          {letterStep === "variables" && (
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-muted-foreground">
+                The selected template contains custom variables that need values. Please enter the values below.
+              </p>
+              {unknownVariables.map((variable) => (
+                <div key={variable}>
+                  <Label htmlFor={`var-${variable}`}>{variable.replace(/_/g, " ")}</Label>
+                  <Input
+                    id={`var-${variable}`}
+                    value={customVariableValues[variable] || ""}
+                    onChange={(e) =>
+                      setCustomVariableValues({
+                        ...customVariableValues,
+                        [variable]: e.target.value,
+                      })
+                    }
+                    placeholder={`Enter ${variable.replace(/_/g, " ").toLowerCase()}`}
+                    className="mt-1"
+                  />
+                </div>
+              ))}
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setLetterStep("select")}>
+                  Back
+                </Button>
+                <Button
+                  onClick={() => generateLetter(selectedTemplateId, customVariableValues)}
+                  disabled={generatingLetter}
+                >
+                  {generatingLetter ? "Generating..." : "Generate Letter"}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+
+          {/* Step 3: Preview */}
+          {letterStep === "preview" && (
+            <div className="space-y-4 py-4">
+              <div
+                className="border rounded-md p-4 bg-white max-h-[50vh] overflow-y-auto"
+                dangerouslySetInnerHTML={{ __html: generatedHtml }}
+              />
+              <DialogFooter className="flex-wrap gap-2">
+                <Button variant="outline" onClick={() => setLetterDialogOpen(false)}>
+                  Close
+                </Button>
+                <Button variant="outline" onClick={downloadLetterHtml}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download HTML
+                </Button>
+                <Button onClick={printLetter}>
+                  <Printer className="mr-2 h-4 w-4" />
+                  Print
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Generated Letters Section (shown if there are any) */}
+      {generatedLetters.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium tracking-wide">Generated Letters</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="space-y-2">
+              {generatedLetters.map((letter) => (
+                <div
+                  key={letter.id}
+                  className="flex items-center justify-between rounded-lg border p-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <div className="font-medium">{letter.template_name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(letter.created_at).toLocaleString()}
+                        {letter.users && ` • ${letter.users.display_name || letter.users.email}`}
+                      </div>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => viewExistingLetter(letter.id)}
+                  >
+                    <FileText className="mr-1 h-4 w-4" />
+                    View
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
