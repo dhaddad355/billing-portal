@@ -15,6 +15,7 @@ interface PatientViewClientProps {
   statementDate: string;
   patientBalance: number;
   currencyCode: string;
+  accountNumber: string;
 }
 
 export default function PatientViewClient({
@@ -24,6 +25,7 @@ export default function PatientViewClient({
   statementDate,
   patientBalance,
   currencyCode,
+  accountNumber,
 }: PatientViewClientProps) {
   const [verified, setVerified] = useState(false);
   const [dob, setDob] = useState("");
@@ -127,7 +129,7 @@ export default function PatientViewClient({
     );
   }
 
-  const paymentUrl = `https://www.lasereyeinstitute.com/online-payment?a=${patientBalance.toFixed(2)}`;
+  const paymentUrl = `https://www.lasereyeinstitute.com/billpay?desc=invoice&amt=${patientBalance.toFixed(2)}&qty=1&account=${encodeURIComponent(accountNumber)}`;
   const pdfUrl = `/api/view/${shortcode}/pdf`;
 
   return (

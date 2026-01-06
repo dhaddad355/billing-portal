@@ -36,6 +36,12 @@ export interface Statement {
   sent_by_user_id: string | null;
   rejected_at: string | null;
   rejected_by_user_id: string | null;
+  payment_status: string | null;
+  payment_amount: number | null;
+  payment_date: string | null;
+  payment_transaction_id: string | null;
+  payment_method: string | null;
+  payment_gateway_entry_id: string | null;
 }
 
 export interface StatementWithPerson extends Statement {

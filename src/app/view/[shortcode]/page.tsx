@@ -15,6 +15,7 @@ interface StatementWithPerson {
   patient_balance: number;
   currency_code: string;
   status: string;
+  account_number_full: string;
   persons: { full_name: string; date_of_birth: string | null } | null;
 }
 
@@ -32,6 +33,7 @@ export default async function ViewPage({ params }: ViewPageProps) {
       patient_balance,
       currency_code,
       status,
+      account_number_full,
       persons (
         full_name,
         date_of_birth
@@ -84,6 +86,7 @@ export default async function ViewPage({ params }: ViewPageProps) {
       statementDate={statement.statement_date}
       patientBalance={statement.patient_balance}
       currencyCode={statement.currency_code}
+      accountNumber={statement.account_number_full}
     />
   );
 }
