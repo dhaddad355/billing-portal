@@ -82,7 +82,6 @@ export default async function ViewPage({ params }: ViewPageProps) {
     <PatientViewClient
       shortcode={shortcode}
       patientName={statement.persons?.full_name || undefined}
-      patientDob={statement.persons?.date_of_birth || undefined}
       statementDate={statement.statement_date}
       patientBalance={statement.patient_balance}
       currencyCode={statement.currency_code}

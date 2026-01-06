@@ -6,12 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { AlertCircle, Calendar, CreditCard, FileText } from "lucide-react";
+import { AlertCircle, Calendar, CreditCard, FileText, User, Stethoscope } from "lucide-react";
 
 interface PatientViewClientProps {
   shortcode: string;
   patientName?: string;
-  patientDob?: string;
   statementDate: string;
   patientBalance: number;
   currencyCode: string;
@@ -21,7 +20,6 @@ interface PatientViewClientProps {
 export default function PatientViewClient({
   shortcode,
   patientName,
-  patientDob,
   statementDate,
   patientBalance,
   currencyCode,
@@ -146,32 +144,34 @@ export default function PatientViewClient({
         </CardHeader>
         <CardContent className="pt-8 pb-8 px-6 sm:px-8">
           <div className="space-y-8">
-            {patientName && (
-              <div className="text-center pb-2">
-                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-1">Patient</p>
-                <p className="text-2xl font-bold text-gray-900">{patientName}</p>
-                {patientDob && (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    DOB: {formatDate(patientDob)}
-                  </p>
-                )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <User className="h-4 w-4 text-blue-600" />
+                  <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Patient</p>
+                </div>
+                <p className="text-lg font-bold text-gray-900">{patientName || "N/A"}</p>
               </div>
-            )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-5 rounded-xl border-2 border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow">
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Stethoscope className="h-4 w-4 text-blue-600" />
+                  <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Doctor</p>
+                </div>
+                <p className="text-lg font-bold text-gray-900">Dr. Daniel Haddad</p>
+              </div>
+              <div className="p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Calendar className="h-4 w-4 text-blue-600" />
                   <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Statement Date</p>
                 </div>
                 <p className="text-lg font-bold text-gray-900">{formatDate(statementDate)}</p>
               </div>
-              <div className="p-5 rounded-xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 shadow-sm hover:shadow-md transition-shadow">
+              <div className="p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <CreditCard className="h-4 w-4 text-blue-700" />
-                  <p className="text-sm font-semibold text-blue-900 uppercase tracking-wide">Amount Due</p>
+                  <CreditCard className="h-4 w-4 text-blue-600" />
+                  <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Amount Due</p>
                 </div>
-                <p className="text-3xl font-bold text-blue-700">
+                <p className="text-lg font-bold text-gray-900">
                   {formatCurrency(patientBalance, currencyCode)}
                 </p>
               </div>
