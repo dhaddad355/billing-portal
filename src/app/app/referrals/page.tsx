@@ -125,7 +125,7 @@ export default function ViewReferralsPage() {
               />
             </div>
             <div className="w-40">
-              <label className="mb-1 block text-sm font-medium">Status</label>
+              <label className="mb-1 block text-sm font-medium">Sub-Status</label>
               <select
                 value={filters.status}
                 onChange={(e) => {
@@ -134,7 +134,7 @@ export default function ViewReferralsPage() {
                 }}
                 className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
               >
-                <option value="">All Statuses</option>
+                <option value="">All Sub-Statuses</option>
                 {REFERRAL_STATUSES.map((status) => (
                   <option key={status} value={status}>
                     {status}

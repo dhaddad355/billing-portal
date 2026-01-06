@@ -467,9 +467,9 @@ export default function ReferralDetailPage() {
                     ))}
                   </select>
                 ) : (
-                  <div className={`mt-1 inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ${STATUS_COLORS[referral.sub_status] || ""}`}>
+                  <Badge variant="secondary" className={`mt-1 pointer-events-none ${STATUS_COLORS[referral.sub_status] || ""}`}>
                     {referral.sub_status}
-                  </div>
+                  </Badge>
                 )}
               </div>
               <div>
