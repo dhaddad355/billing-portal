@@ -139,6 +139,12 @@ export default async function StatementPage({ params }: StatementPageProps) {
                 </p>
               </div>
               <div>
+                <label className="text-sm text-muted-foreground">Payment Status</label>
+                <p className={`font-medium ${statement.payment_status === "Paid" ? "text-green-600" : "text-red-600"}`}>
+                  {statement.payment_status === "Paid" ? "Paid" : "Unpaid"}
+                </p>
+              </div>
+              <div>
                 <label className="text-sm text-muted-foreground">Last Statement Date</label>
                 <p className="font-medium">{formatDate(statement.last_statement_date)}</p>
               </div>

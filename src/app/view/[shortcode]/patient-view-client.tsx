@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { AlertCircle, Calendar, CreditCard, FileText, User, Stethoscope } from "lucide-react";
+import { AlertCircle, Calendar, CreditCard, FileText, User, Stethoscope, CheckCircle, XCircle } from "lucide-react";
 
 interface PatientViewClientProps {
   shortcode: string;
@@ -15,6 +15,7 @@ interface PatientViewClientProps {
   patientBalance: number;
   currencyCode: string;
   accountNumber: string;
+  paymentStatus: string | null;
 }
 
 export default function PatientViewClient({
@@ -24,6 +25,7 @@ export default function PatientViewClient({
   patientBalance,
   currencyCode,
   accountNumber,
+  paymentStatus,
 }: PatientViewClientProps) {
   const [verified, setVerified] = useState(false);
   const [dob, setDob] = useState("");
@@ -173,6 +175,19 @@ export default function PatientViewClient({
                 </div>
                 <p className="text-lg font-bold text-gray-900">
                   {formatCurrency(patientBalance, currencyCode)}
+                </p>
+              </div>
+              <div className="p-4 sm:col-span-2">
+                <div className="flex items-center gap-2 mb-2">
+                  {paymentStatus === "Paid" ? (
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <XCircle className="h-4 w-4 text-red-600" />
+                  )}
+                  <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Payment Status</p>
+                </div>
+                <p className={`text-lg font-bold ${paymentStatus === "Paid" ? "text-green-600" : "text-red-600"}`}>
+                  {paymentStatus === "Paid" ? "Paid" : "Unpaid"}
                 </p>
               </div>
             </div>
