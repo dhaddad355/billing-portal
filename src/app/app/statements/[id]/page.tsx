@@ -121,6 +121,10 @@ export default async function StatementPage({ params }: StatementPageProps) {
                 <p className="font-medium">{statement.persons?.full_name || "N/A"}</p>
               </div>
               <div>
+                <label className="text-sm text-muted-foreground">Date of Birth</label>
+                <p className="font-medium">{statement.persons?.date_of_birth ? formatDate(statement.persons.date_of_birth) : "N/A"}</p>
+              </div>
+              <div>
                 <label className="text-sm text-muted-foreground">Account Number</label>
                 <p className="font-medium">{statement.account_number_suffix}</p>
               </div>
