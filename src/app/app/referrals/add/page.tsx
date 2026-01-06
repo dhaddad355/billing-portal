@@ -30,8 +30,6 @@ export default function AddReferralPage() {
     referral_reason: "Laser Vision Correction" as "Laser Vision Correction" | "Cataract Consultation" | "Other",
     referral_reason_other: "",
     scheduling_preference: "Call Patient" as "Call Patient" | "SMS Patient" | "Email Patient" | "Patient Instructed To Call",
-    communication_preference: "Fax" as "Email" | "Fax",
-    communication_value: "",
     notes: "",
   });
 
@@ -93,14 +91,12 @@ export default function AddReferralPage() {
             .filter((name) => name?.trim())
             .join(" ")
             .trim(),
-          patient_dob: form.patient_dob,
+          patient_dob: form.patient_dob || null,
           patient_phone: form.patient_phone || null,
           patient_email: form.patient_email || null,
           referral_reason: form.referral_reason,
           referral_reason_other: form.referral_reason === "Other" ? form.referral_reason_other : null,
           scheduling_preference: form.scheduling_preference,
-          communication_preference: form.communication_preference,
-          communication_value: form.communication_value || null,
           notes: form.notes || null,
         }),
       });
@@ -284,6 +280,7 @@ export default function AddReferralPage() {
             <CardTitle>Referral Details</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4">
+            {/* Row 1: Referral Reason and Scheduling Preference */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="referral_reason">Referral Reason</Label>
@@ -303,19 +300,6 @@ export default function AddReferralPage() {
                   <option value="Other">Other</option>
                 </select>
               </div>
-              {form.referral_reason === "Other" && (
-                <div>
-                  <Label htmlFor="referral_reason_other">Specify Other Reason</Label>
-                  <Input
-                    id="referral_reason_other"
-                    placeholder="Please specify..."
-                    value={form.referral_reason_other}
-                    onChange={(e) => setForm({ ...form, referral_reason_other: e.target.value })}
-                  />
-                </div>
-              )}
-            </div>
-            <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="scheduling_preference">Scheduling Preference</Label>
                 <select
@@ -335,38 +319,20 @@ export default function AddReferralPage() {
                   <option value="Patient Instructed To Call">Patient Instructed To Call</option>
                 </select>
               </div>
-              <div>
-                <Label htmlFor="communication_preference">Communication Preference</Label>
-                <select
-                  id="communication_preference"
-                  value={form.communication_preference}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      communication_preference: e.target.value as "Email" | "Fax",
-                    })
-                  }
-                  className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
-                >
-                  <option value="Fax">Fax</option>
-                  <option value="Email">Email</option>
-                </select>
-              </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            {/* Show other reason input if "Other" is selected */}
+            {form.referral_reason === "Other" && (
               <div>
-                <Label htmlFor="communication_value">
-                  {form.communication_preference === "Email" ? "Email Address" : "Fax Number"}
-                </Label>
+                <Label htmlFor="referral_reason_other">Specify Other Reason</Label>
                 <Input
-                  id="communication_value"
-                  type={form.communication_preference === "Email" ? "email" : "tel"}
-                  placeholder={form.communication_preference === "Email" ? "email@example.com" : "(555) 555-5555"}
-                  value={form.communication_value}
-                  onChange={(e) => setForm({ ...form, communication_value: e.target.value })}
+                  id="referral_reason_other"
+                  placeholder="Please specify..."
+                  value={form.referral_reason_other}
+                  onChange={(e) => setForm({ ...form, referral_reason_other: e.target.value })}
                 />
               </div>
-            </div>
+            )}
+            {/* Row 2: Notes */}
             <div>
               <Label htmlFor="notes">Notes</Label>
               <textarea

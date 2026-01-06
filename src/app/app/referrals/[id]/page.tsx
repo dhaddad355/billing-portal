@@ -3,11 +3,20 @@
 import * as React from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { ChevronUp, Upload, FileText, Download, Lock, Unlock } from "lucide-react";
+import { ChevronUp, Upload, FileText, Download, Lock, Unlock, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { ReferralWithRelations, ReferralNoteWithUser, ReferralAttachmentWithUser } from "@/types/database";
 
 const REFERRAL_STATUSES = [
@@ -63,6 +72,14 @@ export default function ReferralDetailPage() {
   // Expandable referral notes state
   const [notesExpanded, setNotesExpanded] = React.useState(false);
 
+  // Change Status modal state
+  const [showStatusModal, setShowStatusModal] = React.useState(false);
+  const [statusForm, setStatusForm] = React.useState({
+    status: "" as "OPEN" | "CLOSED",
+    sub_status: "" as "Scheduling" | "Appointment" | "Quote" | "Procedure" | "Post-Op",
+  });
+  const [savingStatus, setSavingStatus] = React.useState(false);
+
   const fetchReferral = React.useCallback(async () => {
     try {
       const res = await fetch(`/api/app/referrals/${referralId}`);
@@ -82,6 +99,10 @@ export default function ReferralDetailPage() {
         procedure_location: data.referral.procedure_location || "",
         patient_phone: data.referral.patient_phone || "",
         patient_email: data.referral.patient_email || "",
+      });
+      setStatusForm({
+        status: data.referral.status,
+        sub_status: data.referral.sub_status,
       });
     } catch (error) {
       console.error("Error fetching referral:", error);
@@ -122,6 +143,33 @@ export default function ReferralDetailPage() {
       console.error("Error saving referral:", error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const saveStatusChange = async () => {
+    setSavingStatus(true);
+    try {
+      const res = await fetch(`/api/app/referrals/${referralId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: statusForm.status,
+          sub_status: statusForm.sub_status,
+        }),
+      });
+
+      if (res.ok) {
+        setShowStatusModal(false);
+        fetchReferral();
+      } else {
+        const error = await res.json();
+        alert(error.error || "Failed to save status change");
+      }
+    } catch (error) {
+      console.error("Error saving status:", error);
+      alert("Failed to save status change");
+    } finally {
+      setSavingStatus(false);
     }
   };
 
@@ -419,7 +467,7 @@ export default function ReferralDetailPage() {
                     ))}
                   </select>
                 ) : (
-                  <Badge className={`mt-1 ${STATUS_COLORS[referral.sub_status] || ""}`}>
+                  <Badge variant="secondary" className={`mt-1 pointer-events-none ${STATUS_COLORS[referral.sub_status] || ""}`}>
                     {referral.sub_status}
                   </Badge>
                 )}
@@ -444,6 +492,20 @@ export default function ReferralDetailPage() {
         </CardHeader>
         <CardContent className="pt-4">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                setStatusForm({
+                  status: referral.status,
+                  sub_status: referral.sub_status,
+                });
+                setShowStatusModal(true);
+              }}
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              Change Status
+            </Button>
             <Button variant="outline" className="w-full" disabled>
               <FileText className="mr-2 h-4 w-4" />
               Generate Letter
@@ -456,17 +518,6 @@ export default function ReferralDetailPage() {
             >
               <Upload className="mr-2 h-4 w-4" />
               {uploading ? "Uploading..." : "Upload File"}
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                setNoteVisibility("private");
-                document.getElementById("note-textarea")?.focus();
-              }}
-            >
-              <Lock className="mr-2 h-4 w-4" />
-              Private Note
             </Button>
             <Button
               variant="outline"
@@ -661,6 +712,55 @@ export default function ReferralDetailPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Change Status Modal */}
+      <Dialog open={showStatusModal} onOpenChange={setShowStatusModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Status</DialogTitle>
+            <DialogDescription>
+              Update the status and sub-status of this referral
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="modal-status">Status</Label>
+              <select
+                id="modal-status"
+                value={statusForm.status}
+                onChange={(e) => setStatusForm({ ...statusForm, status: e.target.value as "OPEN" | "CLOSED" })}
+                className="mt-1 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+              >
+                <option value="OPEN">Open</option>
+                <option value="CLOSED">Closed</option>
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="modal-sub-status">Sub-Status</Label>
+              <select
+                id="modal-sub-status"
+                value={statusForm.sub_status}
+                onChange={(e) => setStatusForm({ ...statusForm, sub_status: e.target.value as "Scheduling" | "Appointment" | "Quote" | "Procedure" | "Post-Op" })}
+                className="mt-1 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+              >
+                {REFERRAL_STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowStatusModal(false)} disabled={savingStatus}>
+              Cancel
+            </Button>
+            <Button onClick={saveStatusChange} disabled={savingStatus}>
+              {savingStatus ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
