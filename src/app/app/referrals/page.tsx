@@ -32,13 +32,6 @@ const STATUS_COLORS: Record<string, string> = {
   "Post-Op": "bg-gray-100 text-gray-800",
 };
 
-const PRIORITY_COLORS: Record<string, string> = {
-  low: "bg-gray-100 text-gray-600",
-  normal: "bg-blue-100 text-blue-600",
-  high: "bg-orange-100 text-orange-600",
-  urgent: "bg-red-100 text-red-600",
-};
-
 export default function ViewReferralsPage() {
   const [referrals, setReferrals] = React.useState<ReferralWithRelations[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -114,15 +107,12 @@ export default function ViewReferralsPage() {
 
       {/* Filters */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Filters</CardTitle>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <form onSubmit={handleSearch} className="flex flex-wrap items-end gap-4">
             <div className="flex-1 min-w-[200px]">
-              <label className="mb-1 block text-sm font-medium">Search</label>
+              <label className="mb-1 block text-sm font-medium">Search by Patient Name</label>
               <Input
-                placeholder="Patient name, provider, procedure..."
+                placeholder="Patient name..."
                 value={filters.search}
                 onChange={(e) =>
                   setFilters({ ...filters, search: e.target.value })
@@ -191,9 +181,8 @@ export default function ViewReferralsPage() {
                   <TableRow>
                     <TableHead>Patient</TableHead>
                     <TableHead>Provider</TableHead>
-                    <TableHead>Procedure</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Priority</TableHead>
+                    <TableHead>Sub-Status</TableHead>
                     <TableHead>Created</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -203,7 +192,7 @@ export default function ViewReferralsPage() {
                     <TableRow key={referral.id}>
                       <TableCell>
                         <div className="font-medium">
-                          {referral.patient_first_name} {referral.patient_last_name}
+                          {referral.patient_full_name}
                         </div>
                         {referral.patient_dob && (
                           <div className="text-sm text-muted-foreground">
@@ -221,46 +210,25 @@ export default function ViewReferralsPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {referral.procedure_type || "—"}
-                        {referral.procedure_location && (
-                          <div className="text-sm text-muted-foreground">
-                            {referral.procedure_location}
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <Badge
-                            className={STATUS_COLORS[referral.status] || ""}
-                            variant="secondary"
-                          >
-                            {referral.status}
-                          </Badge>
-                          <Badge
-                            variant={
-                              referral.open_status === "OPEN"
-                                ? "default"
-                                : "outline"
-                            }
-                            className="w-fit"
-                          >
-                            {referral.open_status}
-                          </Badge>
-                        </div>
+                        <Badge
+                          className={referral.status === "OPEN" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}
+                        >
+                          {referral.status}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <Badge
-                          className={referral.priority ? PRIORITY_COLORS[referral.priority] : ""}
+                          className={STATUS_COLORS[referral.sub_status] || ""}
                           variant="secondary"
                         >
-                          {referral.priority || "normal"}
+                          {referral.sub_status}
                         </Badge>
                       </TableCell>
                       <TableCell>{formatDate(referral.created_at)}</TableCell>
                       <TableCell className="text-right">
                         <Link href={`/app/referrals/${referral.id}`}>
-                          <Button variant="ghost" size="sm">
-                            View
+                          <Button variant="outline" size="sm">
+                            View Details
                           </Button>
                         </Link>
                       </TableCell>
