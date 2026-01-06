@@ -523,12 +523,12 @@ export default function ReferralDetailPage() {
               variant="outline"
               className="w-full"
               onClick={() => {
-                setNoteVisibility("private");
+                setNoteVisibility("public");
                 document.getElementById("note-textarea")?.focus();
               }}
             >
-              <Lock className="mr-2 h-4 w-4" />
-              Private Note
+              <Unlock className="mr-2 h-4 w-4" />
+              Public Note
             </Button>
           </div>
           <input

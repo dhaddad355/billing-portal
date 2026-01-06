@@ -32,6 +32,11 @@ const STATUS_COLORS: Record<string, string> = {
   "Post-Op": "bg-gray-100 text-gray-800",
 };
 
+const MAIN_STATUS_COLORS: Record<string, string> = {
+  OPEN: "bg-green-100 text-green-800",
+  CLOSED: "bg-gray-100 text-gray-800",
+};
+
 export default function ViewReferralsPage() {
   const [referrals, setReferrals] = React.useState<ReferralWithRelations[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -211,7 +216,7 @@ export default function ViewReferralsPage() {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          className={referral.status === "OPEN" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}
+                          className={MAIN_STATUS_COLORS[referral.status] || ""}
                         >
                           {referral.status}
                         </Badge>

@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
       `, { count: "exact" })
       .order("created_at", { ascending: false });
 
+    // Filter by sub-status (e.g., "Scheduling", "Appointment", etc.)
     if (status) {
       query = query.eq("sub_status", status);
     }
@@ -47,6 +48,7 @@ export async function GET(request: NextRequest) {
       query = query.eq("sub_status", subStatus);
     }
 
+    // Filter by open/closed status
     if (openStatus) {
       query = query.eq("status", openStatus);
     }
