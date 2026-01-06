@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import DOMPurify from "dompurify";
 import { ChevronUp, Upload, FileText, Download, Lock, Unlock, Mail, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -225,10 +226,19 @@ export default function ReferralDetailPage() {
     }
   };
 
+  // Sanitize HTML for safe rendering
+  const sanitizeHtml = (html: string): string => {
+    return DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ['p', 'br', 'strong', 'b', 'u', 'em', 'i', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'span', 'table', 'tr', 'td', 'th', 'thead', 'tbody', 'hr', 'a'],
+      ALLOWED_ATTR: ['style', 'href', 'target', 'class'],
+    });
+  };
+
   const printLetter = () => {
     const printWindow = window.open("", "_blank");
     if (printWindow) {
-      printWindow.document.write(generatedHtml);
+      const sanitizedHtml = sanitizeHtml(generatedHtml);
+      printWindow.document.write(sanitizedHtml);
       printWindow.document.close();
       printWindow.focus();
       printWindow.print();
@@ -236,7 +246,8 @@ export default function ReferralDetailPage() {
   };
 
   const downloadLetterHtml = () => {
-    const blob = new Blob([generatedHtml], { type: "text/html" });
+    const sanitizedHtml = sanitizeHtml(generatedHtml);
+    const blob = new Blob([sanitizedHtml], { type: "text/html" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -923,7 +934,7 @@ export default function ReferralDetailPage() {
             <div className="space-y-4 py-4">
               <div
                 className="border rounded-md p-4 bg-white max-h-[50vh] overflow-y-auto"
-                dangerouslySetInnerHTML={{ __html: generatedHtml }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(generatedHtml) }}
               />
               <DialogFooter className="flex-wrap gap-2">
                 <Button variant="outline" onClick={() => setLetterDialogOpen(false)}>

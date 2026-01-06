@@ -43,8 +43,8 @@ const KNOWN_VARIABLES = [
 function extractVariables(body: string): string[] {
   const regex = /\{\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}/g;
   const variables: Set<string> = new Set();
-  let match;
-  while ((match = regex.exec(body)) !== null) {
+  const matches = body.matchAll(regex);
+  for (const match of matches) {
     variables.add(match[1]);
   }
   return Array.from(variables);

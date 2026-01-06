@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import DOMPurify from "dompurify";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,14 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, FileText, Eye } from "lucide-react";
 import type { LetterTemplate, LetterSettings } from "@/types/database";
+
+// Sanitize HTML for safe rendering
+const sanitizeHtml = (html: string): string => {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'b', 'u', 'em', 'i', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'span', 'table', 'tr', 'td', 'th', 'thead', 'tbody', 'hr', 'a'],
+    ALLOWED_ATTR: ['style', 'href', 'target', 'class'],
+  });
+};
 
 export default function ReferralSettingsPage() {
   const [templates, setTemplates] = React.useState<LetterTemplate[]>([]);
@@ -238,14 +247,14 @@ export default function ReferralSettingsPage() {
               <Label className="text-sm font-medium">Header Preview</Label>
               <div
                 className="mt-2 rounded-md border bg-muted/30 p-4 text-sm"
-                dangerouslySetInnerHTML={{ __html: settings?.header_html || "<em>No header configured</em>" }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(settings?.header_html || "<em>No header configured</em>") }}
               />
             </div>
             <div>
               <Label className="text-sm font-medium">Footer Preview</Label>
               <div
                 className="mt-2 rounded-md border bg-muted/30 p-4 text-sm"
-                dangerouslySetInnerHTML={{ __html: settings?.footer_html || "<em>No footer configured</em>" }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(settings?.footer_html || "<em>No footer configured</em>") }}
               />
             </div>
           </div>
@@ -497,7 +506,7 @@ Thank you for your referral."
           </DialogHeader>
           <div
             className="border rounded-md p-4 bg-white"
-            dangerouslySetInnerHTML={{ __html: previewContent }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(previewContent) }}
           />
           <DialogFooter>
             <Button onClick={() => setPreviewOpen(false)}>Close</Button>
