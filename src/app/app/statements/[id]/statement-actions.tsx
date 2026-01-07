@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Send, XCircle, AlertTriangle, Mail, MessageSquare, DollarSign } from "lucide-react";
+import { Send, XCircle, AlertTriangle, Mail, MessageSquare, DollarSign, Bell } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -31,9 +31,11 @@ export default function StatementActions({
 }: StatementActionsProps) {
   const router = useRouter();
   const [sending, setSending] = useState(false);
+  const [sendingReminder, setSendingReminder] = useState(false);
   const [rejecting, setRejecting] = useState(false);
   const [markingPaid, setMarkingPaid] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [reminderDialogOpen, setReminderDialogOpen] = useState(false);
 
   const getSendBothDescription = () => {
     if (hasEmail && hasPhone) {
@@ -117,6 +119,35 @@ export default function StatementActions({
       alert("Failed to mark statement as paid");
     } finally {
       setMarkingPaid(false);
+    }
+  };
+
+  const handleSendReminder = async (sendEmail: boolean, sendSms: boolean) => {
+    if (sendingReminder) return;
+
+    setSendingReminder(true);
+    setReminderDialogOpen(false);
+    try {
+      const response = await fetch(`/api/app/statements/${statementId}/send-reminder`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          send_email: sendEmail,
+          send_sms: sendSms,
+        }),
+      });
+      if (response.ok) {
+        router.refresh();
+        alert("Reminder sent successfully");
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error}`);
+      }
+    } catch (error) {
+      console.error("Error sending reminder:", error);
+      alert("Failed to send reminder");
+    } finally {
+      setSendingReminder(false);
     }
   };
 
@@ -206,6 +237,81 @@ export default function StatementActions({
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Send Reminder Dialog - Only for SENT statements */}
+        {isSent && paymentStatus !== "Paid" && (
+          <Dialog open={reminderDialogOpen} onOpenChange={setReminderDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                disabled={sendingReminder}
+                className="border-orange-500 text-orange-600 hover:bg-orange-50"
+              >
+                <Bell className="mr-2 h-4 w-4" />
+                {sendingReminder ? "Sending..." : "Send Reminder"}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Send Payment Reminder</DialogTitle>
+                <DialogDescription>
+                  Send a reminder to the patient about their outstanding balance.
+                  This will use the reminder message templates.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <Button
+                  variant="outline"
+                  className="justify-start h-auto py-4"
+                  onClick={() => handleSendReminder(true, false)}
+                  disabled={!hasEmail}
+                >
+                  <Mail className="mr-2 h-5 w-5" />
+                  <div className="text-left">
+                    <div className="font-semibold">Email Reminder</div>
+                    <div className="text-sm text-muted-foreground">
+                      {hasEmail ? "Send reminder via email" : "No email address on file"}
+                    </div>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="justify-start h-auto py-4"
+                  onClick={() => handleSendReminder(false, true)}
+                  disabled={!hasPhone}
+                >
+                  <MessageSquare className="mr-2 h-5 w-5" />
+                  <div className="text-left">
+                    <div className="font-semibold">SMS Reminder</div>
+                    <div className="text-sm text-muted-foreground">
+                      {hasPhone ? "Send reminder via text message" : "No phone number on file"}
+                    </div>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="justify-start h-auto py-4"
+                  onClick={() => handleSendReminder(true, true)}
+                  disabled={!hasEmail || !hasPhone}
+                >
+                  <Bell className="mr-2 h-5 w-5" />
+                  <div className="text-left">
+                    <div className="font-semibold">Send Both</div>
+                    <div className="text-sm text-muted-foreground">
+                      {getSendBothDescription()}
+                    </div>
+                  </div>
+                </Button>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setReminderDialogOpen(false)}>
+                  Cancel
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+
         {!isSent && !isError && (
           <Button
             variant="destructive"

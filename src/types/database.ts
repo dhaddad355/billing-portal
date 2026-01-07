@@ -202,3 +202,18 @@ export interface ReferralAttachment {
 export interface ReferralAttachmentWithUser extends ReferralAttachment {
   users: User | null;
 }
+
+export type MessageTemplateType = "initial" | "reminder";
+export type MessageChannel = "sms" | "email";
+
+export interface MessageTemplate {
+  id: string;
+  template_type: MessageTemplateType;
+  channel: MessageChannel;
+  email_subject: string | null;
+  message_body: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  updated_by_user_id: string | null;
+}
