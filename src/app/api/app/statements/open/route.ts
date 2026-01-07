@@ -16,13 +16,14 @@ export async function GET(request: NextRequest) {
 
     const supabase = getServiceClient();
 
-    // Get total count of unpaid statements (payment_status is null or not "Paid")
+    // Get total count of SENT and unpaid statements
     const { count } = await supabase
       .from("statements")
       .select("*", { count: "exact", head: true })
+      .eq("status", "SENT")
       .or("payment_status.is.null,payment_status.neq.Paid");
 
-    // Get unpaid statements with person data
+    // Get SENT and unpaid statements with person data
     const { data: statements, error } = await supabase
       .from("statements")
       .select(`
@@ -50,6 +51,7 @@ export async function GET(request: NextRequest) {
           cell_phone
         )
       `)
+      .eq("status", "SENT")
       .or("payment_status.is.null,payment_status.neq.Paid")
       .order("created_at", { ascending: false })
       .range((page - 1) * pageSize, page * pageSize - 1);
