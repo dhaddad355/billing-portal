@@ -3,13 +3,22 @@ import { getServiceClient } from "@/lib/supabase";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
+interface ExtendedSession {
+  user: {
+    id: string;
+    azureOid: string;
+    name?: string | null;
+    email?: string | null;
+  };
+}
+
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as ExtendedSession | null;
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -17,8 +26,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
     const supabase = getServiceClient();
 
-    // Get user ID from session
-    const userId = (session as { user: { id: string } }).user.id;
+    const userId = session.user.id;
 
     // Get current statement
     const { data: statement, error: fetchError } = await supabase
