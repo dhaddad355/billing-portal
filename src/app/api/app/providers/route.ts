@@ -60,6 +60,8 @@ export async function POST(request: NextRequest) {
         first_name: body.first_name,
         last_name: body.last_name,
         degree: body.degree || null,
+        npi: body.npi || null,
+        specialty: body.specialty || null,
         email: body.email || null,
         phone: body.phone || null,
         notes: body.notes || null,

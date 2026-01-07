@@ -45,11 +45,11 @@ export async function PUT(
       .from("practices")
       .update({
         name: body.name,
-        address_line1: body.address_line1,
+        address_line1: body.address || body.address_line1,
         address_line2: body.address_line2,
         city: body.city,
         state: body.state,
-        zip_code: body.zip_code,
+        zip_code: body.zip || body.zip_code,
         phone: body.phone,
         fax: body.fax,
         website: body.website,

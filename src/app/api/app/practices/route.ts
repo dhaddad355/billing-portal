@@ -46,11 +46,11 @@ export async function POST(request: NextRequest) {
       .from("practices")
       .insert({
         name: body.name,
-        address_line1: body.address_line1 || null,
+        address_line1: body.address || body.address_line1 || null,
         address_line2: body.address_line2 || null,
         city: body.city || null,
         state: body.state || null,
-        zip_code: body.zip_code || null,
+        zip_code: body.zip || body.zip_code || null,
         phone: body.phone || null,
         fax: body.fax || null,
         website: body.website || null,
