@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Send, XCircle, AlertTriangle, Mail, MessageSquare } from "lucide-react";
+import { Send, XCircle, AlertTriangle, Mail, MessageSquare, DollarSign } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,7 @@ interface StatementActionsProps {
   status: string;
   hasEmail: boolean;
   hasPhone: boolean;
+  paymentStatus: string | null;
 }
 
 export default function StatementActions({
@@ -26,10 +27,12 @@ export default function StatementActions({
   status,
   hasEmail,
   hasPhone,
+  paymentStatus,
 }: StatementActionsProps) {
   const router = useRouter();
   const [sending, setSending] = useState(false);
   const [rejecting, setRejecting] = useState(false);
+  const [markingPaid, setMarkingPaid] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const getSendBothDescription = () => {
@@ -92,6 +95,28 @@ export default function StatementActions({
       alert("Failed to reject statement");
     } finally {
       setRejecting(false);
+    }
+  };
+
+  const handleMarkPaid = async () => {
+    if (markingPaid) return;
+    if (!confirm("Are you sure you want to mark this statement as paid?")) return;
+    setMarkingPaid(true);
+    try {
+      const response = await fetch(`/api/app/statements/${statementId}/mark-paid`, {
+        method: "POST",
+      });
+      if (response.ok) {
+        router.refresh();
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error}`);
+      }
+    } catch (error) {
+      console.error("Error marking statement as paid:", error);
+      alert("Failed to mark statement as paid");
+    } finally {
+      setMarkingPaid(false);
     }
   };
 
@@ -189,6 +214,17 @@ export default function StatementActions({
           >
             <XCircle className="mr-2 h-4 w-4" />
             {rejecting ? "Rejecting..." : "Reject Statement"}
+          </Button>
+        )}
+        {paymentStatus !== "Paid" && (
+          <Button
+            variant="outline"
+            onClick={handleMarkPaid}
+            disabled={markingPaid}
+            className="border-green-600 text-green-600 hover:bg-green-50"
+          >
+            <DollarSign className="mr-2 h-4 w-4" />
+            {markingPaid ? "Marking..." : "Mark as Paid"}
           </Button>
         )}
       </div>

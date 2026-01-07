@@ -13,6 +13,7 @@ import {
   MoreHorizontal,
   PlusCircle,
   Eye,
+  AlertCircle,
 } from "lucide-react";
 
 import {
@@ -59,11 +60,17 @@ export function AppSidebar({ user }: AppSidebarProps) {
   ];
 
   const invoiceItems = [
-     {
+    {
       title: "Process Statements",
       href: "/app/statements-processing",
       icon: FileText,
-    },{
+    },
+    {
+      title: "Open Statements",
+      href: "/app/open-statements",
+      icon: AlertCircle,
+    },
+    {
       title: "Invoice Settings",
       href: "/app/settings/invoices",
       icon: Settings,
