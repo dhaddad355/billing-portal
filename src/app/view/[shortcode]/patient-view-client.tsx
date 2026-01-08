@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -80,13 +81,17 @@ export default function PatientViewClient({
 
   if (!verified) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-4 sm:p-8 bg-gradient-to-br from-blue-50 to-slate-50">
-        <Card className="max-w-md w-full shadow-lg">
+      <main className="min-h-screen flex items-center justify-center p-4 sm:p-8" style={{ background: "linear-gradient(180deg, #f0f4f8 0%, #e2e8f0 100%)" }}>
+        <Card className="max-w-md w-full" style={{ background: "#fff", borderRadius: "24px", boxShadow: "0 20px 60px rgba(0, 0, 0, 0.1)" }}>
           <CardHeader className="text-center pb-6">
             <div className="flex items-center justify-center gap-2 mb-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-md">
-                <span className="text-base font-bold">LEI</span>
-              </div>
+              <Image
+                src="/images/logo.png"
+                alt="Laser Eye Institute"
+                width={64}
+                height={64}
+                className="rounded-xl"
+              />
             </div>
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-blue-600 bg-clip-text text-transparent">Laser Eye Institute</CardTitle>
             <CardDescription className="text-base mt-1">Statement Verification</CardDescription>
@@ -133,13 +138,17 @@ export default function PatientViewClient({
   const pdfUrl = `/api/view/${shortcode}/pdf`;
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-4 sm:p-8 bg-gradient-to-br from-blue-50 to-slate-50">
-      <Card className="max-w-2xl w-full shadow-lg">
+    <main className="min-h-screen flex items-center justify-center p-4 sm:p-8" style={{ background: "linear-gradient(180deg, #f0f4f8 0%, #e2e8f0 100%)" }}>
+      <Card className="max-w-2xl w-full" style={{ background: "#fff", borderRadius: "24px", boxShadow: "0 20px 60px rgba(0, 0, 0, 0.1)" }}>
         <CardHeader className="text-center border-b pb-6">
           <div className="flex items-center justify-center gap-2 mb-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-md">
-              <span className="text-base font-bold">LEI</span>
-            </div>
+            <Image
+              src="/images/logo.png"
+              alt="Laser Eye Institute"
+              width={64}
+              height={64}
+              className="rounded-xl"
+            />
           </div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-blue-600 bg-clip-text text-transparent">Laser Eye Institute</CardTitle>
           <CardDescription className="text-base mt-1">Your Statement Details</CardDescription>
@@ -208,8 +217,8 @@ export default function PatientViewClient({
             </div>
 
             <div className="text-center text-sm text-muted-foreground border-t-2 pt-6 mt-2">
-              <p className="font-medium text-gray-700 mb-1">Questions about your statement?</p>
-              <p className="text-blue-600 font-semibold text-base">Call (248) 557-1010</p>
+              <p className="font-medium text-gray-700 mb-1">Need Help?</p>
+              <p className="text-blue-600 font-semibold text-base">Call (248) 680-7400</p>
             </div>
           </div>
         </CardContent>
