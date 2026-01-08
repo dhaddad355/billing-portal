@@ -20,10 +20,12 @@ export async function GET(request: NextRequest) {
     
     const status = searchParams.get("status");
     const subStatus = searchParams.get("sub_status");
+    const openStatus = searchParams.get("open_status");
+    const search = searchParams.get("search");
     const startDate = searchParams.get("start_date");
     const endDate = searchParams.get("end_date");
     const page = parseInt(searchParams.get("page") || "1");
-    const pageSize = parseInt(searchParams.get("page_size") || "20");
+    const pageSize = parseInt(searchParams.get("limit") || searchParams.get("page_size") || "20");
 
     let query = supabase
       .from("referrals")
@@ -37,12 +39,22 @@ export async function GET(request: NextRequest) {
       `, { count: "exact" })
       .order("created_at", { ascending: false });
 
+    // Filter by sub-status (e.g., "Scheduling", "Appointment", etc.)
     if (status) {
-      query = query.eq("status", status);
+      query = query.eq("sub_status", status);
     }
 
     if (subStatus) {
       query = query.eq("sub_status", subStatus);
+    }
+
+    // Filter by open/closed status
+    if (openStatus) {
+      query = query.eq("status", openStatus);
+    }
+
+    if (search) {
+      query = query.ilike("patient_full_name", `%${search}%`);
     }
 
     if (startDate) {
@@ -67,6 +79,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       referrals: data,
+      total: count || 0,
       pagination: {
         page,
         pageSize,
@@ -108,14 +121,14 @@ export async function POST(request: NextRequest) {
         provider_id: body.provider_id || null,
         practice_id: body.practice_id || null,
         patient_full_name: body.patient_full_name,
-        patient_dob: body.patient_dob,
+        patient_dob: body.patient_dob || null,
         patient_phone: body.patient_phone || null,
         patient_email: body.patient_email || null,
-        referral_reason: body.referral_reason,
+        referral_reason: body.referral_reason || null,
         referral_reason_other: body.referral_reason_other || null,
         notes: body.notes || null,
-        scheduling_preference: body.scheduling_preference,
-        communication_preference: body.communication_preference,
+        scheduling_preference: body.scheduling_preference || null,
+        communication_preference: body.communication_preference || null,
         communication_value: body.communication_value || null,
         status: "OPEN",
         sub_status: "Scheduling",

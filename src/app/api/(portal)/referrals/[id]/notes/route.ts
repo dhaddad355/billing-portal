@@ -63,11 +63,26 @@ export async function POST(
       return NextResponse.json({ error: "Invalid visibility value" }, { status: 400 });
     }
 
+    // Get user ID from session - validate it's a proper UUID and exists
+    let userId = null;
+    if (session?.user?.id && session.user.id.trim() !== "") {
+      // Verify the user exists in the database before using the ID
+      const { data: userExists } = await supabase
+        .from("users")
+        .select("id")
+        .eq("id", session.user.id)
+        .single();
+
+      if (userExists) {
+        userId = session.user.id;
+      }
+    }
+
     const { data, error } = await supabase
       .from("referral_notes")
       .insert({
         referral_id: id,
-        user_id: session?.user?.id || null,
+        user_id: userId,
         note: body.note.trim(),
         note_type: "manual",
         visibility: visibility,

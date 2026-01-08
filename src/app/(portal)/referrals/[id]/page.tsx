@@ -4,9 +4,10 @@ import * as React from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import DOMPurify from "dompurify";
-import { ChevronUp, Upload, FileText, Download, Lock, Unlock, Mail, Printer } from "lucide-react";
+import { ChevronUp, Upload, FileText, Download, Lock, Unlock, Mail, Printer, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -17,7 +18,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import type { ReferralWithRelations, ReferralNoteWithUser, ReferralAttachmentWithUser, LetterTemplate, GeneratedLetterWithUser } from "@/types/database";
 
 const REFERRAL_STATUSES = [
@@ -84,11 +84,19 @@ export default function ReferralDetailPage() {
   const [letterStep, setLetterStep] = React.useState<"select" | "variables" | "preview">("select");
   const [generatedHtml, setGeneratedHtml] = React.useState("");
 
+  // Change Status modal state
+  const [showStatusModal, setShowStatusModal] = React.useState(false);
+  const [statusForm, setStatusForm] = React.useState({
+    status: "" as "OPEN" | "CLOSED",
+    sub_status: "" as "Scheduling" | "Appointment" | "Quote" | "Procedure" | "Post-Op",
+  });
+  const [savingStatus, setSavingStatus] = React.useState(false);
+
   const fetchReferral = React.useCallback(async () => {
     try {
       const res = await fetch(`/api/referrals/${referralId}`);
       if (!res.ok) {
-        router.push("/app/referrals");
+        router.push("/referrals");
         return;
       }
       const data = await res.json();
@@ -103,6 +111,10 @@ export default function ReferralDetailPage() {
         procedure_location: data.referral.procedure_location || "",
         patient_phone: data.referral.patient_phone || "",
         patient_email: data.referral.patient_email || "",
+      });
+      setStatusForm({
+        status: data.referral.status,
+        sub_status: data.referral.sub_status,
       });
     } catch (error) {
       console.error("Error fetching referral:", error);
@@ -154,7 +166,7 @@ export default function ReferralDetailPage() {
 
   const handleTemplateSelect = async (templateId: string) => {
     setSelectedTemplateId(templateId);
-    
+
     // Get template variables
     try {
       const res = await fetch(`/api/referrals/${referralId}/letters`, {
@@ -167,14 +179,14 @@ export default function ReferralDetailPage() {
         const data = await res.json();
         const unknownVars = data.unknown_variables || [];
         setUnknownVariables(unknownVars);
-        
+
         // Initialize empty values for unknown variables
         const initialValues: Record<string, string> = {};
         unknownVars.forEach((v: string) => {
           initialValues[v] = "";
         });
         setCustomVariableValues(initialValues);
-        
+
         if (unknownVars.length > 0) {
           setLetterStep("variables");
         } else {
@@ -204,14 +216,14 @@ export default function ReferralDetailPage() {
         const data = await res.json();
         setGeneratedHtml(data.html);
         setLetterStep("preview");
-        
+
         // Refresh letters list
         const lettersRes = await fetch(`/api/referrals/${referralId}/letters`);
         if (lettersRes.ok) {
           const lettersData = await lettersRes.json();
           setGeneratedLetters(lettersData.letters || []);
         }
-        
+
         // Refresh notes to show the system note
         fetchReferral();
       } else {
@@ -301,6 +313,33 @@ export default function ReferralDetailPage() {
       console.error("Error saving referral:", error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const saveStatusChange = async () => {
+    setSavingStatus(true);
+    try {
+      const res = await fetch(`/api/referrals/${referralId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: statusForm.status,
+          sub_status: statusForm.sub_status,
+        }),
+      });
+
+      if (res.ok) {
+        setShowStatusModal(false);
+        fetchReferral();
+      } else {
+        const error = await res.json();
+        alert(error.error || "Failed to save status change");
+      }
+    } catch (error) {
+      console.error("Error saving status:", error);
+      alert("Failed to save status change");
+    } finally {
+      setSavingStatus(false);
     }
   };
 
@@ -400,7 +439,7 @@ export default function ReferralDetailPage() {
     return (
       <div className="flex h-full flex-col items-center justify-center">
         <div className="text-muted-foreground">Referral not found</div>
-        <Link href="/app/referrals" className="mt-2">
+        <Link href="/referrals" className="mt-2">
           <Button variant="outline">Back to Referrals</Button>
         </Link>
       </div>
@@ -413,7 +452,7 @@ export default function ReferralDetailPage() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <Link href="/app/referrals" className="text-muted-foreground hover:text-foreground">
+            <Link href="/referrals" className="text-muted-foreground hover:text-foreground">
               ← Back
             </Link>
           </div>
@@ -444,7 +483,7 @@ export default function ReferralDetailPage() {
       <div className="space-y-4">
         {/* Patient Information - Full Width */}
         <Card>
-         
+
           <CardContent className="pt-4">
             <div className="grid grid-cols-4 gap-6">
               <div>
@@ -486,7 +525,7 @@ export default function ReferralDetailPage() {
 
         {/* Referral Information - Full Width */}
         <Card>
-         
+
           <CardContent className="space-y-6 pt-4">
             {/* First Row: Provider Details */}
             <div className="grid grid-cols-4 gap-6">
@@ -511,7 +550,7 @@ export default function ReferralDetailPage() {
                 <div className="text-sm text-muted-foreground">Fax</div>
                 <div className="font-medium">{referral.providers?.practices?.fax || "—"}</div>
               </div>
-             
+
             </div>
 
             {/* Second Row: Referral Notes */}
@@ -520,7 +559,7 @@ export default function ReferralDetailPage() {
                 {referral.referral_reason === "Other" && referral.referral_reason_other && (
                   <div className="text-xs text-muted-foreground">{referral.referral_reason_other}</div>
                 )}</div>
-                
+
 
 
 
@@ -559,7 +598,7 @@ export default function ReferralDetailPage() {
 
         {/* Status - Full Width */}
         <Card>
-          
+
           <CardContent className="pt-4">
             <div className="grid grid-cols-4 gap-6">
               <div>
@@ -598,7 +637,7 @@ export default function ReferralDetailPage() {
                     ))}
                   </select>
                 ) : (
-                  <Badge className={`mt-1 ${STATUS_COLORS[referral.sub_status] || ""}`}>
+                  <Badge variant="secondary" className={`mt-1 pointer-events-none ${STATUS_COLORS[referral.sub_status] || ""}`}>
                     {referral.sub_status}
                   </Badge>
                 )}
@@ -626,6 +665,20 @@ export default function ReferralDetailPage() {
             <Button
               variant="outline"
               className="w-full"
+              onClick={() => {
+                setStatusForm({
+                  status: referral.status,
+                  sub_status: referral.sub_status,
+                });
+                setShowStatusModal(true);
+              }}
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              Change Status
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
               onClick={openLetterDialog}
               disabled={letterTemplates.length === 0}
             >
@@ -645,17 +698,6 @@ export default function ReferralDetailPage() {
               variant="outline"
               className="w-full"
               onClick={() => {
-                setNoteVisibility("private");
-                document.getElementById("note-textarea")?.focus();
-              }}
-            >
-              <Lock className="mr-2 h-4 w-4" />
-              Private Note
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => {
                 setNoteVisibility("public");
                 document.getElementById("note-textarea")?.focus();
               }}
@@ -667,7 +709,7 @@ export default function ReferralDetailPage() {
           {letterTemplates.length === 0 && (
             <p className="mt-2 text-sm text-muted-foreground">
               No letter templates available. Configure templates in{" "}
-              <a href="/app/settings/referrals" className="text-primary underline">
+              <a href="/settings/referrals" className="text-primary underline">
                 Settings → Referrals
               </a>
             </p>
@@ -991,6 +1033,57 @@ export default function ReferralDetailPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Change Status Modal */}
+      <Dialog open={showStatusModal} onOpenChange={setShowStatusModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Status</DialogTitle>
+            <DialogDescription>
+              Update the status and sub-status of this referral
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="modal-status">Status</Label>
+              <select
+                id="modal-status"
+                value={statusForm.status}
+                onChange={(e) => setStatusForm({ ...statusForm, status: e.target.value as "OPEN" | "CLOSED" })}
+                className="mt-1 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+                aria-label="Referral status"
+              >
+                <option value="OPEN">Open</option>
+                <option value="CLOSED">Closed</option>
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="modal-sub-status">Sub-Status</Label>
+              <select
+                id="modal-sub-status"
+                value={statusForm.sub_status}
+                onChange={(e) => setStatusForm({ ...statusForm, sub_status: e.target.value as "Scheduling" | "Appointment" | "Quote" | "Procedure" | "Post-Op" })}
+                className="mt-1 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+                aria-label="Referral sub-status"
+              >
+                {REFERRAL_STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowStatusModal(false)} disabled={savingStatus}>
+              Cancel
+            </Button>
+            <Button onClick={saveStatusChange} disabled={savingStatus}>
+              {savingStatus ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
