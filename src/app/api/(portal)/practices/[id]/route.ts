@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServiceClient } from "@/lib/supabase";
 
-// GET /api/app/practices/[id] - Get a specific practice
+// GET /api/practices/[id] - Get a specific practice
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -31,7 +31,7 @@ export async function GET(
   }
 }
 
-// PUT /api/app/practices/[id] - Update a practice
+// PUT /api/practices/[id] - Update a practice
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -73,7 +73,7 @@ export async function PUT(
   }
 }
 
-// DELETE /api/app/practices/[id] - Soft delete a practice
+// DELETE /api/practices/[id] - Soft delete a practice
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServiceClient } from "@/lib/supabase";
 
-// GET /api/app/practices - List all practices
+// GET /api/practices - List all practices
 export async function GET(request: NextRequest) {
   try {
     const supabase = getServiceClient();
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/app/practices - Create a new practice
+// POST /api/practices - Create a new practice
 export async function POST(request: NextRequest) {
   try {
     const supabase = getServiceClient();

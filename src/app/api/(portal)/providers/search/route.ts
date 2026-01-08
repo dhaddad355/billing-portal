@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServiceClient } from "@/lib/supabase";
 
-// GET /api/app/providers/search - Search providers by name or practice
+// GET /api/providers/search - Search providers by name or practice
 export async function GET(request: NextRequest) {
   try {
     const supabase = getServiceClient();

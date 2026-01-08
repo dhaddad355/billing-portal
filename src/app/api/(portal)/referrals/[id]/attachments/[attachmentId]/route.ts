@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServiceClient } from "@/lib/supabase";
 
-// GET /api/app/referrals/[id]/attachments/[attachmentId] - Download an attachment
+// GET /api/referrals/[id]/attachments/[attachmentId] - Download an attachment
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; attachmentId: string }> }
@@ -49,7 +49,7 @@ export async function GET(
   }
 }
 
-// DELETE /api/app/referrals/[id]/attachments/[attachmentId] - Delete an attachment
+// DELETE /api/referrals/[id]/attachments/[attachmentId] - Delete an attachment
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; attachmentId: string }> }

@@ -57,7 +57,7 @@ vi.mock("@/lib/auth", () => ({
   authOptions: {},
 }));
 
-describe("Referrals API - POST /api/app/referrals", () => {
+describe("Referrals API - POST /api/referrals", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
@@ -96,7 +96,7 @@ describe("Referrals API - POST /api/app/referrals", () => {
       communication_preference: "email",
     };
 
-    const request = new Request("http://localhost:3000/api/app/referrals", {
+    const request = new Request("http://localhost:3000/api/referrals", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
@@ -129,7 +129,7 @@ describe("Referrals API - POST /api/app/referrals", () => {
       communication_preference: "email",
     };
 
-    const request = new Request("http://localhost:3000/api/app/referrals", {
+    const request = new Request("http://localhost:3000/api/referrals", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
@@ -171,7 +171,7 @@ describe("Referrals API - POST /api/app/referrals", () => {
       communication_preference: "phone",
     };
 
-    const request = new Request("http://localhost:3000/api/app/referrals", {
+    const request = new Request("http://localhost:3000/api/referrals", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),

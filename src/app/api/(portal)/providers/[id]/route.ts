@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServiceClient } from "@/lib/supabase";
 
-// GET /api/app/providers/[id] - Get a specific provider
+// GET /api/providers/[id] - Get a specific provider
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -34,7 +34,7 @@ export async function GET(
   }
 }
 
-// PUT /api/app/providers/[id] - Update a provider
+// PUT /api/providers/[id] - Update a provider
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -75,7 +75,7 @@ export async function PUT(
   }
 }
 
-// DELETE /api/app/providers/[id] - Soft delete a provider
+// DELETE /api/providers/[id] - Soft delete a provider
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

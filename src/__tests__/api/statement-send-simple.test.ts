@@ -86,7 +86,7 @@ describe("Send Statement API - Basic Tests", () => {
   it("should reject unauthenticated requests", async () => {
     (getServerSession as unknown as Mock).mockResolvedValue(null);
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements/test-id/send", {
+    const request = new NextRequest("http://localhost:3000/api/statements/test-id/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),
@@ -106,7 +106,7 @@ describe("Send Statement API - Basic Tests", () => {
       error: { message: "Not found" },
     });
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements/nonexistent/send", {
+    const request = new NextRequest("http://localhost:3000/api/statements/nonexistent/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),
@@ -126,7 +126,7 @@ describe("Send Statement API - Basic Tests", () => {
       error: null,
     });
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements/stmt-1/send", {
+    const request = new NextRequest("http://localhost:3000/api/statements/stmt-1/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),
@@ -173,7 +173,7 @@ describe("Send Statement API - Basic Tests", () => {
       eq: mockSupabase.eq,
     }));
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements/stmt-1/send", {
+    const request = new NextRequest("http://localhost:3000/api/statements/stmt-1/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),

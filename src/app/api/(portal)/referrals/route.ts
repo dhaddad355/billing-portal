@@ -12,7 +12,7 @@ interface ExtendedSession {
   };
 }
 
-// GET /api/app/referrals - List all referrals with filters
+// GET /api/referrals - List all referrals with filters
 export async function GET(request: NextRequest) {
   try {
     const supabase = getServiceClient();
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/app/referrals - Create a new referral
+// POST /api/referrals - Create a new referral
 export async function POST(request: NextRequest) {
   try {
     const supabase = getServiceClient();

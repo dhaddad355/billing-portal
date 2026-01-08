@@ -24,7 +24,7 @@ const ALLOWED_FILE_TYPES = [
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-// GET /api/app/referrals/[id]/attachments - Get all attachments for a referral
+// GET /api/referrals/[id]/attachments - Get all attachments for a referral
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -54,7 +54,7 @@ export async function GET(
   }
 }
 
-// POST /api/app/referrals/[id]/attachments - Upload a file attachment
+// POST /api/referrals/[id]/attachments - Upload a file attachment
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

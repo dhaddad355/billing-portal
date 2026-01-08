@@ -12,7 +12,7 @@ interface ExtendedSession {
   };
 }
 
-// GET /api/app/referrals/[id]/notes - Get all notes for a referral
+// GET /api/referrals/[id]/notes - Get all notes for a referral
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -42,7 +42,7 @@ export async function GET(
   }
 }
 
-// POST /api/app/referrals/[id]/notes - Add a note to a referral
+// POST /api/referrals/[id]/notes - Add a note to a referral
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
