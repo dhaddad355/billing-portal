@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import StatementActions from "./statement-actions";
+import NextGenInfo from "./nextgen-info";
 import { Clock, CheckCircle2, XCircle, ExternalLink, ArrowLeft, Mail, MessageSquare } from "lucide-react";
 import Link from "next/link";
 
@@ -176,6 +177,9 @@ export default async function StatementPage({ params }: StatementPageProps) {
                 </div>
               </div>
             </div>
+
+            {/* NextGen Information */}
+            <NextGenInfo statementId={statement.id} />
 
             {/* Short Code Info */}
             {statement.short_code && (

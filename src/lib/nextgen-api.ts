@@ -91,6 +91,14 @@ export interface PersonResponse {
   }>;
 }
 
+export interface ChartBalancesResponse {
+  totalAmountDue?: number;
+  badDebtAmount?: number;
+  amountDueInsurance?: number;
+  availableCredit?: number;
+  accountCredit?: number;
+}
+
 interface CachedToken {
   token: string;
   expiresAt: number;
@@ -357,6 +365,14 @@ export class NextGenApiClient {
    */
   async updatePerson(personId: string, updates: Partial<CreatePersonParams>): Promise<PersonResponse> {
     return this.request<PersonResponse>('PATCH', `/persons/${personId}`, { body: updates });
+  }
+
+  /**
+   * Get chart balances for a person
+   * GET /persons/{personId}/chart/balances
+   */
+  async getChartBalances(personId: string): Promise<ChartBalancesResponse> {
+    return this.request<ChartBalancesResponse>('GET', `/persons/${personId}/chart/balances`);
   }
 
   /**
