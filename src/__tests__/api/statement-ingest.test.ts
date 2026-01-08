@@ -15,6 +15,8 @@ const mockSupabaseClient = {
       upload: vi.fn().mockResolvedValue({ data: { path: "test-path" }, error: null }),
       remove: vi.fn().mockResolvedValue({ error: null }),
     }),
+    getBucket: vi.fn(),
+    createBucket: vi.fn(),
   },
 };
 
@@ -44,6 +46,8 @@ describe("Statement Ingest API - POST /api/statement", () => {
     mockSupabaseClient.upsert.mockResolvedValue({ error: null });
     mockSupabaseClient.insert.mockResolvedValue({ error: null });
     mockSupabaseClient.single.mockResolvedValue({ data: null, error: null });
+    mockSupabaseClient.storage.getBucket.mockResolvedValue({ data: { name: "statements" }, error: null });
+    mockSupabaseClient.storage.createBucket.mockResolvedValue({ data: { name: "statements" }, error: null });
   });
 
   describe("Authentication", () => {
@@ -298,6 +302,7 @@ describe("Statement Ingest API - POST /api/statement", () => {
       const { POST } = await import("@/app/api/statement/route");
       await POST(request);
 
+      expect(mockSupabaseClient.storage.getBucket).toHaveBeenCalledWith("statements");
       expect(mockSupabaseClient.storage.from).toHaveBeenCalledWith("statements");
     });
 
@@ -320,6 +325,30 @@ describe("Statement Ingest API - POST /api/statement", () => {
       await POST(request);
 
       expect(mockSupabaseClient.from).toHaveBeenCalledWith("statement_events");
+    });
+
+    it("should attempt to create bucket when missing", async () => {
+      mockSupabaseClient.storage.getBucket.mockResolvedValueOnce({ data: null, error: { status: 404 } });
+      mockSupabaseClient.storage.createBucket.mockResolvedValueOnce({ data: { name: "statements" }, error: null });
+
+      const request = new NextRequest("http://localhost:3000/api/statement", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": "test-api-key",
+        },
+        body: JSON.stringify({
+          person_id: PERSON_ID,
+          account_number_full: "ACC-001",
+          patient_balance: 100.0,
+          pdf_base64: createValidPdfBuffer().toString("base64"),
+        }),
+      });
+
+      const { POST } = await import("@/app/api/statement/route");
+      await POST(request);
+
+      expect(mockSupabaseClient.storage.createBucket).toHaveBeenCalledWith("statements", { public: false });
     });
   });
 });

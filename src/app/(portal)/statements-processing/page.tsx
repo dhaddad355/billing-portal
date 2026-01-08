@@ -85,13 +85,13 @@ export default function DashboardPage() {
     ) {
       return;
     }
-    router.push(`/app/statements/${statementId}`);
+    router.push(`/statements/${statementId}`);
   };
 
   const handleRowKeyDown = (statementId: string, event: React.KeyboardEvent) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      router.push(`/app/statements/${statementId}`);
+      router.push(`/statements/${statementId}`);
     }
   };
 
@@ -369,7 +369,7 @@ export default function DashboardPage() {
                             size="sm"
                             asChild
                           >
-                            <Link href={`/app/statements/${statement.id}`}>
+                            <Link href={`/statements/${statement.id}`}>
                               <Eye className="mr-2 h-4 w-4" />
                               View Details
                             </Link>

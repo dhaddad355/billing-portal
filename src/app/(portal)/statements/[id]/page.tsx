@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import StatementActions from "./statement-actions";
+import NextGenInfo from "./nextgen-info";
 import { Clock, CheckCircle2, XCircle, ExternalLink, ArrowLeft, Mail, MessageSquare } from "lucide-react";
 import Link from "next/link";
 
@@ -98,7 +99,7 @@ export default async function StatementPage({ params }: StatementPageProps) {
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" asChild>
-            <Link href="/app/statements-processing">
+            <Link href="/statements-processing">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Statements
             </Link>
@@ -121,6 +122,10 @@ export default async function StatementPage({ params }: StatementPageProps) {
                 <p className="font-medium">{statement.persons?.full_name || "N/A"}</p>
               </div>
               <div>
+                <label className="text-sm text-muted-foreground">Date of Birth</label>
+                <p className="font-medium">{statement.persons?.date_of_birth ? formatDate(statement.persons.date_of_birth) : "N/A"}</p>
+              </div>
+              <div>
                 <label className="text-sm text-muted-foreground">Account Number</label>
                 <p className="font-medium">{statement.account_number_suffix}</p>
               </div>
@@ -132,6 +137,12 @@ export default async function StatementPage({ params }: StatementPageProps) {
                 <label className="text-sm text-muted-foreground">Amount Due</label>
                 <p className="font-medium text-xl text-primary">
                   {formatCurrency(statement.patient_balance, statement.currency_code)}
+                </p>
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground">Payment Status</label>
+                <p className={`font-medium ${statement.payment_status === "Paid" ? "text-green-600" : "text-red-600"}`}>
+                  {statement.payment_status === "Paid" ? "Paid" : "Unpaid"}
                 </p>
               </div>
               <div>
@@ -166,6 +177,9 @@ export default async function StatementPage({ params }: StatementPageProps) {
                 </div>
               </div>
             </div>
+
+            {/* NextGen Information */}
+            <NextGenInfo statementId={statement.id} />
 
             {/* Short Code Info */}
             {statement.short_code && (
@@ -234,6 +248,7 @@ export default async function StatementPage({ params }: StatementPageProps) {
               status={statement.status}
               hasEmail={!!statement.persons?.email_address}
               hasPhone={!!statement.persons?.cell_phone}
+              paymentStatus={statement.payment_status}
             />
           </CardContent>
         </Card>

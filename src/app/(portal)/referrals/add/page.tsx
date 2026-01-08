@@ -103,7 +103,7 @@ export default function AddReferralPage() {
 
       if (res.ok) {
         const data = await res.json();
-        router.push(`/app/referrals/${data.referral.id}`);
+        router.push(`/referrals/${data.referral.id}`);
       } else {
         const error = await res.json();
         alert(error.error || "Failed to create referral");
@@ -352,7 +352,7 @@ export default function AddReferralPage() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push("/app/referrals")}
+            onClick={() => router.push("/referrals")}
           >
             Cancel
           </Button>

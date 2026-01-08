@@ -3,28 +3,29 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // Protected page routes (from route group (portal))
-const PROTECTED_PAGE_ROUTES = [
+const protectedPageRoutes = [
   "/dashboard",
-  "/referrals",
-  "/statements",
   "/statements-processing",
+  "/statements",
+  "/open-statements",
+  "/referrals",
   "/settings",
 ];
 
 // Protected API routes (from route group (portal))
-const PROTECTED_API_ROUTES = [
+const protectedApiRoutes = [
   "/api/practices",
   "/api/providers",
   "/api/referrals",
-  "/api/statements",
   "/api/settings",
+  "/api/statements",
 ];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check if this is a protected page route
-  const isProtectedPage = PROTECTED_PAGE_ROUTES.some(
+  const isProtectedPage = protectedPageRoutes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
 
@@ -42,7 +43,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Check if this is a protected API route
-  const isProtectedApi = PROTECTED_API_ROUTES.some(
+  const isProtectedApi = protectedApiRoutes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
 
@@ -63,14 +64,15 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/dashboard/:path*",
-    "/referrals/:path*",
-    "/statements/:path*",
     "/statements-processing/:path*",
+    "/statements/:path*",
+    "/open-statements/:path*",
+    "/referrals/:path*",
     "/settings/:path*",
     "/api/practices/:path*",
     "/api/providers/:path*",
     "/api/referrals/:path*",
-    "/api/statements/:path*",
     "/api/settings/:path*",
+    "/api/statements/:path*",
   ],
 };

@@ -36,6 +36,12 @@ export interface Statement {
   sent_by_user_id: string | null;
   rejected_at: string | null;
   rejected_by_user_id: string | null;
+  payment_status: string | null;
+  payment_amount: number | null;
+  payment_date: string | null;
+  payment_transaction_id: string | null;
+  payment_method: string | null;
+  payment_gateway_entry_id: string | null;
 }
 
 export interface StatementWithPerson extends Statement {
@@ -235,4 +241,21 @@ export interface GeneratedLetter {
 
 export interface GeneratedLetterWithUser extends GeneratedLetter {
   users: User | null;
+}
+
+// Message Templates Feature Types
+
+export type MessageTemplateType = "initial" | "reminder";
+export type MessageChannel = "sms" | "email";
+
+export interface MessageTemplate {
+  id: string;
+  template_type: MessageTemplateType;
+  channel: MessageChannel;
+  email_subject: string | null;
+  message_body: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  updated_by_user_id: string | null;
 }

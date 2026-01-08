@@ -1,29 +1,32 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { AlertCircle, Calendar, CreditCard, FileText } from "lucide-react";
+import { AlertCircle, Calendar, CreditCard, FileText, User, Stethoscope, CheckCircle, XCircle } from "lucide-react";
 
 interface PatientViewClientProps {
   shortcode: string;
   patientName?: string;
-  patientDob?: string;
   statementDate: string;
   patientBalance: number;
   currencyCode: string;
+  accountNumber: string;
+  paymentStatus: string | null;
 }
 
 export default function PatientViewClient({
   shortcode,
   patientName,
-  patientDob,
   statementDate,
   patientBalance,
   currencyCode,
+  accountNumber,
+  paymentStatus,
 }: PatientViewClientProps) {
   const [verified, setVerified] = useState(false);
   const [dob, setDob] = useState("");
@@ -78,13 +81,17 @@ export default function PatientViewClient({
 
   if (!verified) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-4 sm:p-8 bg-gradient-to-br from-blue-50 to-slate-50">
-        <Card className="max-w-md w-full shadow-lg">
+      <main className="min-h-screen flex items-center justify-center p-4 sm:p-8" style={{ background: "linear-gradient(180deg, #f0f4f8 0%, #e2e8f0 100%)" }}>
+        <Card className="max-w-md w-full" style={{ background: "#fff", borderRadius: "24px", boxShadow: "0 20px 60px rgba(0, 0, 0, 0.1)" }}>
           <CardHeader className="text-center pb-6">
             <div className="flex items-center justify-center gap-2 mb-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-md">
-                <span className="text-base font-bold">LEI</span>
-              </div>
+              <Image
+                src="/images/logo.png"
+                alt="Laser Eye Institute"
+                width={64}
+                height={64}
+                className="rounded-xl"
+              />
             </div>
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-blue-600 bg-clip-text text-transparent">Laser Eye Institute</CardTitle>
             <CardDescription className="text-base mt-1">Statement Verification</CardDescription>
@@ -127,50 +134,69 @@ export default function PatientViewClient({
     );
   }
 
-  const paymentUrl = `https://www.lasereyeinstitute.com/online-payment?a=${patientBalance.toFixed(2)}`;
+  const paymentUrl = `https://www.lasereyeinstitute.com/billpay?desc=invoice&amt=${patientBalance.toFixed(2)}&qty=1&account=${encodeURIComponent(accountNumber)}`;
   const pdfUrl = `/api/view/${shortcode}/pdf`;
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-4 sm:p-8 bg-gradient-to-br from-blue-50 to-slate-50">
-      <Card className="max-w-2xl w-full shadow-lg">
+    <main className="min-h-screen flex items-center justify-center p-4 sm:p-8" style={{ background: "linear-gradient(180deg, #f0f4f8 0%, #e2e8f0 100%)" }}>
+      <Card className="max-w-2xl w-full" style={{ background: "#fff", borderRadius: "24px", boxShadow: "0 20px 60px rgba(0, 0, 0, 0.1)" }}>
         <CardHeader className="text-center border-b pb-6">
           <div className="flex items-center justify-center gap-2 mb-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-md">
-              <span className="text-base font-bold">LEI</span>
-            </div>
+            <Image
+              src="/images/logo.png"
+              alt="Laser Eye Institute"
+              width={64}
+              height={64}
+              className="rounded-xl"
+            />
           </div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-blue-600 bg-clip-text text-transparent">Laser Eye Institute</CardTitle>
           <CardDescription className="text-base mt-1">Your Statement Details</CardDescription>
         </CardHeader>
         <CardContent className="pt-8 pb-8 px-6 sm:px-8">
           <div className="space-y-8">
-            {patientName && (
-              <div className="text-center pb-2">
-                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-1">Patient</p>
-                <p className="text-2xl font-bold text-gray-900">{patientName}</p>
-                {patientDob && (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    DOB: {formatDate(patientDob)}
-                  </p>
-                )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <User className="h-4 w-4 text-blue-600" />
+                  <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Patient</p>
+                </div>
+                <p className="text-lg font-bold text-gray-900">{patientName || "N/A"}</p>
               </div>
-            )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-5 rounded-xl border-2 border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow">
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Stethoscope className="h-4 w-4 text-blue-600" />
+                  <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Doctor</p>
+                </div>
+                <p className="text-lg font-bold text-gray-900">Dr. Daniel Haddad</p>
+              </div>
+              <div className="p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Calendar className="h-4 w-4 text-blue-600" />
                   <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Statement Date</p>
                 </div>
                 <p className="text-lg font-bold text-gray-900">{formatDate(statementDate)}</p>
               </div>
-              <div className="p-5 rounded-xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 shadow-sm hover:shadow-md transition-shadow">
+              <div className="p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <CreditCard className="h-4 w-4 text-blue-700" />
-                  <p className="text-sm font-semibold text-blue-900 uppercase tracking-wide">Amount Due</p>
+                  <CreditCard className="h-4 w-4 text-blue-600" />
+                  <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Amount Due</p>
                 </div>
-                <p className="text-3xl font-bold text-blue-700">
+                <p className="text-lg font-bold text-gray-900">
                   {formatCurrency(patientBalance, currencyCode)}
+                </p>
+              </div>
+              <div className="p-4 sm:col-span-2">
+                <div className="flex items-center gap-2 mb-2">
+                  {paymentStatus === "Paid" ? (
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <XCircle className="h-4 w-4 text-red-600" />
+                  )}
+                  <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Payment Status</p>
+                </div>
+                <p className={`text-lg font-bold ${paymentStatus === "Paid" ? "text-green-600" : "text-red-600"}`}>
+                  {paymentStatus === "Paid" ? "Paid" : "Unpaid"}
                 </p>
               </div>
             </div>
@@ -191,8 +217,8 @@ export default function PatientViewClient({
             </div>
 
             <div className="text-center text-sm text-muted-foreground border-t-2 pt-6 mt-2">
-              <p className="font-medium text-gray-700 mb-1">Questions about your statement?</p>
-              <p className="text-blue-600 font-semibold text-base">Call (248) 557-1010</p>
+              <p className="font-medium text-gray-700 mb-1">Need Help?</p>
+              <p className="text-blue-600 font-semibold text-base">Call (248) 680-7400</p>
             </div>
           </div>
         </CardContent>

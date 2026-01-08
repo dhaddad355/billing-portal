@@ -13,6 +13,7 @@ import {
   MoreHorizontal,
   PlusCircle,
   Eye,
+  AlertCircle,
 } from "lucide-react";
 
 import {
@@ -52,20 +53,26 @@ export function AppSidebar({ user }: AppSidebarProps) {
   const navItems = [
     {
       title: "Dashboard",
-      href: "/app/dashboard",
+      href: "/dashboard",
       icon: LayoutDashboard,
     }
-   
+
   ];
 
   const invoiceItems = [
-     {
+    {
       title: "Process Statements",
-      href: "/app/statements-processing",
+      href: "/statements-processing",
       icon: FileText,
-    },{
+    },
+    {
+      title: "Open Statements",
+      href: "/open-statements",
+      icon: AlertCircle,
+    },
+    {
       title: "Invoice Settings",
-      href: "/app/settings/invoices",
+      href: "/settings/invoices",
       icon: Settings,
     },
   ];
@@ -73,22 +80,22 @@ export function AppSidebar({ user }: AppSidebarProps) {
   const referralItems = [
     {
       title: "Submit Referrals",
-      href: "/app/referrals/add",
+      href: "/referrals/add",
       icon: PlusCircle,
     },
     {
       title: "View Referrals",
-      href: "/app/referrals",
+      href: "/referrals",
       icon: Eye,
     },
     {
       title: "Referral Settings",
-      href: "/app/settings/referrals",
+      href: "/settings/referrals",
       icon: Settings,
     },
      {
       title: "Manage Providers",
-      href: "/app/referrals/providers",
+      href: "/referrals/providers",
       icon: Settings,
     },
   ];
