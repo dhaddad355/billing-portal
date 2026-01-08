@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Suspense } from "react";
 function SignInContent() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/app/statements-processing";
+  const callbackUrl = searchParams.get("callbackUrl") || "/statements-processing";
   const error = searchParams.get("error");
 
   return (

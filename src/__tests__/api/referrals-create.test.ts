@@ -102,7 +102,7 @@ describe("Referrals API - POST /api/app/referrals", () => {
       body: JSON.stringify(requestBody),
     });
 
-    const { POST } = await import("@/app/api/app/referrals/route");
+    const { POST } = await import("@/app/api/(portal)/referrals/route");
     const response = await POST(request as unknown as NextRequest);
     const data = await response.json();
 
@@ -135,7 +135,7 @@ describe("Referrals API - POST /api/app/referrals", () => {
       body: JSON.stringify(requestBody),
     });
 
-    const { POST } = await import("@/app/api/app/referrals/route");
+    const { POST } = await import("@/app/api/(portal)/referrals/route");
     const response = await POST(request as unknown as NextRequest);
     const data = await response.json();
 
@@ -177,7 +177,7 @@ describe("Referrals API - POST /api/app/referrals", () => {
       body: JSON.stringify(requestBody),
     });
 
-    const { POST } = await import("@/app/api/app/referrals/route");
+    const { POST } = await import("@/app/api/(portal)/referrals/route");
     const response = await POST(request as unknown as NextRequest);
     const data = await response.json();
 

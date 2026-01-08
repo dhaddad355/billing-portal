@@ -92,7 +92,7 @@ describe("Send Statement API - Basic Tests", () => {
       body: JSON.stringify({}),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/send/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/send/route");
     const response = await POST(request, { params: Promise.resolve({ id: "test-id" }) });
     const data = await response.json();
 
@@ -112,7 +112,7 @@ describe("Send Statement API - Basic Tests", () => {
       body: JSON.stringify({}),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/send/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/send/route");
     const response = await POST(request, { params: Promise.resolve({ id: "nonexistent" }) });
     const data = await response.json();
 
@@ -132,7 +132,7 @@ describe("Send Statement API - Basic Tests", () => {
       body: JSON.stringify({}),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/send/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/send/route");
     const response = await POST(request, { params: Promise.resolve({ id: "stmt-1" }) });
     const data = await response.json();
 
@@ -179,7 +179,7 @@ describe("Send Statement API - Basic Tests", () => {
       body: JSON.stringify({}),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/send/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/send/route");
     const response = await POST(request, { params: Promise.resolve({ id: "stmt-1" }) });
     const data = await response.json();
 

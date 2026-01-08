@@ -4,7 +4,9 @@
       "Bash(npx tsc:*)",
       "Bash(npx shadcn@latest add:*)",
       "Bash(npm run build:*)",
-      "Bash(pnpm test:*)"
+      "Bash(pnpm test:*)",
+      "Bash(ren \"src\\\\app\\\\app\" \"\\(portal\\)\")",
+      "Bash(powershell -Command \"Rename-Item -Path ''src/app/app'' -NewName ''\\(portal\\)''\")"
     ]
   }
 }

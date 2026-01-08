@@ -24,7 +24,7 @@ export default async function AppLayout({ children }: AppLayoutProps) {
   const session = (await getServerSession(authOptions)) as ExtendedSession | null;
 
   if (!session) {
-    redirect("/api/auth/signin?callbackUrl=/app/statements-processing");
+    redirect("/api/auth/signin?callbackUrl=/statements-processing");
   }
 
   return (

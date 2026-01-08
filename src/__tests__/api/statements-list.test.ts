@@ -54,7 +54,7 @@ describe("Statements List API - GET /api/app/statements", () => {
       method: "GET",
     });
 
-    const { GET } = await import("@/app/api/app/statements/route");
+    const { GET } = await import("@/app/api/(portal)/statements/route");
     const response = await GET(request);
     const data = await response.json();
 
@@ -102,7 +102,7 @@ describe("Statements List API - GET /api/app/statements", () => {
       method: "GET",
     });
 
-    const { GET } = await import("@/app/api/app/statements/route");
+    const { GET } = await import("@/app/api/(portal)/statements/route");
     const response = await GET(request);
     const data = await response.json();
 
@@ -137,7 +137,7 @@ describe("Statements List API - GET /api/app/statements", () => {
       method: "GET",
     });
 
-    const { GET } = await import("@/app/api/app/statements/route");
+    const { GET } = await import("@/app/api/(portal)/statements/route");
     const response = await GET(request);
     const data = await response.json();
 
@@ -171,7 +171,7 @@ describe("Statements List API - GET /api/app/statements", () => {
       method: "GET",
     });
 
-    const { GET } = await import("@/app/api/app/statements/route");
+    const { GET } = await import("@/app/api/(portal)/statements/route");
     const response = await GET(request);
     const data = await response.json();
 
@@ -205,7 +205,7 @@ describe("Statements List API - GET /api/app/statements", () => {
       method: "GET",
     });
 
-    const { GET } = await import("@/app/api/app/statements/route");
+    const { GET } = await import("@/app/api/(portal)/statements/route");
     const response = await GET(request);
     const data = await response.json();
 

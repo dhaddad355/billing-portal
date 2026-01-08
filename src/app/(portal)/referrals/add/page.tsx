@@ -40,7 +40,7 @@ export default function AddReferralPage() {
         setSearchingProvider(true);
         try {
           const res = await fetch(
-            `/api/app/providers/search?q=${encodeURIComponent(providerSearch)}`
+            `/api/providers/search?q=${encodeURIComponent(providerSearch)}`
           );
           const data = await res.json();
           setProviderResults(data.providers || []);
@@ -81,7 +81,7 @@ export default function AddReferralPage() {
 
     setSaving(true);
     try {
-      const res = await fetch("/api/app/referrals", {
+      const res = await fetch("/api/referrals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -103,7 +103,7 @@ export default function AddReferralPage() {
 
       if (res.ok) {
         const data = await res.json();
-        router.push(`/app/referrals/${data.referral.id}`);
+        router.push(`/referrals/${data.referral.id}`);
       } else {
         const error = await res.json();
         alert(error.error || "Failed to create referral");
@@ -352,7 +352,7 @@ export default function AddReferralPage() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push("/app/referrals")}
+            onClick={() => router.push("/referrals")}
           >
             Cancel
           </Button>

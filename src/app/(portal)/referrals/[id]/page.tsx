@@ -82,9 +82,9 @@ export default function ReferralDetailPage() {
 
   const fetchReferral = React.useCallback(async () => {
     try {
-      const res = await fetch(`/api/app/referrals/${referralId}`);
+      const res = await fetch(`/api/referrals/${referralId}`);
       if (!res.ok) {
-        router.push("/app/referrals");
+        router.push("/referrals");
         return;
       }
       const data = await res.json();
@@ -118,7 +118,7 @@ export default function ReferralDetailPage() {
   const saveChanges = async () => {
     setSaving(true);
     try {
-      const res = await fetch(`/api/app/referrals/${referralId}`, {
+      const res = await fetch(`/api/referrals/${referralId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -149,7 +149,7 @@ export default function ReferralDetailPage() {
   const saveStatusChange = async () => {
     setSavingStatus(true);
     try {
-      const res = await fetch(`/api/app/referrals/${referralId}`, {
+      const res = await fetch(`/api/referrals/${referralId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -178,7 +178,7 @@ export default function ReferralDetailPage() {
 
     setAddingNote(true);
     try {
-      const res = await fetch(`/api/app/referrals/${referralId}/notes`, {
+      const res = await fetch(`/api/referrals/${referralId}/notes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ note: newNote, visibility }),
@@ -208,7 +208,7 @@ export default function ReferralDetailPage() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await fetch(`/api/app/referrals/${referralId}/attachments`, {
+      const res = await fetch(`/api/referrals/${referralId}/attachments`, {
         method: "POST",
         body: formData,
       });
@@ -232,7 +232,7 @@ export default function ReferralDetailPage() {
 
   const downloadAttachment = async (attachmentId: string, fileName: string) => {
     try {
-      const res = await fetch(`/api/app/referrals/${referralId}/attachments/${attachmentId}`);
+      const res = await fetch(`/api/referrals/${referralId}/attachments/${attachmentId}`);
       if (res.ok) {
         const blob = await res.blob();
         const url = window.URL.createObjectURL(blob);
@@ -269,7 +269,7 @@ export default function ReferralDetailPage() {
     return (
       <div className="flex h-full flex-col items-center justify-center">
         <div className="text-muted-foreground">Referral not found</div>
-        <Link href="/app/referrals" className="mt-2">
+        <Link href="/referrals" className="mt-2">
           <Button variant="outline">Back to Referrals</Button>
         </Link>
       </div>
@@ -282,7 +282,7 @@ export default function ReferralDetailPage() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <Link href="/app/referrals" className="text-muted-foreground hover:text-foreground">
+            <Link href="/referrals" className="text-muted-foreground hover:text-foreground">
               ← Back
             </Link>
           </div>

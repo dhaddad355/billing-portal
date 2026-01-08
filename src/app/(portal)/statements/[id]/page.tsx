@@ -98,7 +98,7 @@ export default async function StatementPage({ params }: StatementPageProps) {
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" asChild>
-            <Link href="/app/statements-processing">
+            <Link href="/statements-processing">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Statements
             </Link>

@@ -63,7 +63,7 @@ export default function ViewReferralsPage() {
       if (filters.open_status) params.append("open_status", filters.open_status);
       if (filters.search) params.append("search", filters.search);
 
-      const res = await fetch(`/api/app/referrals?${params}`);
+      const res = await fetch(`/api/referrals?${params}`);
       const data = await res.json();
       setReferrals(data.referrals || []);
       setTotal(data.total || 0);
@@ -105,7 +105,7 @@ export default function ViewReferralsPage() {
             View and manage all patient referrals
           </p>
         </div>
-        <Link href="/app/referrals/add">
+        <Link href="/referrals/add">
           <Button>Add Referral</Button>
         </Link>
       </div>
@@ -175,7 +175,7 @@ export default function ViewReferralsPage() {
           ) : referrals.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
               <div className="text-muted-foreground">No referrals found</div>
-              <Link href="/app/referrals/add" className="mt-2">
+              <Link href="/referrals/add" className="mt-2">
                 <Button variant="outline">Add your first referral</Button>
               </Link>
             </div>
@@ -231,7 +231,7 @@ export default function ViewReferralsPage() {
                       </TableCell>
                       <TableCell>{formatDate(referral.created_at)}</TableCell>
                       <TableCell className="text-right">
-                        <Link href={`/app/referrals/${referral.id}`}>
+                        <Link href={`/referrals/${referral.id}`}>
                           <Button variant="outline" size="sm">
                             View Details
                           </Button>

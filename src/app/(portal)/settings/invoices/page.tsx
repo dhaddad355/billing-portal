@@ -32,7 +32,7 @@ export default function InvoiceSettingsPage() {
 
   const fetchTemplates = async () => {
     try {
-      const response = await fetch("/api/app/settings/message-templates");
+      const response = await fetch("/api/settings/message-templates");
       if (response.ok) {
         const data = await response.json();
         setTemplates(data.templates);
@@ -85,7 +85,7 @@ export default function InvoiceSettingsPage() {
 
     setSaving(key);
     try {
-      const response = await fetch("/api/app/settings/message-templates", {
+      const response = await fetch("/api/settings/message-templates", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

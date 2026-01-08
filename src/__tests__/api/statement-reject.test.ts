@@ -70,7 +70,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
       body: JSON.stringify({ reason: "Invalid data" }),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/reject/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/reject/route");
     const response = await POST(request, { params: Promise.resolve({ id: "test-id" }) });
     const data = await response.json();
 
@@ -97,7 +97,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
       body: JSON.stringify({ reason: "Duplicate statement" }),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/reject/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/reject/route");
     const response = await POST(request, { params: Promise.resolve({ id: "stmt-1" }) });
     const data = await response.json();
 
@@ -124,7 +124,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
       body: JSON.stringify({}),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/reject/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/reject/route");
     await POST(request, { params: Promise.resolve({ id: "stmt-1" }) });
 
     expect(mockSupabaseClient.update).toHaveBeenCalledWith(
@@ -153,7 +153,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
       body: JSON.stringify({}),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/reject/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/reject/route");
     await POST(request, { params: Promise.resolve({ id: "stmt-1" }) });
 
     expect(mockSupabaseClient.insert).toHaveBeenCalledWith(
@@ -179,7 +179,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
       body: JSON.stringify({ reason: "Test" }),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/reject/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/reject/route");
     const response = await POST(request, { params: Promise.resolve({ id: "nonexistent" }) });
     const data = await response.json();
 
@@ -202,7 +202,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
       body: JSON.stringify({ reason: "Test" }),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/reject/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/reject/route");
     const response = await POST(request, { params: Promise.resolve({ id: "stmt-1" }) });
     const data = await response.json();
 

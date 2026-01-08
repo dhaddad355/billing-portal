@@ -56,7 +56,7 @@ export default function StatementActions({
     setSending(true);
     setDialogOpen(false);
     try {
-      const response = await fetch(`/api/app/statements/${statementId}/send`, {
+      const response = await fetch(`/api/statements/${statementId}/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -83,7 +83,7 @@ export default function StatementActions({
     if (!confirm("Are you sure you want to reject this statement?")) return;
     setRejecting(true);
     try {
-      const response = await fetch(`/api/app/statements/${statementId}/reject`, {
+      const response = await fetch(`/api/statements/${statementId}/reject`, {
         method: "POST",
       });
       if (response.ok) {
@@ -105,7 +105,7 @@ export default function StatementActions({
     if (!confirm("Are you sure you want to mark this statement as paid?")) return;
     setMarkingPaid(true);
     try {
-      const response = await fetch(`/api/app/statements/${statementId}/mark-paid`, {
+      const response = await fetch(`/api/statements/${statementId}/mark-paid`, {
         method: "POST",
       });
       if (response.ok) {
@@ -128,7 +128,7 @@ export default function StatementActions({
     setSendingReminder(true);
     setReminderDialogOpen(false);
     try {
-      const response = await fetch(`/api/app/statements/${statementId}/send-reminder`, {
+      const response = await fetch(`/api/statements/${statementId}/send-reminder`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

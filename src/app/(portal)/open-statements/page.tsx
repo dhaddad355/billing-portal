@@ -25,8 +25,8 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  TrendingUp,
-  TrendingDown,
+  DollarSign,
+  AlertCircle,
   Eye,
 } from "lucide-react";
 
@@ -50,6 +50,7 @@ interface Statement {
   short_code: string | null;
   view_count: number;
   status: string;
+  payment_status: string | null;
   created_at: string;
   sent_at: string | null;
   persons: Person;
@@ -62,7 +63,7 @@ interface Pagination {
   totalPages: number;
 }
 
-export default function DashboardPage() {
+export default function OpenStatementsPage() {
   const router = useRouter();
   const [statements, setStatements] = useState<Statement[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
@@ -72,11 +73,9 @@ export default function DashboardPage() {
     totalPages: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState("PENDING");
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
 
   const handleRowClick = (statementId: string, event: React.MouseEvent) => {
-    // Don't navigate if clicking on checkbox or button
     const target = event.target as HTMLElement;
     if (
       target.closest('button') ||
@@ -85,13 +84,13 @@ export default function DashboardPage() {
     ) {
       return;
     }
-    router.push(`/app/statements/${statementId}`);
+    router.push(`/statements/${statementId}`);
   };
 
   const handleRowKeyDown = (statementId: string, event: React.KeyboardEvent) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      router.push(`/app/statements/${statementId}`);
+      router.push(`/statements/${statementId}`);
     }
   };
 
@@ -99,20 +98,20 @@ export default function DashboardPage() {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/app/statements?status=${statusFilter}&page=${pagination.page}&pageSize=${pagination.pageSize}`
+        `/api/statements/open?page=${pagination.page}&pageSize=${pagination.pageSize}`
       );
       if (response.ok) {
         const data = await response.json();
         setStatements(data.statements);
         setPagination((prev) => ({ ...prev, ...data.pagination }));
-        setSelectedRows(new Set()); // Clear selection on data change
+        setSelectedRows(new Set());
       }
     } catch (error) {
       console.error("Error fetching statements:", error);
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, pagination.page, pagination.pageSize]);
+  }, [pagination.page, pagination.pageSize]);
 
   useEffect(() => {
     fetchStatements();
@@ -153,11 +152,22 @@ export default function DashboardPage() {
     }
   };
 
-  const filterTabs = [
-    { key: "PENDING", label: "Pending", count: statusFilter === "PENDING" ? pagination.total : null },
-    { key: "SENT", label: "Sent", count: statusFilter === "SENT" ? pagination.total : null },
-    { key: "REJECTED", label: "Rejected", count: statusFilter === "REJECTED" ? pagination.total : null },
-  ];
+  const getPaymentBadge = (paymentStatus: string | null) => {
+    if (paymentStatus === "Paid") {
+      return (
+        <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">
+          <CheckCircle2 className="mr-1 h-3 w-3" />
+          Paid
+        </Badge>
+      );
+    }
+    return (
+      <Badge variant="outline" className="text-red-700 border-red-300 bg-red-50">
+        <XCircle className="mr-1 h-3 w-3" />
+        Unpaid
+      </Badge>
+    );
+  };
 
   const toggleRow = (id: string) => {
     setSelectedRows((prev) => {
@@ -179,75 +189,58 @@ export default function DashboardPage() {
     }
   };
 
+  // Calculate total amount due
+  const totalAmountDue = statements.reduce((sum, s) => sum + s.patient_balance, 0);
+
   return (
     <div className="space-y-6">
-      {/* Summary Cards - matching the reference design */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Summary Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Statements
+              Open Statements
             </CardTitle>
-            <span className="flex items-center text-xs text-green-600">
-              <TrendingUp className="mr-1 h-3 w-3" />
-              +12.5%
-            </span>
+            <AlertCircle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{pagination.total}</div>
-            <p className="text-xs text-muted-foreground mt-1 flex items-center">
-              Trending up this month <TrendingUp className="ml-1 h-3 w-3" />
+            <p className="text-xs text-muted-foreground mt-1">
+              Awaiting payment
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Pending Review
+              Total Amount Due
             </CardTitle>
-            <span className="flex items-center text-xs text-yellow-600">
-              <Clock className="mr-1 h-3 w-3" />
-              Needs attention
-            </span>
+            <DollarSign className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{statusFilter === "PENDING" ? pagination.total : "—"}</div>
-            <p className="text-xs text-muted-foreground mt-1 flex items-center">
-              Awaiting approval
+            <div className="text-2xl font-bold text-primary">
+              {formatCurrency(totalAmountDue, "USD")}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              From current page
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Sent Statements
+              Average Balance
             </CardTitle>
-            <span className="flex items-center text-xs text-green-600">
-              <TrendingUp className="mr-1 h-3 w-3" />
-              +12.5%
-            </span>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{statusFilter === "SENT" ? pagination.total : "—"}</div>
-            <p className="text-xs text-muted-foreground mt-1 flex items-center">
-              Strong delivery rate <TrendingUp className="ml-1 h-3 w-3" />
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Rejected
-            </CardTitle>
-            <span className="flex items-center text-xs text-red-600">
-              <TrendingDown className="mr-1 h-3 w-3" />
-              -4.5%
-            </span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{statusFilter === "REJECTED" ? pagination.total : "—"}</div>
-            <p className="text-xs text-muted-foreground mt-1 flex items-center">
-              Rejection rate decreasing <TrendingDown className="ml-1 h-3 w-3" />
+            <div className="text-2xl font-bold">
+              {statements.length > 0
+                ? formatCurrency(totalAmountDue / statements.length, "USD")
+                : "$0.00"}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Per statement
             </p>
           </CardContent>
         </Card>
@@ -258,38 +251,8 @@ export default function DashboardPage() {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Statements</CardTitle>
-              <CardDescription>Manage patient billing statements</CardDescription>
-            </div>
-          </div>
-          {/* Filter Tabs */}
-          <div className="flex items-center gap-1 pt-4 border-b">
-            {filterTabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => {
-                  setStatusFilter(tab.key);
-                  setPagination((prev) => ({ ...prev, page: 1 }));
-                }}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                  statusFilter === tab.key
-                    ? "border-primary text-foreground"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {tab.label}
-                {tab.count !== null && (
-                  <span className="ml-1 rounded-full bg-muted px-2 py-0.5 text-xs">
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            ))}
-            <div className="ml-auto flex items-center gap-2">
-              <Button variant="outline" size="sm">
-                Customize Columns
-              </Button>
-              <Button size="sm">+ Add Section</Button>
+              <CardTitle>Open Statements</CardTitle>
+              <CardDescription>All unpaid patient statements</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -301,8 +264,9 @@ export default function DashboardPage() {
             </div>
           ) : statements.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-              <FileText className="mb-2 h-8 w-8" />
-              <p>No {statusFilter.toLowerCase()} statements found.</p>
+              <CheckCircle2 className="mb-2 h-8 w-8 text-green-500" />
+              <p>No open statements found.</p>
+              <p className="text-sm">All statements have been paid!</p>
             </div>
           ) : (
             <>
@@ -319,17 +283,17 @@ export default function DashboardPage() {
                       </TableHead>
                       <TableHead className="font-medium">Patient Name</TableHead>
                       <TableHead className="font-medium">Account #</TableHead>
-                      <TableHead className="font-medium">Status</TableHead>
+                      <TableHead className="font-medium">Statement Status</TableHead>
+                      <TableHead className="font-medium">Payment Status</TableHead>
                       <TableHead className="font-medium text-right">Amount Due</TableHead>
                       <TableHead className="font-medium">Statement Date</TableHead>
-                      <TableHead className="font-medium">Reviewer</TableHead>
                       <TableHead className="font-medium text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {statements.map((statement) => (
-                      <TableRow 
-                        key={statement.id} 
+                      <TableRow
+                        key={statement.id}
                         className="group cursor-pointer hover:bg-gray-50"
                         data-state={selectedRows.has(statement.id) ? "selected" : undefined}
                         onClick={(e) => handleRowClick(statement.id, e)}
@@ -354,14 +318,12 @@ export default function DashboardPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>{getStatusBadge(statement.status)}</TableCell>
+                        <TableCell>{getPaymentBadge(statement.payment_status)}</TableCell>
                         <TableCell className="text-right font-medium">
                           {formatCurrency(statement.patient_balance, statement.currency_code)}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                           {formatDate(statement.statement_date)}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          Staff
                         </TableCell>
                         <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                           <Button
@@ -369,7 +331,7 @@ export default function DashboardPage() {
                             size="sm"
                             asChild
                           >
-                            <Link href={`/app/statements/${statement.id}`}>
+                            <Link href={`/statements/${statement.id}`}>
                               <Eye className="mr-2 h-4 w-4" />
                               View Details
                             </Link>
@@ -381,7 +343,7 @@ export default function DashboardPage() {
                 </Table>
               </div>
 
-              {/* Pagination - matching reference design */}
+              {/* Pagination */}
               <div className="flex items-center justify-between pt-4">
                 <span className="text-sm text-muted-foreground">
                   {selectedRows.size} of {pagination.total} row(s) selected.
@@ -389,7 +351,7 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-6">
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">Rows per page</span>
-                    <select 
+                    <select
                       className="h-8 rounded-md border border-input bg-background px-2 text-sm"
                       value={pagination.pageSize}
                       onChange={(e) => setPagination((prev) => ({ ...prev, pageSize: Number(e.target.value), page: 1 }))}

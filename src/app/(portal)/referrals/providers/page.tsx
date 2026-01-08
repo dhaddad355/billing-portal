@@ -65,8 +65,8 @@ export default function ManageProvidersPage() {
     setLoading(true);
     try {
       const [practicesRes, providersRes] = await Promise.all([
-        fetch("/api/app/practices"),
-        fetch("/api/app/providers"),
+        fetch("/api/practices"),
+        fetch("/api/providers"),
       ]);
       const practicesData = await practicesRes.json();
       const providersData = await providersRes.json();
@@ -113,8 +113,8 @@ export default function ManageProvidersPage() {
   const saveProvider = async () => {
     try {
       const url = editingProvider
-        ? `/api/app/providers/${providerForm.id}`
-        : "/api/app/providers";
+        ? `/api/providers/${providerForm.id}`
+        : "/api/providers";
       const method = editingProvider ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -145,7 +145,7 @@ export default function ManageProvidersPage() {
 
   const deleteProvider = async (id: string) => {
     try {
-      const res = await fetch(`/api/app/providers/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/providers/${id}`, { method: "DELETE" });
       if (res.ok) {
         setShowDeleteModal(null);
         fetchData();
@@ -189,8 +189,8 @@ export default function ManageProvidersPage() {
   const savePractice = async () => {
     try {
       const url = editingPractice
-        ? `/api/app/practices/${practiceForm.id}`
-        : "/api/app/practices";
+        ? `/api/practices/${practiceForm.id}`
+        : "/api/practices";
       const method = editingPractice ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -221,7 +221,7 @@ export default function ManageProvidersPage() {
 
   const deletePractice = async (id: string) => {
     try {
-      const res = await fetch(`/api/app/practices/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/practices/${id}`, { method: "DELETE" });
       if (res.ok) {
         setShowDeleteModal(null);
         fetchData();
