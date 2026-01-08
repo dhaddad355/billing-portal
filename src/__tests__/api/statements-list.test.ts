@@ -36,7 +36,7 @@ vi.mock("@/lib/auth", () => ({
 
 import { getServerSession } from "next-auth";
 
-describe("Statements List API - GET /api/app/statements", () => {
+describe("Statements List API - GET /api/statements", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
@@ -50,11 +50,11 @@ describe("Statements List API - GET /api/app/statements", () => {
   it("should reject unauthenticated requests", async () => {
     (getServerSession as unknown as Mock).mockResolvedValue(null);
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements?status=PENDING", {
+    const request = new NextRequest("http://localhost:3000/api/statements?status=PENDING", {
       method: "GET",
     });
 
-    const { GET } = await import("@/app/api/app/statements/route");
+    const { GET } = await import("@/app/api/(portal)/statements/route");
     const response = await GET(request);
     const data = await response.json();
 
@@ -98,11 +98,11 @@ describe("Statements List API - GET /api/app/statements", () => {
       }) as any
     );
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements?status=PENDING&page=1&pageSize=10", {
+    const request = new NextRequest("http://localhost:3000/api/statements?status=PENDING&page=1&pageSize=10", {
       method: "GET",
     });
 
-    const { GET } = await import("@/app/api/app/statements/route");
+    const { GET } = await import("@/app/api/(portal)/statements/route");
     const response = await GET(request);
     const data = await response.json();
 
@@ -133,11 +133,11 @@ describe("Statements List API - GET /api/app/statements", () => {
       }) as any
     );
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements?status=PENDING", {
+    const request = new NextRequest("http://localhost:3000/api/statements?status=PENDING", {
       method: "GET",
     });
 
-    const { GET } = await import("@/app/api/app/statements/route");
+    const { GET } = await import("@/app/api/(portal)/statements/route");
     const response = await GET(request);
     const data = await response.json();
 
@@ -167,11 +167,11 @@ describe("Statements List API - GET /api/app/statements", () => {
       }) as any
     );
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements?status=PENDING", {
+    const request = new NextRequest("http://localhost:3000/api/statements?status=PENDING", {
       method: "GET",
     });
 
-    const { GET } = await import("@/app/api/app/statements/route");
+    const { GET } = await import("@/app/api/(portal)/statements/route");
     const response = await GET(request);
     const data = await response.json();
 
@@ -201,11 +201,11 @@ describe("Statements List API - GET /api/app/statements", () => {
       }) as any
     );
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements?page=2&pageSize=10", {
+    const request = new NextRequest("http://localhost:3000/api/statements?page=2&pageSize=10", {
       method: "GET",
     });
 
-    const { GET } = await import("@/app/api/app/statements/route");
+    const { GET } = await import("@/app/api/(portal)/statements/route");
     const response = await GET(request);
     const data = await response.json();
 

@@ -86,13 +86,13 @@ describe("Send Statement API - Basic Tests", () => {
   it("should reject unauthenticated requests", async () => {
     (getServerSession as unknown as Mock).mockResolvedValue(null);
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements/test-id/send", {
+    const request = new NextRequest("http://localhost:3000/api/statements/test-id/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/send/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/send/route");
     const response = await POST(request, { params: Promise.resolve({ id: "test-id" }) });
     const data = await response.json();
 
@@ -106,13 +106,13 @@ describe("Send Statement API - Basic Tests", () => {
       error: { message: "Not found" },
     });
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements/nonexistent/send", {
+    const request = new NextRequest("http://localhost:3000/api/statements/nonexistent/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/send/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/send/route");
     const response = await POST(request, { params: Promise.resolve({ id: "nonexistent" }) });
     const data = await response.json();
 
@@ -126,13 +126,13 @@ describe("Send Statement API - Basic Tests", () => {
       error: null,
     });
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements/stmt-1/send", {
+    const request = new NextRequest("http://localhost:3000/api/statements/stmt-1/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/send/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/send/route");
     const response = await POST(request, { params: Promise.resolve({ id: "stmt-1" }) });
     const data = await response.json();
 
@@ -173,13 +173,13 @@ describe("Send Statement API - Basic Tests", () => {
       eq: mockSupabase.eq,
     }));
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements/stmt-1/send", {
+    const request = new NextRequest("http://localhost:3000/api/statements/stmt-1/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/send/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/send/route");
     const response = await POST(request, { params: Promise.resolve({ id: "stmt-1" }) });
     const data = await response.json();
 

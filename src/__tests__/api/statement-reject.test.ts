@@ -48,7 +48,7 @@ vi.mock("@/lib/auth", () => ({
 
 import { getServerSession } from "next-auth";
 
-describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
+describe("Statement Reject API - POST /api/statements/[id]/reject", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
@@ -62,7 +62,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
   it("should reject unauthenticated requests", async () => {
     (getServerSession as unknown as Mock).mockResolvedValue(null);
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements/test-id/reject", {
+    const request = new NextRequest("http://localhost:3000/api/statements/test-id/reject", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -70,7 +70,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
       body: JSON.stringify({ reason: "Invalid data" }),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/reject/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/reject/route");
     const response = await POST(request, { params: Promise.resolve({ id: "test-id" }) });
     const data = await response.json();
 
@@ -89,7 +89,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
     });
     mockSupabaseClient.update.mockReturnValue({ eq: mockSupabaseClient.eq });
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements/stmt-1/reject", {
+    const request = new NextRequest("http://localhost:3000/api/statements/stmt-1/reject", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -97,7 +97,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
       body: JSON.stringify({ reason: "Duplicate statement" }),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/reject/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/reject/route");
     const response = await POST(request, { params: Promise.resolve({ id: "stmt-1" }) });
     const data = await response.json();
 
@@ -116,7 +116,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
     });
     mockSupabaseClient.update.mockReturnValue({ eq: mockSupabaseClient.eq });
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements/stmt-1/reject", {
+    const request = new NextRequest("http://localhost:3000/api/statements/stmt-1/reject", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -124,7 +124,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
       body: JSON.stringify({}),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/reject/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/reject/route");
     await POST(request, { params: Promise.resolve({ id: "stmt-1" }) });
 
     expect(mockSupabaseClient.update).toHaveBeenCalledWith(
@@ -145,7 +145,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
     });
     mockSupabaseClient.update.mockReturnValue({ eq: mockSupabaseClient.eq });
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements/stmt-1/reject", {
+    const request = new NextRequest("http://localhost:3000/api/statements/stmt-1/reject", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -153,7 +153,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
       body: JSON.stringify({}),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/reject/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/reject/route");
     await POST(request, { params: Promise.resolve({ id: "stmt-1" }) });
 
     expect(mockSupabaseClient.insert).toHaveBeenCalledWith(
@@ -171,7 +171,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
     });
     mockSupabaseClient.eq.mockReturnValue({ single: mockSupabaseClient.single });
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements/nonexistent/reject", {
+    const request = new NextRequest("http://localhost:3000/api/statements/nonexistent/reject", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -179,7 +179,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
       body: JSON.stringify({ reason: "Test" }),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/reject/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/reject/route");
     const response = await POST(request, { params: Promise.resolve({ id: "nonexistent" }) });
     const data = await response.json();
 
@@ -194,7 +194,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
     });
     mockSupabaseClient.eq.mockReturnValue({ single: mockSupabaseClient.single });
 
-    const request = new NextRequest("http://localhost:3000/api/app/statements/stmt-1/reject", {
+    const request = new NextRequest("http://localhost:3000/api/statements/stmt-1/reject", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -202,7 +202,7 @@ describe("Statement Reject API - POST /api/app/statements/[id]/reject", () => {
       body: JSON.stringify({ reason: "Test" }),
     });
 
-    const { POST } = await import("@/app/api/app/statements/[id]/reject/route");
+    const { POST } = await import("@/app/api/(portal)/statements/[id]/reject/route");
     const response = await POST(request, { params: Promise.resolve({ id: "stmt-1" }) });
     const data = await response.json();
 

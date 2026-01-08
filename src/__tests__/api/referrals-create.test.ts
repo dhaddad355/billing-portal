@@ -57,7 +57,7 @@ vi.mock("@/lib/auth", () => ({
   authOptions: {},
 }));
 
-describe("Referrals API - POST /api/app/referrals", () => {
+describe("Referrals API - POST /api/referrals", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();
@@ -96,13 +96,13 @@ describe("Referrals API - POST /api/app/referrals", () => {
       communication_preference: "email",
     };
 
-    const request = new Request("http://localhost:3000/api/app/referrals", {
+    const request = new Request("http://localhost:3000/api/referrals", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
     });
 
-    const { POST } = await import("@/app/api/app/referrals/route");
+    const { POST } = await import("@/app/api/(portal)/referrals/route");
     const response = await POST(request as unknown as NextRequest);
     const data = await response.json();
 
@@ -129,13 +129,13 @@ describe("Referrals API - POST /api/app/referrals", () => {
       communication_preference: "email",
     };
 
-    const request = new Request("http://localhost:3000/api/app/referrals", {
+    const request = new Request("http://localhost:3000/api/referrals", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
     });
 
-    const { POST } = await import("@/app/api/app/referrals/route");
+    const { POST } = await import("@/app/api/(portal)/referrals/route");
     const response = await POST(request as unknown as NextRequest);
     const data = await response.json();
 
@@ -171,13 +171,13 @@ describe("Referrals API - POST /api/app/referrals", () => {
       communication_preference: "phone",
     };
 
-    const request = new Request("http://localhost:3000/api/app/referrals", {
+    const request = new Request("http://localhost:3000/api/referrals", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
     });
 
-    const { POST } = await import("@/app/api/app/referrals/route");
+    const { POST } = await import("@/app/api/(portal)/referrals/route");
     const response = await POST(request as unknown as NextRequest);
     const data = await response.json();
 
