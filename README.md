@@ -30,8 +30,11 @@ A secure portal built with Next.js 14 (App Router) that enables:
 | `/` | Public | Landing page |
 | `/app/statements-processing` | Staff (Azure AD) | Statement management dashboard |
 | `/app/statements/[id]` | Staff (Azure AD) | Statement detail view |
+| `/app/referrals` | Staff (Azure AD) | View and manage referrals |
+| `/app/referrals/inbound-queue` | Staff (Azure AD) | Process inbound referrals from website |
 | `/view/[shortcode]` | Public (DOB gated) | Patient statement view |
 | `/api/statement` | API Key | Inbound endpoint for .NET app |
+| `/api/inbound-referrals` | API Key | Inbound endpoint for website referrals |
 | `/api/app/**` | Staff (Azure AD) | Staff API endpoints |
 | `/api/view/**` | Public | Patient view API endpoints |
 
@@ -47,6 +50,9 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
 # API Key for Statement Ingestion (from .NET app)
 STATEMENT_INGEST_API_KEY=your_statement_ingest_api_key
+
+# API Key for Referral Ingestion (from website)
+REFERRAL_INGEST_API_KEY=your_referral_ingest_api_key
 
 # Azure AD Configuration
 AZURE_AD_CLIENT_ID=your_azure_ad_client_id
@@ -136,6 +142,37 @@ Verifies patient DOB for statement access.
   "dob": "MM/DD/YYYY"
 }
 ```
+
+### POST /api/inbound-referrals
+
+Accepts referral submissions from the website. All fields are sent as strings and stored in an inbound queue for staff processing.
+
+**Headers:**
+- `x-api-key`: Your REFERRAL_INGEST_API_KEY
+
+**Body (application/json):**
+```json
+{
+  "patient_full_name": "John Doe",
+  "patient_first_name": "John",
+  "patient_last_name": "Doe",
+  "patient_dob": "01/15/1990",
+  "patient_phone": "555-1234",
+  "patient_email": "john@example.com",
+  "referral_reason": "Laser Vision Correction",
+  "referral_reason_other": "",
+  "notes": "Patient interested in LASIK",
+  "scheduling_preference": "Call Patient",
+  "provider_name": "Dr. Smith",
+  "practice_name": "Smith Eye Care",
+  "provider_email": "dr.smith@eyecare.com",
+  "provider_phone": "555-5678",
+  "communication_preference": "Email",
+  "communication_value": "dr.smith@eyecare.com"
+}
+```
+
+**Note:** All fields are optional. The API accepts any string values and normalizes them. Staff will review and validate the data in the inbound queue before converting to a proper referral.
 
 ## Security Considerations
 
