@@ -52,7 +52,7 @@ export default function ProcessInboundReferralPage() {
   React.useEffect(() => {
     const fetchInboundReferral = async () => {
       try {
-        const res = await fetch(`/api/inbound-referrals/${id}`);
+        const res = await fetch(`/api/inbound-referral-queue/${id}`);
         const data = await res.json();
         if (data.inbound_referral) {
           const ref = data.inbound_referral;
@@ -127,9 +127,9 @@ export default function ProcessInboundReferralPage() {
     // Auto-populate communication value if available
     if (!form.communication_value) {
       if (form.communication_preference === "Email" && provider.email) {
-        setForm({ ...form, communication_value: provider.email });
+        setForm(prev => ({ ...prev, communication_value: provider.email }));
       } else if (form.communication_preference === "Fax" && provider.practices?.fax) {
-        setForm({ ...form, communication_value: provider.practices.fax });
+        setForm(prev => ({ ...prev, communication_value: provider.practices.fax }));
       }
     }
   };
@@ -150,7 +150,7 @@ export default function ProcessInboundReferralPage() {
 
     setProcessing(true);
     try {
-      const res = await fetch(`/api/inbound-referrals/${id}/convert`, {
+      const res = await fetch(`/api/inbound-referral-queue/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -190,7 +190,7 @@ export default function ProcessInboundReferralPage() {
     setError(null);
     setRejecting(true);
     try {
-      const res = await fetch(`/api/inbound-referrals/${id}`, {
+      const res = await fetch(`/api/inbound-referral-queue/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reason: reason || "Rejected by staff" }),

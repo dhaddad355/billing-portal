@@ -46,7 +46,7 @@ export default function InboundQueuePage() {
       if (filters.status) params.append("status", filters.status);
       if (filters.search) params.append("search", filters.search);
 
-      const res = await fetch(`/api/inbound-referrals?${params}`);
+      const res = await fetch(`/api/inbound-referral-queue?${params}`);
       const data = await res.json();
       setInboundReferrals(data.inbound_referrals || []);
       setTotal(data.total || 0);
