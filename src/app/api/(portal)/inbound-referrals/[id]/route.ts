@@ -168,8 +168,17 @@ export async function DELETE(
     const { id } = await params;
     const supabase = getServiceClient();
     const session = (await getServerSession(authOptions)) as ExtendedSession | null;
-    const { searchParams } = new URL(request.url);
-    const reason = searchParams.get("reason");
+    
+    // Try to get reason from body, fallback to query param for backwards compatibility
+    let reason: string | null = null;
+    try {
+      const body = await request.json();
+      reason = body.reason || null;
+    } catch {
+      // If no body, check query params
+      const { searchParams } = new URL(request.url);
+      reason = searchParams.get("reason");
+    }
 
     // Get user ID from session
     let userId = null;

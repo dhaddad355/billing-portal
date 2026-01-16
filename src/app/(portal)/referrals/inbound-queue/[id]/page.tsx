@@ -24,6 +24,7 @@ export default function ProcessInboundReferralPage() {
   const [loading, setLoading] = React.useState(true);
   const [processing, setProcessing] = React.useState(false);
   const [rejecting, setRejecting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
   const [inboundReferral, setInboundReferral] = React.useState<InboundReferral | null>(null);
 
   // Provider search
@@ -140,8 +141,10 @@ export default function ProcessInboundReferralPage() {
 
   const handleConvert = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    
     if (!selectedProvider) {
-      alert("Please select a referring provider");
+      setError("Please select a referring provider");
       return;
     }
 
@@ -170,11 +173,11 @@ export default function ProcessInboundReferralPage() {
       if (res.ok && data.success) {
         router.push(`/referrals/${data.referral.id}`);
       } else {
-        alert(data.error || "Failed to convert referral");
+        setError(data.error || "Failed to convert referral");
       }
     } catch (error) {
       console.error("Error converting referral:", error);
-      alert("Failed to convert referral");
+      setError("Failed to convert referral. Please try again.");
     } finally {
       setProcessing(false);
     }
@@ -184,20 +187,24 @@ export default function ProcessInboundReferralPage() {
     const reason = prompt("Enter rejection reason (optional):");
     if (reason === null) return; // User cancelled
 
+    setError(null);
     setRejecting(true);
     try {
-      const res = await fetch(`/api/inbound-referrals/${id}?reason=${encodeURIComponent(reason)}`, {
+      const res = await fetch(`/api/inbound-referrals/${id}`, {
         method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: reason || "Rejected by staff" }),
       });
 
       if (res.ok) {
         router.push("/referrals/inbound-queue");
       } else {
-        alert("Failed to reject referral");
+        const data = await res.json();
+        setError(data.error || "Failed to reject referral");
       }
     } catch (error) {
       console.error("Error rejecting referral:", error);
-      alert("Failed to reject referral");
+      setError("Failed to reject referral. Please try again.");
     } finally {
       setRejecting(false);
     }
@@ -248,6 +255,15 @@ export default function ProcessInboundReferralPage() {
           </Button>
         </div>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <Card className="border-red-500 bg-red-50">
+          <CardContent className="pt-6">
+            <p className="text-red-800">{error}</p>
+          </CardContent>
+        </Card>
+      )}
 
       {!isPending && (
         <Card>

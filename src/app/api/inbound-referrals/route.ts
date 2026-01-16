@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
   try {
     // Validate API key
     const apiKey = request.headers.get("x-api-key");
-    const expectedApiKey = process.env.REFERRAL_INGEST_API_KEY || process.env.STATEMENT_INGEST_API_KEY;
+    const expectedApiKey = process.env.REFERRAL_INGEST_API_KEY;
 
     if (!apiKey || !expectedApiKey || apiKey !== expectedApiKey) {
       return NextResponse.json(
