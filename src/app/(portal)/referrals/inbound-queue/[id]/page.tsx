@@ -127,9 +127,9 @@ export default function ProcessInboundReferralPage() {
     // Auto-populate communication value if available
     if (!form.communication_value) {
       if (form.communication_preference === "Email" && provider.email) {
-        setForm(prev => ({ ...prev, communication_value: provider.email }));
+        setForm(prev => ({ ...prev, communication_value: provider.email || "" }));
       } else if (form.communication_preference === "Fax" && provider.practices?.fax) {
-        setForm(prev => ({ ...prev, communication_value: provider.practices.fax }));
+        setForm(prev => ({ ...prev, communication_value: provider.practices?.fax || "" }));
       }
     }
   };
