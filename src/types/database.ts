@@ -259,3 +259,51 @@ export interface MessageTemplate {
   updated_at: string;
   updated_by_user_id: string | null;
 }
+
+// Inbound Referrals Queue Types
+
+export type InboundReferralStatus = "PENDING" | "CONVERTED" | "REJECTED";
+
+export interface InboundReferral {
+  id: string;
+  // Raw patient information (all strings from website)
+  patient_full_name: string | null;
+  patient_first_name: string | null;
+  patient_last_name: string | null;
+  patient_dob: string | null; // Stored as string, needs validation
+  patient_phone: string | null;
+  patient_email: string | null;
+  // Raw referral details
+  referral_reason: string | null;
+  referral_reason_other: string | null;
+  notes: string | null;
+  scheduling_preference: string | null;
+  // Raw provider/practice information
+  provider_name: string | null;
+  practice_name: string | null;
+  provider_email: string | null;
+  provider_phone: string | null;
+  practice_phone: string | null;
+  practice_fax: string | null;
+  // Communication preferences
+  communication_preference: string | null;
+  communication_value: string | null;
+  // Processing status
+  status: InboundReferralStatus;
+  converted_referral_id: string | null;
+  converted_at: string | null;
+  converted_by: string | null;
+  rejection_reason: string | null;
+  rejected_at: string | null;
+  rejected_by: string | null;
+  // Metadata
+  source: string | null;
+  raw_json: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InboundReferralWithUsers extends InboundReferral {
+  converted_by_user: User | null;
+  rejected_by_user: User | null;
+}
