@@ -64,10 +64,10 @@ export default function ProcessInboundReferralPage() {
             patient_dob: ref.patient_dob || "",
             patient_phone: ref.patient_phone || "",
             patient_email: ref.patient_email || "",
-            referral_reason: (ref.referral_reason as any) || "Laser Vision Correction",
+            referral_reason: (ref.referral_reason || "Laser Vision Correction") as typeof form.referral_reason,
             referral_reason_other: ref.referral_reason_other || "",
-            scheduling_preference: (ref.scheduling_preference as any) || "Call Patient",
-            communication_preference: (ref.communication_preference as any) || "Email",
+            scheduling_preference: (ref.scheduling_preference || "Call Patient") as typeof form.scheduling_preference,
+            communication_preference: (ref.communication_preference || "Email") as typeof form.communication_preference,
             communication_value: ref.communication_value || ref.provider_email || "",
             notes: ref.notes || "",
           });
@@ -87,6 +87,7 @@ export default function ProcessInboundReferralPage() {
     if (id) {
       fetchInboundReferral();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   // Search providers when query is 3+ chars
@@ -440,7 +441,7 @@ export default function ProcessInboundReferralPage() {
                 onChange={(e) =>
                   setForm({
                     ...form,
-                    referral_reason: e.target.value as any,
+                    referral_reason: e.target.value as typeof form.referral_reason,
                   })
                 }
                 disabled={!isPending}
@@ -475,7 +476,7 @@ export default function ProcessInboundReferralPage() {
                 onChange={(e) =>
                   setForm({
                     ...form,
-                    scheduling_preference: e.target.value as any,
+                    scheduling_preference: e.target.value as typeof form.scheduling_preference,
                   })
                 }
                 disabled={!isPending}
@@ -498,7 +499,7 @@ export default function ProcessInboundReferralPage() {
                 onChange={(e) =>
                   setForm({
                     ...form,
-                    communication_preference: e.target.value as any,
+                    communication_preference: e.target.value as typeof form.communication_preference,
                   })
                 }
                 disabled={!isPending}

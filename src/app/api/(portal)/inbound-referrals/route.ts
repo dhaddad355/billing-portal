@@ -1,16 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServiceClient } from "@/lib/supabase";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-
-interface ExtendedSession {
-  user: {
-    id: string;
-    azureOid: string;
-    name?: string | null;
-    email?: string | null;
-  };
-}
 
 // GET /api/inbound-referrals - List all inbound referrals
 export async function GET(request: NextRequest) {
